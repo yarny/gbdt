@@ -1,0 +1,55 @@
+tree {
+   score: 0.25
+}
+tree {
+  split {
+    feature: "color"
+    cat_split {
+      category: "red"
+    }
+  }
+  left_child {
+    score: 0.030555556
+    split {
+      feature: "height"
+      float_split {
+        threshold: 6
+      }
+    }
+    left_child {
+      score: -0.0050000004
+    }
+    right_child {
+      score: 0.075
+    }
+  }
+  right_child {
+    score: -0.025
+  }
+}
+tree {
+  split {
+    feature: "color"
+    cat_split {
+      category: "red"
+    }
+  }
+  left_child {
+    score: 0.027500002
+    split {
+      feature: "height"
+      float_split {
+        threshold: 5
+      }
+    }
+    left_child {
+      score: -0.024500001
+    }
+    right_child {
+      score: 0.053500004
+    }
+  }
+  right_child {
+    score: -0.022499999
+  }
+}

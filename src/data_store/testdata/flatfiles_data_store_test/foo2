@@ -1,0 +1,12 @@
+# dtype=raw_floats
+0.1
+1.2
+# ? is treated as missing.
+?
+2.3
+3.4
+4.5
+# empty line is treated as missing too.
+
+?
+5.6
