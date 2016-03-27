@@ -1,0 +1,11 @@
+# dtype=strings
+foo
+bar
+# __missing__ represents missing.
+__missing__
+foo
+hello
+world
+__missing__
+__missing__
+world
