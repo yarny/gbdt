@@ -15,6 +15,7 @@
 
 #include "tsv_data_store.h"
 
+#include <future>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -37,13 +38,8 @@ TSVDataStore::TSVDataStore(const string& header_file,
   LoadTSVs(header_file, tsvs, config);
 }
 
-void TSVDataStore::LoadBlock(const string& tsv, unique_ptr<TSVBlock>* block) {
-  unique_ptr<TSVBlock> tmp_block(new TSVBlock(tsv, float_column_indices_, string_column_indices_));
-  {
-    std::unique_lock<std::mutex> lock(mutex_);
-    *block = std::move(tmp_block);
-  }
-  cv_.notify_one();
+void TSVDataStore::LoadBlock(const string& tsv, promise<TSVBlock*>* block) {
+  block->set_value(new TSVBlock(tsv, float_column_indices_, string_column_indices_));
 }
 
 void TSVDataStore::LoadTSVs(const string& header_file,
@@ -53,8 +49,7 @@ void TSVDataStore::LoadTSVs(const string& header_file,
   stopwatch.Start();
   SetupColumns(header_file, config);
 
-  vector<unique_ptr<TSVBlock>> blocks(tsvs.size());
-
+  vector<promise<TSVBlock*>> blocks(tsvs.size());
   ThreadPool pool(FLAGS_num_threads);
   for (int i = 0; i < tsvs.size(); ++i) {
     const auto& tsv = tsvs[i];
@@ -63,14 +58,10 @@ void TSVDataStore::LoadTSVs(const string& header_file,
   }
 
   for (int i = 0; i < blocks.size(); ++i) {
-    unique_ptr<TSVBlock> working_block;
-    auto* block = &blocks[i];
-    {
-      std::unique_lock<std::mutex> lock(mutex_);
-      cv_.wait(lock, [block] { return block->get() != nullptr; });
-      working_block = std::move(*block);
-    }
-    ProcessBlock(std::move(working_block));
+    auto block_future = blocks[i].get_future();
+    block_future.wait();
+    unique_ptr<TSVBlock> block(block_future.get());
+    ProcessBlock(block.get());
     LOG(INFO) << "Processed block " << tsvs[i] << ".";
   }
 
@@ -80,7 +71,7 @@ void TSVDataStore::LoadTSVs(const string& header_file,
             << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs());
 }
 
-void TSVDataStore::ProcessBlock(unique_ptr<TSVBlock> block) {
+void TSVDataStore::ProcessBlock(const TSVBlock* block) {
   ThreadPool pool(FLAGS_num_threads);
   for (auto p : binned_float_columns_) {
     pool.Enqueue(std::bind(&BinnedFloatColumn::Add, p.first,

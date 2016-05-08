@@ -16,6 +16,7 @@
 #ifndef TSV_DATA_STORE_H_
 #define TSV_DATA_STORE_H_
 
+#include <future>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -42,21 +43,19 @@ public:
   virtual ~TSVDataStore() {}
 
 protected:
-  void ProcessBlock(unique_ptr<TSVBlock> block);
+  void ProcessBlock(const TSVBlock* block);
   void Finalize();
   void SetupColumns(const string& header_file, const TSVDataConfig& data_config);
   void LoadTSVs(const string& header_file,
                 const vector<string>& tsvs,
                 const TSVDataConfig& data_config);
-  void LoadBlock(const string& tsv, unique_ptr<TSVBlock>* block);
+  void LoadBlock(const string& tsv, promise<TSVBlock*>* block);
 
   vector<pair<BinnedFloatColumn*, int>> binned_float_columns_;
   vector<pair<RawFloatColumn*, int>> raw_float_columns_;
   vector<pair<StringColumn*, int>> string_columns_;
   vector<int> float_column_indices_;
   vector<int> string_column_indices_;
-  std::mutex mutex_;
-  std::condition_variable cv_;
 };
 
 }  // namespace gbdt
