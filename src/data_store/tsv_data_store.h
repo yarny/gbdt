@@ -49,7 +49,6 @@ protected:
   void LoadTSVs(const string& header_file,
                 const vector<string>& tsvs,
                 const TSVDataConfig& data_config);
-  void LoadBlock(const string& tsv, promise<TSVBlock*>* block);
 
   vector<pair<BinnedFloatColumn*, int>> binned_float_columns_;
   vector<pair<RawFloatColumn*, int>> raw_float_columns_;
