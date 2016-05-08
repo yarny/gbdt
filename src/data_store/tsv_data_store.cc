@@ -38,10 +38,6 @@ TSVDataStore::TSVDataStore(const string& header_file,
   LoadTSVs(header_file, tsvs, config);
 }
 
-void TSVDataStore::LoadBlock(const string& tsv, promise<TSVBlock*>* block) {
-  block->set_value(new TSVBlock(tsv, float_column_indices_, string_column_indices_));
-}
-
 void TSVDataStore::LoadTSVs(const string& header_file,
                             const vector<string>& tsvs,
                             const TSVDataConfig& config) {
@@ -52,9 +48,10 @@ void TSVDataStore::LoadTSVs(const string& header_file,
   vector<promise<TSVBlock*>> blocks(tsvs.size());
   ThreadPool pool(FLAGS_num_threads);
   for (int i = 0; i < tsvs.size(); ++i) {
-    const auto& tsv = tsvs[i];
-    CHECK(FileExists(tsv)) << "TSV " << tsv << " does not exist.";
-    pool.Enqueue(std::bind(&TSVDataStore::LoadBlock, this, tsv, &blocks[i]));
+    pool.Enqueue([this, &block=blocks[i], &tsv=tsvs[i]] {
+        CHECK(FileExists(tsv)) << "TSV " << tsv << " does not exist.";
+        block.set_value(new TSVBlock(tsv, float_column_indices_, string_column_indices_));
+      });
   }
 
   for (int i = 0; i < blocks.size(); ++i) {
@@ -73,30 +70,27 @@ void TSVDataStore::LoadTSVs(const string& header_file,
 
 void TSVDataStore::ProcessBlock(const TSVBlock* block) {
   ThreadPool pool(FLAGS_num_threads);
-  for (auto p : binned_float_columns_) {
-    pool.Enqueue(std::bind(&BinnedFloatColumn::Add, p.first,
-                           &block->float_columns()[p.second]));
+  for (auto& p : binned_float_columns_) {
+    pool.Enqueue([&] { p.first->Add(&block->float_columns()[p.second]); });
   }
   for (auto p : raw_float_columns_) {
-    pool.Enqueue(std::bind(&RawFloatColumn::Add, p.first,
-                           &block->float_columns()[p.second]));
+    pool.Enqueue([&] { p.first->Add(&block->float_columns()[p.second]); });
   }
   for (auto p : string_columns_) {
-    pool.Enqueue(std::bind(&StringColumn::Add, p.first,
-                           &block->string_columns()[p.second]));
+    pool.Enqueue([&] { p.first->Add(&block->string_columns()[p.second]); });
   }
 }
 
 void TSVDataStore::Finalize() {
   ThreadPool pool(FLAGS_num_threads);
-  for (auto p : binned_float_columns_) {
-    pool.Enqueue(std::bind(&BinnedFloatColumn::Finalize, p.first));
+  for (auto& p : binned_float_columns_) {
+    pool.Enqueue([&] { p.first->Finalize(); });
   }
   for (auto p : string_columns_) {
-    pool.Enqueue(std::bind(&StringColumn::Finalize, p.first));
+    pool.Enqueue([&] { p.first->Finalize(); });
   }
   for (auto p : raw_float_columns_) {
-    pool.Enqueue(std::bind(&RawFloatColumn::Finalize, p.first));
+    pool.Enqueue([&] { p.first->Finalize(); });
   }
 }
 
