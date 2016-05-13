@@ -48,7 +48,7 @@ void TSVDataStore::LoadTSVs(const string& header_file,
   vector<promise<TSVBlock*>> blocks(tsvs.size());
   ThreadPool pool(FLAGS_num_threads);
   for (int i = 0; i < tsvs.size(); ++i) {
-    pool.Enqueue([this, &block=blocks[i], &tsv=tsvs[i]] {
+    pool.Enqueue([this, &block=blocks[i], tsv=tsvs[i]] {
         CHECK(FileExists(tsv)) << "TSV " << tsv << " does not exist.";
         block.set_value(new TSVBlock(tsv, float_column_indices_, string_column_indices_));
       });
