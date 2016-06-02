@@ -39,10 +39,8 @@
 
 DECLARE_string(config_file);
 DECLARE_string(mode);
-DECLARE_string(training_flatfiles_dirs);
-DECLARE_string(testing_flatfiles_dirs);
-DECLARE_string(training_tsvs);
-DECLARE_string(testing_tsvs);
+DECLARE_string(flatfiles_dirs);
+DECLARE_string(tsvs);
 DECLARE_string(testing_model_file);
 DECLARE_string(output_dir);
 DECLARE_string(output_model_name);
@@ -89,32 +87,17 @@ void GetHeaderAndTsvs(const string& tsv_flag, string* header_file, vector<string
   tsvs->erase(tsvs->begin());
 }
 
-unique_ptr<DataStore> LoadTrainingDataStore(const DataConfig& config) {
-  if (!FLAGS_training_flatfiles_dirs.empty()) {
+unique_ptr<DataStore> LoadDataStore(const DataConfig& config) {
+  if (!FLAGS_flatfiles_dirs.empty()) {
     return unique_ptr<DataStore>(
-    new FlatfilesDataStore(strings::split(FLAGS_training_flatfiles_dirs, ",")));
-  } else if (!FLAGS_training_tsvs.empty()) {
+    new FlatfilesDataStore(strings::split(FLAGS_flatfiles_dirs, ",")));
+  } else if (!FLAGS_tsvs.empty()) {
     string header_file;
     vector<string> tsvs;
-    GetHeaderAndTsvs(FLAGS_training_tsvs, &header_file, &tsvs);
+    GetHeaderAndTsvs(FLAGS_tsvs, &header_file, &tsvs);
     return unique_ptr<DataStore>(new TSVDataStore(header_file, tsvs, config.tsv_data_config()));
   } else {
-    LOG(FATAL) << "Please specify --training_flatfiles_dirs or --training_tsvs.";
-  }
-  return nullptr;
-}
-
-unique_ptr<DataStore> LoadTestingDataStore(const DataConfig& config) {
-  if (!FLAGS_testing_flatfiles_dirs.empty()) {
-    return unique_ptr<DataStore>(
-    new FlatfilesDataStore(strings::split(FLAGS_testing_flatfiles_dirs, ",")));
-  } else if (!FLAGS_testing_tsvs.empty()) {
-    string header_file;
-    vector<string> tsvs;
-    GetHeaderAndTsvs(FLAGS_testing_tsvs, &header_file, &tsvs);
-    return unique_ptr<DataStore>(new TSVDataStore(header_file, tsvs, config.tsv_data_config()));
-  } else {
-    LOG(FATAL) << "Please specify --testing_flatfiles_dirs or --testing_tsvs.";
+    LOG(FATAL) << "Please specify --flatfiles_dirs or --tsvs.";
   }
   return nullptr;
 }
@@ -137,7 +120,7 @@ void Train() {
       << "Failed to parse json to proto: " << config_text;
 
   // Load DataStore.
-  auto data_store = LoadTrainingDataStore(config.data_config());
+  auto data_store = LoadDataStore(config.data_config());
   CHECK(data_store) << "Failed to load DataStore.";
 
   // Start learning.
@@ -179,7 +162,7 @@ void Test() {
   LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
 
   // Load DataStore.
-  auto data_store = LoadTestingDataStore(config.data_config());
+  auto data_store = LoadDataStore(config.data_config());
   CHECK(data_store) << "Failed to load DataStore.";
 
   // Evaluate forest and write score out.

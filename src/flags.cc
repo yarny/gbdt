@@ -18,16 +18,12 @@
 
 DEFINE_string(output_dir, "", "The output dir");
 DEFINE_string(output_model_name, "forest", "The output model name");
-DEFINE_string(training_flatfiles_dirs, "", "The training flatfiles dir.");
-DEFINE_string(testing_flatfiles_dirs, "", "The testing flatfiles dir.");
+DEFINE_string(flatfiles_dirs, "", "The flatfiles dir.");
+DEFINE_string(tsvs, "",
+              "The comma separated tsv files. "
+              "The first file is the header file.");
 DEFINE_string(testing_model_file, "", "The testing model file");
 DEFINE_string(config_file, "", "The config file.");
 DEFINE_int32(num_threads, 1, "The number of threads");
 DEFINE_string(mode, "train", "The running mode.");
 DEFINE_int32(seed, 123467, "The random seed");
-DEFINE_string(training_tsvs, "",
-              "The comma separated training tsv files. "
-              "The first file is the header file.");
-DEFINE_string(testing_tsvs, "",
-              "The comma separated testing tsv files. "
-              "The first file is the header file.");

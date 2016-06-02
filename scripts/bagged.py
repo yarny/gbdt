@@ -13,8 +13,8 @@ import sys
 option_list = [
     make_option("--num_bags",
                 action="store", type="int", dest="num_bags", default=10),
-    make_option("--training_flatfiles_dir",
-                action="store", type="string", dest="training_flatfiles_dir"),
+    make_option("--flatfiles_dir",
+                action="store", type="string", dest="flatfiles_dir"),
     make_option("--config_file",
                 action="store", type="string", dest="config_file"),
     make_option("--output_dir",
@@ -30,8 +30,8 @@ def executeCommand(command):
 class Bagging:
     def __init__(self, opts):
         self._opts = opts
-        flatfiles = os.listdir(self._opts.training_flatfiles_dir)
-        flatfile = os.path.join(self._opts.training_flatfiles_dir, flatfiles[0])
+        flatfiles = os.listdir(self._opts.flatfiles_dir)
+        flatfile = os.path.join(self._opts.flatfiles_dir, flatfiles[0])
         self._opts.num_rows = len(
             [line for line in open(flatfile).readlines() if not line.startswith('#') and line.strip()])
 
@@ -87,28 +87,28 @@ class Bagging:
     def trainAndEvalBag(self, k):
         working_dir = self.bagDir(k)
         self.prepareBaggingDir(k)
-        flatfiles_dir = os.path.join(working_dir, 'flatfiles')
+        working_flatfiles_dir = os.path.join(working_dir, 'flatfiles')
         model_dir = os.path.join(working_dir, 'model')
 
         # Train the model.
-        training_command = """{binary} --training_flatfiles_dirs={flatfiles_dir},{training_flatfiles_dir} \
+        training_command = """{binary} --flatfiles_dirs={working_flatfiles_dir},{flatfiles_dir} \
         --num_threads={num_threads} \
         --logtostderr \
         --output_model_name=forest \
         --config_file={config_file} --output_dir={model_dir}""".format(
             binary=self._opts.binary,
-            flatfiles_dir=flatfiles_dir,
+            working_flatfiles_dir=working_flatfiles_dir,
             num_threads=self._opts.num_threads,
-            training_flatfiles_dir=self._opts.training_flatfiles_dir,
+            flatfiles_dir=self._opts.flatfiles_dir,
             config_file=os.path.join(working_dir, 'bagging.config'),
             model_dir=model_dir)
-        testing_command = """{binary} --testing_flatfiles_dirs={training_flatfiles_dir} \
+        testing_command = """{binary} --flatfiles_dirs={flatfiles_dir} \
         --mode=test --config_file={config_file} --testing_model_file={model_dir}/forest.json \
         --logtostderr \
         --num_threads={num_threads} \
         --output_dir={model_dir}""".format(
             binary=self._opts.binary,
-            training_flatfiles_dir=self._opts.training_flatfiles_dir,
+            flatfiles_dir=self._opts.flatfiles_dir,
             config_file=self._opts.config_file,
             num_threads=self._opts.num_threads,
             model_dir=model_dir)
