@@ -73,10 +73,10 @@ void TSVDataStore::ProcessBlock(const TSVBlock* block) {
   for (auto& p : binned_float_columns_) {
     pool.Enqueue([&] { p.first->Add(&block->float_columns()[p.second]); });
   }
-  for (auto p : raw_float_columns_) {
+  for (auto& p : raw_float_columns_) {
     pool.Enqueue([&] { p.first->Add(&block->float_columns()[p.second]); });
   }
-  for (auto p : string_columns_) {
+  for (auto& p : string_columns_) {
     pool.Enqueue([&] { p.first->Add(&block->string_columns()[p.second]); });
   }
 }
@@ -86,10 +86,10 @@ void TSVDataStore::Finalize() {
   for (auto& p : binned_float_columns_) {
     pool.Enqueue([&] { p.first->Finalize(); });
   }
-  for (auto p : string_columns_) {
+  for (auto& p : string_columns_) {
     pool.Enqueue([&] { p.first->Finalize(); });
   }
-  for (auto p : raw_float_columns_) {
+  for (auto& p : raw_float_columns_) {
     pool.Enqueue([&] { p.first->Finalize(); });
   }
 }
