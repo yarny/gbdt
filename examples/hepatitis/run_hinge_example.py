@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../../scripts/bagged.py --config_file=hepatitis.hinge.config --training_flatfiles_dir=flatfiles --output_dir=bagged
+../../scripts/bagged.py --config_file=hepatitis.hinge.config --flatfiles_dir=flatfiles --output_dir=bagged
