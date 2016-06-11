@@ -43,11 +43,11 @@ string ReadFirstLine(const string& tsv) {
 
 }  // namespace
 
-TSVDataStore::TSVDataStore(const vector<string>& tsvs, const TSVDataConfig& config) {
+TSVDataStore::TSVDataStore(const vector<string>& tsvs, const DataConfig& config) {
   LoadTSVs(tsvs, config);
 }
 
-void TSVDataStore::LoadTSVs(const vector<string>& tsvs, const TSVDataConfig& config) {
+void TSVDataStore::LoadTSVs(const vector<string>& tsvs, const DataConfig& config) {
   CHECK_GT(tsvs.size(), 0) << "There should be at least 1 tsvs.";
   StopWatch stopwatch;
   stopwatch.Start();
@@ -101,7 +101,7 @@ void TSVDataStore::Finalize() {
   }
 }
 
-void TSVDataStore::SetupColumns(const string& first_tsv, const TSVDataConfig& config) {
+void TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& config) {
   // Read header from first tsv.
   vector<string> headers = strings::split(ReadFirstLine(first_tsv), "\t");
   unordered_map<string, int> map_from_header_to_index;
@@ -110,9 +110,11 @@ void TSVDataStore::SetupColumns(const string& first_tsv, const TSVDataConfig& co
     map_from_header_to_index[headers[i]] = i;
   }
 
-  for (const string& header : config.binned_float_column()) {
+  // Add float features as binned float columns.
+  for (const string& header : config.float_feature()) {
     auto it = map_from_header_to_index.find(header);
-    CHECK(it != map_from_header_to_index.end()) << "Failed to find " << header << " in header file.";
+    CHECK(it != map_from_header_to_index.end())
+      << "Failed to find column " << header << " in " << first_tsv;
     column_map_[header].reset(new BinnedFloatColumn(header));
     binned_float_columns_.push_back(
         make_pair(static_cast<BinnedFloatColumn*>(column_map_[header].get()),
@@ -120,9 +122,11 @@ void TSVDataStore::SetupColumns(const string& first_tsv, const TSVDataConfig& co
     float_column_indices_.push_back(it->second);
   }
 
-  for (const string& header : config.raw_float_column()) {
+  // Add additional float columns as raw float columns.
+  for (const string& header : config.additional_float_column()) {
     auto it = map_from_header_to_index.find(header);
-    CHECK(it != map_from_header_to_index.end()) << "Failed to find " << header << " in header file.";
+    CHECK(it != map_from_header_to_index.end())
+        << "Failed to find column " << header << " in " << first_tsv;
     column_map_[header].reset(new RawFloatColumn(header));
     raw_float_columns_.push_back(
         make_pair(static_cast<RawFloatColumn*>(column_map_[header].get()),
@@ -130,9 +134,23 @@ void TSVDataStore::SetupColumns(const string& first_tsv, const TSVDataConfig& co
     float_column_indices_.push_back(it->second);
   }
 
-  for (const string& header : config.string_column()) {
+  // Add categorical features as string columns.
+  for (const string& header : config.categorical_feature()) {
         auto it = map_from_header_to_index.find(header);
-    CHECK(it != map_from_header_to_index.end()) << "Failed to find " << header << " in header file.";
+    CHECK(it != map_from_header_to_index.end())
+        << "Failed to find column " << header << " in " << first_tsv;
+    column_map_[header].reset(new StringColumn(header));
+    string_columns_.push_back(
+        make_pair(static_cast<StringColumn*>(column_map_[header].get()),
+                  string_column_indices_.size()));
+    string_column_indices_.push_back(it->second);
+  }
+
+  // Add additional string columns.
+  for (const string& header : config.additional_string_column()) {
+        auto it = map_from_header_to_index.find(header);
+    CHECK(it != map_from_header_to_index.end())
+        << "Failed to find column " << header << " in " << first_tsv;
     column_map_[header].reset(new StringColumn(header));
     string_columns_.push_back(
         make_pair(static_cast<StringColumn*>(column_map_[header].get()),
