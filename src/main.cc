@@ -16,10 +16,8 @@
 
 #include <gflags/gflags.h>
 #include <glog/logging.h>
-#include <google/protobuf/text_format.h>
 #include <memory>
 #include <sys/stat.h>
-#include <unordered_set>
 
 #include "external/cppformat/format.h"
 
@@ -116,7 +114,7 @@ void Train() {
 
   // Start learning.
   unique_ptr<Forest> forest = TrainGBDT(config, data_store.get());
-  CHECK(forest) << "Failed to tain a forest";
+  CHECK(forest) << "Failed to train a forest";
 
   // Write the model into a file.
   mkdir(FLAGS_output_dir.c_str(), 0744);
@@ -137,6 +135,8 @@ void Test() {
   CHECK(!FLAGS_testing_model_file.empty()) << "Please specify --testing_model_file";
   CHECK(!FLAGS_output_dir.empty()) << "Please specify --output_dir.";
 
+  StopWatch stopwatch;
+  stopwatch.Start();
   LOG(INFO) << "Start testing.";
 
   // Load config.
@@ -162,5 +162,7 @@ void Test() {
       << "Failed to evaluate the forest.";
 
   LOG(INFO) << "Wrote testing outputs to " << FLAGS_output_dir;
-  LOG(INFO) << "Finished testing.";
+  stopwatch.End();
+  LOG(INFO) << "Finished testing in "
+            << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()) << ".";
 }

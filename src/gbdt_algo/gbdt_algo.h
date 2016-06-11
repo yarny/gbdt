@@ -20,9 +20,6 @@
 #define GBDT_ALGO_H_
 
 #include <memory>
-#include <string>
-#include <unordered_set>
-#include <vector>
 
 #include "src/base/base.h"
 
@@ -52,7 +49,6 @@ class Forest;
 // * DataStore is a container of data. It is not a const variable because some of our data
 //   can be loaded in a lazy fashion.
 unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store);
-
 
 }  // namespace gbdt
 

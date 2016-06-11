@@ -20,7 +20,6 @@
 #include <glog/logging.h>
 #include <queue>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
