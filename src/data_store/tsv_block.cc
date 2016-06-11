@@ -27,14 +27,16 @@ namespace gbdt {
 
 TSVBlock::TSVBlock(const string& tsv,
                    const vector<int>& float_column_indices,
-                   const vector<int>& string_column_indices) {
-
-  ReadTSV(tsv, float_column_indices, string_column_indices);
+                   const vector<int>& string_column_indices,
+                   bool skip_header) {
+  ReadTSV(tsv, float_column_indices, string_column_indices, skip_header);
 }
 
 void TSVBlock::ReadTSV(const string& tsv,
                        const vector<int>& float_column_indices,
-                       const vector<int>& string_column_indices) {
+                       const vector<int>& string_column_indices,
+                       bool skip_header) {
+  CHECK(FileExists(tsv)) << "TSV " << tsv << " does not exist.";
   StopWatch stopwatch;
   stopwatch.Start();
 
@@ -44,6 +46,10 @@ void TSVBlock::ReadTSV(const string& tsv,
   string_columns_.resize(string_column_indices.size());
 
   std::ifstream in(tsv);
+  if (skip_header) {
+    string line;
+    std::getline(in, line);
+  }
 
   int num_rows = 0;
   while (!in.eof()) {

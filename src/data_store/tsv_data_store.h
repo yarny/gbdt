@@ -16,14 +16,9 @@
 #ifndef TSV_DATA_STORE_H_
 #define TSV_DATA_STORE_H_
 
-#include <future>
-#include <memory>
-#include <mutex>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <condition_variable>
 
 #include "column.h"
 #include "data_store.h"
@@ -36,19 +31,17 @@ class TSVDataConfig;
 
 class TSVDataStore : public DataStore {
 public:
-  // TSVS can be divided into blocks. The first tsv contains the header file.
+  // TSVs can be divided into blocks. The first tsv contains the header file.
   // data_config contains information on how to load the columns. The column
   // can be loaded as binned_floats, raw_float, or strings.
-  TSVDataStore(const string& header_file, const vector<string>& tsvs, const TSVDataConfig& data_config);
+  TSVDataStore(const vector<string>& tsvs, const TSVDataConfig& data_config);
   virtual ~TSVDataStore() {}
 
 protected:
   void ProcessBlock(const TSVBlock* block);
   void Finalize();
-  void SetupColumns(const string& header_file, const TSVDataConfig& data_config);
-  void LoadTSVs(const string& header_file,
-                const vector<string>& tsvs,
-                const TSVDataConfig& data_config);
+  void SetupColumns(const string& first_tsv, const TSVDataConfig& data_config);
+  void LoadTSVs(const vector<string>& tsvs, const TSVDataConfig& data_config);
 
   vector<pair<BinnedFloatColumn*, int>> binned_float_columns_;
   vector<pair<RawFloatColumn*, int>> raw_float_columns_;

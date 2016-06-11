@@ -40,11 +40,7 @@ message TreeConfig {
   int32 num_iterations = 1;
   int32 num_leaves = 2;
   float shrinkage = 3;
-  SplitConfig split_config = 6;
-}
-
-message UniformSamplingConfig {
-  float sampling_rate = 1;
+  SplitConfig split_config = 4;
 }
 
 message SamplingConfig {
