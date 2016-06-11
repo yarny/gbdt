@@ -43,4 +43,23 @@ TEST(TSVBlockTest, TestHeaderedBlock) {
   EXPECT_EQ(vector<string>({"rainy", "clear", "cloudy"}), tsv_block.string_columns()[1]);
 }
 
+TEST(TSVBlockTest, TestBlockWithMissingValue) {
+  TSVBlock tsv_block(
+      "src/data_store/testdata/tsv_data_store_test/data_with_missing.tsv",
+      {0, 1}, {}, true);
+  ASSERT_EQ(2, tsv_block.float_columns().size());
+  // First column.
+  EXPECT_FLOAT_EQ(32.33333342, tsv_block.float_columns()[0][0]);
+  EXPECT_TRUE(isnan(tsv_block.float_columns()[0][1]));
+  EXPECT_TRUE(isnan(tsv_block.float_columns()[0][2]));
+  EXPECT_FLOAT_EQ(-593.323, tsv_block.float_columns()[0][3]);
+  EXPECT_TRUE(isnan(tsv_block.float_columns()[0][4]));
+  // Second column.
+  EXPECT_FLOAT_EQ(-3.295, tsv_block.float_columns()[1][0]);
+  EXPECT_FLOAT_EQ(95231.405, tsv_block.float_columns()[1][1]);
+  EXPECT_FLOAT_EQ(32.11392, tsv_block.float_columns()[1][2]);
+  EXPECT_TRUE(isnan(tsv_block.float_columns()[1][3]));
+  EXPECT_FLOAT_EQ(0.33234, tsv_block.float_columns()[1][4]);
+}
+
 }  // namespace gbdt
