@@ -77,6 +77,11 @@ void TSVBlock::ReadTSV(const string& tsv,
       if (strings::StringCast(row[index], &v)) {
         float_columns_[i].push_back(v);
       } else {
+        CHECK(row[index] == "nan" ||
+              row[index] == "_" ||
+              row[index] == "?" ||
+              row[index] == "-" ||
+              row[index] == "*") << "Invalid input for float " << row[index];
         float_columns_[i].push_back(NAN);
       }
     }
