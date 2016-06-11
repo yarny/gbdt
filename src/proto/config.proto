@@ -17,16 +17,14 @@ syntax = 'proto3';
 
 package gbdt;
 
-message TSVDataConfig {
-  repeated string binned_float_column = 1;
-  repeated string string_column = 2;
-  repeated string raw_float_column = 3;
-}
-
 message DataConfig {
-  repeated string feature = 1;
-  string sample_weight_column = 2;
-  TSVDataConfig tsv_data_config = 3;
+  repeated string float_feature = 1;
+  repeated string categorical_feature = 2;
+  // Columns to be loaded in additional to features.
+  // These are usually columns needed for loss function computation.
+  repeated string additional_float_column = 3;
+  repeated string additional_string_column = 4;
+  string sample_weight_column = 5;
 }
 
 message SplitConfig {

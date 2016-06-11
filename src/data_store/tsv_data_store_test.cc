@@ -34,11 +34,11 @@ class TSVDataStoreTest : public ::testing::Test {
     for (const auto& block : blocks) {
       block_paths.push_back(kTestFileDir + "/" + block);
     }
-    TSVDataConfig config;
-    config.add_binned_float_column("foo");
-    config.add_binned_float_column("bar");
-    config.add_string_column("weather");
-    config.add_raw_float_column("target");
+    DataConfig config;
+    config.add_float_feature("foo");
+    config.add_float_feature("bar");
+    config.add_categorical_feature("weather");
+    config.add_additional_float_column("target");
     data_store_.reset(new TSVDataStore(block_paths, config));
   }
 

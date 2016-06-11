@@ -72,9 +72,11 @@ vector<float> GetSampleWeightsOrDie(const Config& config, DataStore* data_store)
 
 vector<const Column*> LoadFeaturesOrDie(const DataConfig& config,
                                         DataStore* data_store) {
-  CHECK_GT(config.feature_size(), 0) << "Feature set should not be empty.";
-  unordered_set<string> feature_names(config.feature().begin(), config.feature().end());
-  CHECK_EQ(config.feature_size(), feature_names.size()) << "Duplicate feature names";
+  unordered_set<string> feature_names(config.float_feature().begin(), config.float_feature().end());
+  feature_names.insert(config.categorical_feature().begin(), config.categorical_feature().end());
+  CHECK_GT(feature_names.size(), 0) << "Feature set should not be empty.";
+  CHECK_EQ(config.float_feature_size() + config.categorical_feature().size(),
+           feature_names.size()) << "Duplicate feature names.";
   return LoadFeaturesOrDie(feature_names, data_store);
 }
 

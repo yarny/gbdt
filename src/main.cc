@@ -83,8 +83,7 @@ unique_ptr<DataStore> LoadDataStore(const DataConfig& config) {
     return unique_ptr<DataStore>(
     new FlatfilesDataStore(strings::split(FLAGS_flatfiles_dirs, ",")));
   } else if (!FLAGS_tsvs.empty()) {
-    return unique_ptr<DataStore>(new TSVDataStore(strings::split(FLAGS_tsvs, ","),
-                                                  config.tsv_data_config()));
+    return unique_ptr<DataStore>(new TSVDataStore(strings::split(FLAGS_tsvs, ","), config));
   } else {
     LOG(FATAL) << "Please specify --flatfiles_dirs or --tsvs.";
   }

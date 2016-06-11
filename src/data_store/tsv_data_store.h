@@ -28,20 +28,21 @@ namespace gbdt {
 
 class TSVBlock;
 class TSVDataConfig;
+class DataConfig;
 
 class TSVDataStore : public DataStore {
 public:
   // TSVs can be divided into blocks. The first tsv contains the header file.
   // data_config contains information on how to load the columns. The column
   // can be loaded as binned_floats, raw_float, or strings.
-  TSVDataStore(const vector<string>& tsvs, const TSVDataConfig& data_config);
+  TSVDataStore(const vector<string>& tsvs, const DataConfig& data_config);
   virtual ~TSVDataStore() {}
 
 protected:
   void ProcessBlock(const TSVBlock* block);
   void Finalize();
-  void SetupColumns(const string& first_tsv, const TSVDataConfig& data_config);
-  void LoadTSVs(const vector<string>& tsvs, const TSVDataConfig& data_config);
+  void SetupColumns(const string& first_tsv, const DataConfig& data_config);
+  void LoadTSVs(const vector<string>& tsvs, const DataConfig& data_config);
 
   vector<pair<BinnedFloatColumn*, int>> binned_float_columns_;
   vector<pair<RawFloatColumn*, int>> raw_float_columns_;
