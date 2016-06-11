@@ -34,15 +34,6 @@ bool HasSuffix(const string& s, const string& suffix);
 
 }  // namespace string
 
-// approximate float equality function
-inline bool ApproximatelyEqual(float a, float b,
-			       float relative_tolerance = 1e-6) {
-  if (a == 0 && b == 0)
-    return true;
-  float e = fabs(a-b)/fabs(max(a,b));
-  return e < relative_tolerance;
-}
-
 string ReadFileToStringOrDie(const string& file);
 void WriteStringToFile(const string& content, const string& file);
 

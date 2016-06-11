@@ -27,7 +27,7 @@ namespace gbdt {
 class TSVDataStoreTest : public ::testing::Test {
  protected:
   const string kTestFileDir = "src/data_store/testdata/tsv_data_store_test";
-  const vector<string> blocks = { "block-0.tsv", "block-1.tsv", "block-2.tsv" };
+  const vector<string> blocks = { "block-0-with-header.tsv", "block-1.tsv", "block-2.tsv" };
   void SetUp() {
 
     vector<string> block_paths;
@@ -39,8 +39,7 @@ class TSVDataStoreTest : public ::testing::Test {
     config.add_binned_float_column("bar");
     config.add_string_column("weather");
     config.add_raw_float_column("target");
-    data_store_.reset(
-        new TSVDataStore(kTestFileDir + "/header", block_paths, config));
+    data_store_.reset(new TSVDataStore(block_paths, config));
   }
 
   static vector<string> GetColStrings(const StringColumn& column){

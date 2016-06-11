@@ -80,22 +80,13 @@ string FeatureImportanceFormatted(const vector<pair<string, double>>& feature_im
   return strings::JoinStrings(feature_importance_strs, "\n");
 }
 
-void GetHeaderAndTsvs(const string& tsv_flag, string* header_file, vector<string>* tsvs) {
-  *tsvs = strings::split(tsv_flag, ",");
-  CHECK_GE(tsvs->size(), 2) << "There should at least be two tsv files: one header and one tsv.";
-  *header_file = (*tsvs)[0];
-  tsvs->erase(tsvs->begin());
-}
-
 unique_ptr<DataStore> LoadDataStore(const DataConfig& config) {
   if (!FLAGS_flatfiles_dirs.empty()) {
     return unique_ptr<DataStore>(
     new FlatfilesDataStore(strings::split(FLAGS_flatfiles_dirs, ",")));
   } else if (!FLAGS_tsvs.empty()) {
-    string header_file;
-    vector<string> tsvs;
-    GetHeaderAndTsvs(FLAGS_tsvs, &header_file, &tsvs);
-    return unique_ptr<DataStore>(new TSVDataStore(header_file, tsvs, config.tsv_data_config()));
+    return unique_ptr<DataStore>(new TSVDataStore(strings::split(FLAGS_tsvs, ","),
+                                                  config.tsv_data_config()));
   } else {
     LOG(FATAL) << "Please specify --flatfiles_dirs or --tsvs.";
   }

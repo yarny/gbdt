@@ -32,25 +32,32 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-TSVDataStore::TSVDataStore(const string& header_file,
-                           const vector<string>& tsvs,
-                           const TSVDataConfig& config) {
-  LoadTSVs(header_file, tsvs, config);
+namespace {
+
+string ReadFirstLine(const string& tsv) {
+  std::ifstream in(tsv);
+  string line;
+  std::getline(in, line);
+  return line;
 }
 
-void TSVDataStore::LoadTSVs(const string& header_file,
-                            const vector<string>& tsvs,
-                            const TSVDataConfig& config) {
+}  // namespace
+
+TSVDataStore::TSVDataStore(const vector<string>& tsvs, const TSVDataConfig& config) {
+  LoadTSVs(tsvs, config);
+}
+
+void TSVDataStore::LoadTSVs(const vector<string>& tsvs, const TSVDataConfig& config) {
+  CHECK_GT(tsvs.size(), 0) << "There should be at least 1 tsvs.";
   StopWatch stopwatch;
   stopwatch.Start();
-  SetupColumns(header_file, config);
+  SetupColumns(tsvs[0], config);
 
   vector<promise<TSVBlock*>> blocks(tsvs.size());
   ThreadPool pool(FLAGS_num_threads);
   for (int i = 0; i < tsvs.size(); ++i) {
-    pool.Enqueue([this, &block=blocks[i], tsv=tsvs[i]] {
-        CHECK(FileExists(tsv)) << "TSV " << tsv << " does not exist.";
-        block.set_value(new TSVBlock(tsv, float_column_indices_, string_column_indices_));
+    pool.Enqueue([this, &block=blocks[i], tsv=tsvs[i], skip_header=(i==0)] {
+        block.set_value(new TSVBlock(tsv, float_column_indices_, string_column_indices_, skip_header));
       });
   }
 
@@ -94,10 +101,9 @@ void TSVDataStore::Finalize() {
   }
 }
 
-void TSVDataStore::SetupColumns(const string& header_file,
-                                const TSVDataConfig& config) {
-  // Read header file.
-  vector<string> headers = strings::split(ReadFileToStringOrDie(header_file), "\t");
+void TSVDataStore::SetupColumns(const string& first_tsv, const TSVDataConfig& config) {
+  // Read header from first tsv.
+  vector<string> headers = strings::split(ReadFirstLine(first_tsv), "\t");
   unordered_map<string, int> map_from_header_to_index;
   for (int i = 0; i < headers.size(); ++i) {
     TrimWhiteSpace(&headers[i]);

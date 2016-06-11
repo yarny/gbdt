@@ -28,7 +28,8 @@ class TSVBlock {
 public:
   TSVBlock(const string& tsv,
            const vector<int>& float_column_indices,
-           const vector<int>& string_column_indices);
+           const vector<int>& string_column_indices,
+           bool skip_header);
 
   const vector<vector<float>>& float_columns() const {
     return float_columns_;
@@ -40,7 +41,8 @@ public:
 private:
   void ReadTSV(const string& tsv,
                const vector<int>& float_column_indices,
-               const vector<int>& string_column_indices);
+               const vector<int>& string_column_indices,
+               bool skip_header);
 
   vector<vector<float>> float_columns_;
   vector<vector<string>> string_columns_;
