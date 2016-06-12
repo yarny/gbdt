@@ -46,26 +46,7 @@ message SamplingConfig {
   float feature_sampling_rate = 2;
 }
 
-message RegressionTargetConfig {
-  string target_column = 1;
-}
-
-message BinaryTargetConfig {
-  message StringSet {
-    repeated string category = 1;
-  }
-
-  string target_column = 1;
-  //  If threshold is set, positive labels are determined by target_column > threshold.
-  // If category is set, positive labels are determined by target_column in category.
-  oneof positivity_test {
-    float threshold = 2;
-    StringSet category = 3;
-  }
-}
-
 message PairwiseTargetConfig {
-  string target_column = 1;
   string group_column = 2;
   float pair_sampling_rate = 3;
 }
@@ -76,14 +57,9 @@ message LambdaMartParams {
 
 message LossFuncConfig {
   string loss_func = 1;
-  oneof target {
-    RegressionTargetConfig regression_target = 2;
-    BinaryTargetConfig binary_target = 3;
-    PairwiseTargetConfig pairwise_target = 4;
-  }
-  oneof parameter {
-    LambdaMartParams lambdamart_params = 5;
-  }
+  string target_column = 2;
+  PairwiseTargetConfig pairwise_target = 3;
+  LambdaMartParams lambdamart_params = 4;
 }
 
 message EvalConfig {

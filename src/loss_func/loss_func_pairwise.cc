@@ -75,7 +75,7 @@ Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss
 }
 
 bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
-  const string& target_column_name = config_.pairwise_target().target_column();
+  const string& target_column_name = config_.target_column();
   const string& group_column_name = config_.pairwise_target().group_column();
 
   w_ = &w;

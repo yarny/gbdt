@@ -22,13 +22,12 @@
 
 namespace gbdt {
 
-class BinaryTargetConfig;
+class LossFuncConfig;
 class DataStore;
 
-// The targets take values from {-1, 1}.
-bool ComputeBinaryTargets(DataStore* data_store, uint num_rows,
-                          const BinaryTargetConfig& config, vector<float>* targets);
-
+// Converts the target column to {-1, 1} binary targets.
+bool ComputeBinaryTargets(DataStore* data_store, const LossFuncConfig& config,
+                          vector<float>* targets);
 
 }  // namespace gbdt
 

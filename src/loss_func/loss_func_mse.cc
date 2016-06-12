@@ -33,7 +33,7 @@ MSE::MSE(const LossFuncConfig& config) : Pointwise(ComputeMSE), config_(config) 
 }
 
 bool MSE::ProvideY(DataStore* data_store, vector<float>* y) {
-  const string& target_column_name = config_.regression_target().target_column();
+  const string& target_column_name = config_.target_column();
   if (target_column_name.empty()) {
     LOG(ERROR) << "Please specify target_column for MSE loss.";
     return false;

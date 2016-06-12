@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../../scripts/bagged.py --config_file=hepatitis.logloss.config --flatfiles_dir=flatfiles --output_dir=bagged
+../../bazel-bin/src/gbdt --config_file=hepatitis.logloss.config --tsvs=hepatitis.tsv --output_dir=model --logtostderr

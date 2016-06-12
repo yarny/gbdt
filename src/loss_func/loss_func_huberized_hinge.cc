@@ -36,9 +36,7 @@ HuberizedHinge::HuberizedHinge(const LossFuncConfig& config)
 }
 
 bool HuberizedHinge::ProvideY(DataStore* data_store, vector<float>* y) {
-  return ComputeBinaryTargets(data_store, data_store->num_rows(),
-                              config_.binary_target(),
-                              y);
+  return ComputeBinaryTargets(data_store, config_, y);
 }
 
 }  // namespace gbdt

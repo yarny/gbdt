@@ -78,10 +78,12 @@ void TSVBlock::ReadTSV(const string& tsv,
         float_columns_[i].push_back(v);
       } else {
         CHECK(row[index] == "nan" ||
+              row[index] == "NAN" ||
               row[index] == "_" ||
               row[index] == "?" ||
               row[index] == "-" ||
-              row[index] == "*") << "Invalid input for float " << row[index];
+              row[index] == "*")
+            << "Invalid input at row " << num_rows << " column " << index + 1 << ": " << row[index];
         float_columns_[i].push_back(NAN);
       }
     }
