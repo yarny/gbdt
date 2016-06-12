@@ -70,8 +70,7 @@ vector<float> GetSampleWeightsOrDie(const Config& config, DataStore* data_store)
   return weights;
 }
 
-vector<const Column*> LoadFeaturesOrDie(const DataConfig& config,
-                                        DataStore* data_store) {
+vector<const Column*> LoadFeaturesOrDie(const DataConfig& config, DataStore* data_store) {
   unordered_set<string> feature_names(config.float_feature().begin(), config.float_feature().end());
   feature_names.insert(config.categorical_feature().begin(), config.categorical_feature().end());
   CHECK_GT(feature_names.size(), 0) << "Feature set should not be empty.";
