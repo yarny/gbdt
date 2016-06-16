@@ -107,8 +107,8 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
   const auto& tree_config = config.tree_config();
   const auto& sampling_config = config.sampling_config();
 
-  LOG(INFO) << "TreeConfig: " << tree_config.DebugString();
-  LOG(INFO) << "SamplingConfig: " << sampling_config.DebugString();
+  LOG(INFO) << "TreeConfig:\n" << tree_config.DebugString();
+  LOG(INFO) << "SamplingConfig:\n" << sampling_config.DebugString();
 
   unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config.loss_func_config());
   if (!loss_func) {
@@ -116,7 +116,7 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
                << config.loss_func_config().DebugString();
     return nullptr;
   }
-  LOG(INFO) << "LossFuncConfig: " << config.loss_func_config().DebugString();
+  LOG(INFO) << "LossFuncConfig:\n" << config.loss_func_config().DebugString();
 
   auto features = LoadFeaturesOrDie(config.data_config(), data_store);
   uint num_rows = data_store->num_rows();
