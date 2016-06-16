@@ -107,6 +107,9 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
   const auto& tree_config = config.tree_config();
   const auto& sampling_config = config.sampling_config();
 
+  LOG(INFO) << "TreeConfig: " << tree_config.DebugString();
+  LOG(INFO) << "SamplingConfig: " << sampling_config.DebugString();
+
   unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config.loss_func_config());
   if (!loss_func) {
     LOG(ERROR) << "Failed to initialize loss func from config "
