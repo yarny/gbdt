@@ -27,12 +27,12 @@
 #include "src/data_store/tsv_data_store.h"
 #include "src/gbdt_algo/evaluation.h"
 #include "src/gbdt_algo/gbdt_algo.h"
-#include "src/gbdt_algo/subsampling.h"
 #include "src/gbdt_algo/utils.h"
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/json_utils.h"
 #include "src/utils/stopwatch.h"
+#include "src/utils/subsampling.h"
 #include "src/utils/utils.h"
 
 DECLARE_string(config_file);
