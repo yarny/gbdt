@@ -22,7 +22,7 @@
 #include "external/cppformat/format.h"
 
 #include "src/base/base.h"
-#include "src/gbdt_algo/subsampling.h"
+#include "src/utils/subsampling.h"
 #include "src/utils/threadpool.h"
 
 DECLARE_int32(num_threads);

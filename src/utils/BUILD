@@ -81,3 +81,25 @@ cc_library(
         "//src/base:base"
    ]
 )
+
+cc_library(
+    name = "subsampling",
+    srcs = [ "subsampling.cc" ],
+    hdrs = [ "subsampling.h" ],
+    deps = [
+        "//src/proto:config_proto_cc",
+        ":utils",
+    ],
+)
+
+cc_test(
+    name = "subsampling_test",
+    srcs = [ "subsampling_test.cc" ],
+    deps = [
+        "//external:gtest_main",
+        ":utils",
+        ":subsampling",
+    ],
+    copts = C_TEST_OPTS,
+    linkopts = LINK_OPTS,
+)

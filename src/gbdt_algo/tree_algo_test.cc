@@ -25,7 +25,7 @@
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
 #include "src/loss_func/gradient_data.h"
-#include "subsampling.h"
+#include "src/utils/subsampling.h"
 
 namespace gbdt {
 
