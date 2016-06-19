@@ -64,6 +64,17 @@ static vector<uint> DivideSamplesHelper(int num_samples, uint num_groups) {
   return group_sizes;
 }
 
+vector<pair<uint, uint>> Subsampling::DivideSamples(int num_samples, int num_groups) {
+  vector<uint> group_sizes = DivideSamplesHelper(num_samples, num_groups);
+  vector<pair<uint, uint>> slices;
+  int start = 0;
+  for (auto size : group_sizes) {
+    slices.emplace_back(start, start + size);
+    start += size;
+  }
+  return slices;
+}
+
 vector<VectorSlice<uint>> Subsampling::DivideSamples(
     VectorSlice<uint> samples, int num_groups) {
   vector<uint> group_sizes = DivideSamplesHelper(samples.size(), num_groups);

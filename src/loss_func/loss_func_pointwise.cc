@@ -22,6 +22,10 @@
 #include "external/cppformat/format.h"
 
 #include "src/base/base.h"
+#include "src/gbdt_algo/subsampling.h"
+#include "src/utils/threadpool.h"
+
+DECLARE_int32(num_threads);
 
 namespace gbdt {
 
@@ -35,6 +39,7 @@ Pointwise::Pointwise(PointwiseLossFunc loss_func) : loss_func_(loss_func) {
 bool Pointwise::Init(DataStore* data_store, const vector<float>& w) {
   w_ = &w;
   weight_sum_ = accumulate(w_->begin(), w_->end(), 0.0);
+  slices_ = Subsampling::DivideSamples(w.size(), FLAGS_num_threads * 5);
   return ProvideY(data_store, &y_);
 }
 
@@ -52,16 +57,24 @@ void Pointwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
   double delta_c = 0;
   LossFuncData total;
   do {
-    total = LossFuncData();
-    for (int i = 0; i < gradient_data_vec->size(); ++i) {
-      double f_current = f[i] + *c;
-      LossFuncData loss = loss_func_(y_[i], f_current);
-      double w = (*w_)[i];
-      auto& gradient_data = (*gradient_data_vec)[i];
-      gradient_data = loss.gradient_data;
-      total.loss += w * loss.loss;
-      total.gradient_data += w * loss.gradient_data;
+    vector<LossFuncData> totals(slices_.size());
+    {
+      ThreadPool pool(FLAGS_num_threads);
+      for (int j = 0; j < slices_.size(); ++j) {
+          pool.Enqueue([&, this, &slice=slices_[j], &total=totals[j]](){
+            for (int i = slice.first; i < slice.second; ++i) {
+              double f_current = f[i] + *c;
+              LossFuncData loss = loss_func_(y_[i], f_current);
+              double w = (*w_)[i];
+              auto& gradient_data = (*gradient_data_vec)[i];
+              gradient_data = loss.gradient_data;
+              total.loss += w * loss.loss;
+              total.gradient_data += w * loss.gradient_data;
+            }
+          });
+      }
     }
+    total = std::accumulate(totals.begin(), totals.end(), LossFuncData());
     delta_c = total.gradient_data.Score(0);
     *c += delta_c;
     ++k;

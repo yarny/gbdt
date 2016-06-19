@@ -66,6 +66,13 @@ struct LossFuncData {
   LossFuncData() {}
   LossFuncData(double loss_arg, double g_arg, double h_arg) : loss(loss_arg), gradient_data(g_arg, h_arg) {}
 
+  inline LossFuncData operator + (const LossFuncData& data) const {
+    LossFuncData res;
+    res.gradient_data = gradient_data + data.gradient_data;
+    res.loss = loss + data.loss;
+    return res;
+  }
+
   double loss = 0;
   GradientData gradient_data;
 };
