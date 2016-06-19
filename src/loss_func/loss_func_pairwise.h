@@ -87,6 +87,8 @@ class Pairwise : public LossFunc {
   string PrepareProgressMessage(double loss);
 
   vector<Group> groups_;
+  // Division of [1, group_size] into slices to help multithreading.
+  vector<pair<uint, uint>> slices_;
   double initial_loss_ = -1;
   LossFuncConfig config_;
   static unique_ptr<std::mt19937> generator_;

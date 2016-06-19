@@ -22,8 +22,12 @@
 #include "external/cppformat/format.h"
 
 #include "src/data_store/data_store.h"
+#include "src/utils/subsampling.h"
+#include "src/utils/threadpool.h"
 
 using namespace std::placeholders;
+
+DECLARE_int32(num_threads);
 
 namespace gbdt {
 
@@ -114,6 +118,7 @@ bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
   for (auto& group : groups) {
     groups_.emplace_back(std::move(group), target_column, generator_.get());
   }
+  slices_ = Subsampling::DivideSamples(groups_.size(), FLAGS_num_threads * 5);
 
   return true;
 }
@@ -133,30 +138,40 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
   double sampling_rate = config_.pairwise_target().pair_sampling_rate();
   if (sampling_rate <= 0) return;
 
-  double loss = 0;
-  double weight_sum = 0;
   // Sample pairs and compute pairwise loss.
-  for (const auto& group : groups_) {
-    int sample_pairs = group.num_pairs() * sampling_rate;
-    auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
-    for (int i = 0; i < sample_pairs; ++i) {
-      auto p = group.SamplePair();
-      auto pos_sample = group.group()[p.first];
-      auto neg_sample = group.group()[p.second];
-      double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
+  vector<double> losses(slices_.size(), 0.0);
+  vector<double> weight_sums(slices_.size(), 0.0);
+  {
+    ThreadPool pool(FLAGS_num_threads);
+    for (int j = 0; j < slices_.size(); ++j) {
+      pool.Enqueue([&, this, &slice=slices_[j], &loss=losses[j], &weight_sum=weight_sums[j]]() {
+          for (int group_index = slice.first; group_index < slice.second; ++group_index) {
+            const auto& group = groups_[group_index];
+            int sample_pairs = group.num_pairs() * sampling_rate;
+            auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
+            for (int i = 0; i < sample_pairs; ++i) {
+              auto p = group.SamplePair();
+              auto pos_sample = group.group()[p.first];
+              auto neg_sample = group.group()[p.second];
+              double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
 
-      auto data = loss_func_(pos_sample, neg_sample, &f);
-      auto& pos_gradient_data = (*gradient_data_vec)[pos_sample];
-      auto& neg_gradient_data = (*gradient_data_vec)[neg_sample];
-      pos_gradient_data.g += data.gradient_data.g * weight;
-      neg_gradient_data.g -= data.gradient_data.g * weight;
-      pos_gradient_data.h += 2.0 * weight * data.gradient_data.h;
-      neg_gradient_data.h += 2.0 * weight * data.gradient_data.h;
-
-      loss += data.loss * weight;
-      weight_sum += weight;
+              auto data = loss_func_(pos_sample, neg_sample, &f);
+              auto& pos_gradient_data = (*gradient_data_vec)[pos_sample];
+              auto& neg_gradient_data = (*gradient_data_vec)[neg_sample];
+              pos_gradient_data.g += data.gradient_data.g * weight;
+              neg_gradient_data.g -= data.gradient_data.g * weight;
+              pos_gradient_data.h += 2.0 * weight * data.gradient_data.h;
+              neg_gradient_data.h += 2.0 * weight * data.gradient_data.h;
+              loss += data.loss * weight;
+              weight_sum += weight;
+            }
+          }
+        });
     }
   }
+
+  double loss = std::accumulate(losses.begin(), losses.end(), 0.0);
+  double weight_sum = std::accumulate(weight_sums.begin(), weight_sums.end(), 0.0);
 
   loss /= weight_sum;
   if (progress) {
