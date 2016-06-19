@@ -24,6 +24,7 @@
 namespace gbdt {
 
 class Column;
+class GradientData;
 class SamplingConfig;
 class TreeConfig;
 class TreeNode;
@@ -31,8 +32,7 @@ class TreeNode;
 // Given gradients and weights, fit trees to minimize mse.
 // It subsamples the examples and features according to the sampling_config.
 TreeNode FitTreeToGradients(const vector<float>& w,
-                            const vector<double>& g,
-                            const vector<double>& h,
+                            const vector<GradientData>& gradient_data_vec,
                             const vector<const Column*>& features,
                             const TreeConfig& tree_config,
                             const SamplingConfig& sampling_config);

@@ -33,9 +33,7 @@ class HuberizedHingeTest : public ::testing::Test {
     data_store_.AddColumn(target->name(), std::move(target));
     LossFuncConfig config;
     config.set_loss_func("huberized_hinge");
-    auto* binary_target_config = config.mutable_binary_target();
-    binary_target_config->set_target_column("target");
-    binary_target_config->set_threshold(0.5);
+    config.set_target_column("target");
 
     hinge_.reset(new HuberizedHinge(config));
     num_rows_ = data_store_.num_rows();
@@ -52,15 +50,15 @@ TEST_F(HuberizedHingeTest, Hinge) {
   CHECK(hinge_->Init(&data_store_, sample_weights_)) << "Failed to init loss func.";
   auto weights = sample_weights_;
   vector<double> f = { 0, 0, 0, 0, 0, 0, 0, 0 };
-  vector<double> g, h;
+  vector<GradientData> gradient_data_vec;
   double c;
-  hinge_->ComputeFunctionalGradientsAndHessians(f, &c, &g, &h, nullptr);
+  hinge_->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   EXPECT_FLOAT_EQ(0.5, c);
   vector<double> expected_g = { -1, -1, -1, -1, 0.5, 0.5, 0.5, 0.5 };
   vector<double> expected_h = { 0, 0, 0, 0, 1, 1, 1, 1 };
-  for (int i = 0; i < g.size(); ++i) {
-    EXPECT_FLOAT_EQ(expected_g[i], g[i]);
-    EXPECT_FLOAT_EQ(expected_h[i], h[i]);
+  for (int i = 0; i < gradient_data_vec.size(); ++i) {
+    EXPECT_FLOAT_EQ(expected_g[i], gradient_data_vec[i].g);
+    EXPECT_FLOAT_EQ(expected_h[i], gradient_data_vec[i].h);
   }
 }
 

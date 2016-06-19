@@ -20,9 +20,9 @@
 
 namespace gbdt {
 
-LossFunc::Data ComputeMSE(double y, double f);
-LossFunc::Data ComputeHuberizedHinge(double y, double f);
-LossFunc::Data ComputeLogLoss(double y, double f);
+LossFuncData ComputeMSE(double y, double f);
+LossFuncData ComputeHuberizedHinge(double y, double f);
+LossFuncData ComputeLogLoss(double y, double f);
 
 }  // namespace gbdt
 

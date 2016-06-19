@@ -91,18 +91,16 @@ Partition(const Column* feature, const Split& split, VectorSlice<uint> samples) 
 
 Histogram::Histogram(const IntegerizedColumn& feature,
                      const vector<float>& w,
-                     const vector<double>& g,
-                     const vector<double>& h,
+                     const vector<GradientData>& gradient_data_vec,
                      const VectorSlice<uint>& samples) {
-  ComputeHistograms(feature, w, g, h, samples);
+  ComputeHistograms(feature, w, gradient_data_vec, samples);
 }
 
 // This is the main work horse of the whole algorithm. Please make sure
 // it is written in an efficient way.
 void Histogram::ComputeHistograms(const IntegerizedColumn& feature,
                                   const vector<float>& w,
-                                  const vector<double>& g,
-                                  const vector<double>& h,
+                                  const vector<GradientData>& gradient_data_vec,
                                   const VectorSlice<uint>& samples) {
   uint max_int = feature.max_int();
   histograms_.resize(max_int);
@@ -110,9 +108,7 @@ void Histogram::ComputeHistograms(const IntegerizedColumn& feature,
   const auto& col = feature.col();
   // Compute histograms.
   for(auto index : samples) {
-    auto value = col[index];
-    histograms_[value].g += w[index] * g[index];
-    histograms_[value].h += w[index] * h[index];
+    histograms_[col[index]] += w[index] * gradient_data_vec[index];
   }
 
   for (uint i = 0; i < max_int; ++i) {
@@ -135,8 +131,8 @@ const GradientData& Histogram::DataOnMissing() const {
 void Histogram::SortOnNodeScore(double lambda) {
   // Compare the Node Score.
   auto compare_node_score = [](uint x, uint y,
-                        const vector<GradientData>* histograms, double lambda) {
-    return (NodeScore((*histograms)[x], lambda) < NodeScore((*histograms)[y], lambda));
+                               const vector<GradientData>* histograms, double lambda) {
+    return ((*histograms)[x].Score(lambda) < (*histograms)[y].Score(lambda));
   };
 
   sort(non_zero_values_.begin(), non_zero_values_.end(), std::bind(compare_node_score, _1, _2, &histograms_, lambda));
@@ -158,24 +154,23 @@ bool FindBestSplitPoint(const IntegerizedColumn& feature,
                         bool place_missing,
                         SplitPoint* split_point) {
   double lambda = config.l2_lambda();
-  double total_energy = Energy(total, lambda);
+  double total_energy = total.Energy(lambda);
 
   GradientData left;
   GradientData right;
   // Scanning to find the best splitting point.
   for (int i = 0; i < histogram.size(); ++i) {
-    right.g = total.g - left.g;
-    right.h = total.h - left.h;
+    right = total - left;
     if (i > 0) {
-      double gain = Energy(left, lambda) + Energy(right, lambda) - total_energy;
+      double gain = left.Energy(lambda) + right.Energy(lambda) - total_energy;
       bool missing_on_right = false;
       if (place_missing && histogram.HasMissingValue()) {
         // By default, for float missing value is placed on the left since they take index 0.
         // We will try to put them on the right to see if it improves the gain. If so, we will put
         // it on the right.
         const auto& data_on_missing = histogram.DataOnMissing();        
-        double gain_on_right = Energy(left - data_on_missing, lambda) +
-                               Energy(right + data_on_missing, lambda) -
+        double gain_on_right = (left - data_on_missing).Energy(lambda) +
+                               (right + data_on_missing).Energy(lambda) -
                                total_energy;
         if (gain_on_right > gain) {
           gain = gain_on_right;
@@ -190,9 +185,7 @@ bool FindBestSplitPoint(const IntegerizedColumn& feature,
       }
     }
 
-    const auto& data = histogram.data(i);
-    left.g += data.g;
-    left.h += data.h;
+    left += histogram.data(i);
   }
 
   return split_point->left_point >= 0;
@@ -204,13 +197,12 @@ bool FindBestSplitPoint(const IntegerizedColumn& feature,
 // point. The time complexity is O(n+num_unique_values).
 bool FindBestFloatSplit(const BinnedFloatColumn& feature,
                         const vector<float>* w,
-                        const vector<double>* g,
-                        const vector<double>* h,
+                        const vector<GradientData>* gradient_data_vec,
                         const VectorSlice<uint>& samples,
                         const SplitConfig& config,
                         const GradientData& total,
                         Split* split) {
-  Histogram histogram(feature, *w, *g, *h, samples);
+  Histogram histogram(feature, *w, *gradient_data_vec, samples);
 
   SplitPoint split_point;
   if (!FindBestSplitPoint(feature, config, histogram, total, true, &split_point)) {
@@ -227,13 +219,12 @@ bool FindBestFloatSplit(const BinnedFloatColumn& feature,
 
 bool FindBestStringSplit(const StringColumn& feature,
                          const vector<float>* w,
-                         const vector<double>* g,
-                         const vector<double>* h,
+                         const vector<GradientData>* gradient_data_vec,
                          const VectorSlice<uint>& samples,
                          const SplitConfig& config,
                          const GradientData& total,
                          Split* split) {
-  Histogram histogram(feature, *w, *g, *h, samples);
+  Histogram histogram(feature, *w, *gradient_data_vec, samples);
   // For categorical features, since there is no preset order, we can
   // sort them based on their node scores and find the optimal subset.
   histogram.SortOnNodeScore(config.l2_lambda());
@@ -261,8 +252,7 @@ bool FindBestStringSplit(const StringColumn& feature,
 
 bool FindBestSplit(const Column* feature,
                    const vector<float>* w,
-                   const vector<double>* g,
-                   const vector<double>* h,
+                   const vector<GradientData>* gradient_data_vec,
                    const VectorSlice<uint>& samples,
                    const SplitConfig& config,
                    const GradientData& total,
@@ -270,10 +260,10 @@ bool FindBestSplit(const Column* feature,
   switch (feature->type()) {
     case Column::kStringColumn:
       return FindBestStringSplit(static_cast<const StringColumn&>(*feature),
-                                 w, g, h, samples, config, total, split);
+                                 w, gradient_data_vec, samples, config, total, split);
     case Column::kBinnedFloatColumn:
       return FindBestFloatSplit(static_cast<const BinnedFloatColumn&>(*feature),
-                                w, g, h, samples, config, total, split);
+                                w, gradient_data_vec, samples, config, total, split);
     default:
       return false;
   }

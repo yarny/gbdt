@@ -23,7 +23,7 @@
 namespace gbdt {
 
 bool ComputeBinaryTargets(DataStore* data_store, const LossFuncConfig& config,
-                               vector<float>* targets) {
+                          vector<float>* targets) {
   const string& target_column_name = config.target_column();
   if (target_column_name.empty()) {
     LOG(ERROR) << "Please specify binary target in your config.";

@@ -120,18 +120,15 @@ bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
 
 void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
-                                                     vector<double>* g,
-                                                     vector<double>* h,
+                                                     vector<GradientData>* gradient_data_vec,
                                                      string* progress) {
   // Resize g and h if they haven't be resized yet.
-  if (g->size() != f.size()) {
-    g->resize(f.size());
-    h->resize(f.size());
+  if (gradient_data_vec->size() != f.size()) {
+    gradient_data_vec->resize(f.size());
   }
   *c = 0;
-  auto set_zero = [](double& x) { x = 0.0; };
-  std::for_each(g->begin(), g->end(), set_zero);
-  std::for_each(h->begin(), h->end(), set_zero);
+  auto set_zero = [](GradientData& x) { x = GradientData(); };
+  std::for_each(gradient_data_vec->begin(), gradient_data_vec->end(), set_zero);
 
   double sampling_rate = config_.pairwise_target().pair_sampling_rate();
   if (sampling_rate <= 0) return;
@@ -149,10 +146,13 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
       double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
 
       auto data = loss_func_(pos_sample, neg_sample, &f);
-      (*g)[pos_sample] += data.g * weight;
-      (*g)[neg_sample] -= data.g * weight;
-      (*h)[pos_sample] += 2.0 * weight * data.h;
-      (*h)[neg_sample] += 2.0 * weight * data.h;
+      auto& pos_gradient_data = (*gradient_data_vec)[pos_sample];
+      auto& neg_gradient_data = (*gradient_data_vec)[neg_sample];
+      pos_gradient_data.g += data.gradient_data.g * weight;
+      neg_gradient_data.g -= data.gradient_data.g * weight;
+      pos_gradient_data.h += 2.0 * weight * data.gradient_data.h;
+      neg_gradient_data.h += 2.0 * weight * data.gradient_data.h;
+
       loss += data.loss * weight;
       weight_sum += weight;
     }

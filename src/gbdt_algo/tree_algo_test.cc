@@ -24,6 +24,7 @@
 #include "src/data_store/column.h"
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
+#include "src/loss_func/gradient_data.h"
 #include "subsampling.h"
 
 namespace gbdt {
@@ -31,7 +32,7 @@ namespace gbdt {
 class TreeBuildingTest : public testing::Test {
  public:
   void SetUp() {
-    allsamples_ = Subsampling::CreateAllSamples(g_.size());
+    allsamples_ = Subsampling::CreateAllSamples(gradient_data_vec_.size());
 
     tree_config_.set_num_leaves(10);
     sampling_config_.set_example_sampling_rate(1.0);
@@ -69,7 +70,7 @@ class TreeBuildingTest : public testing::Test {
   unique_ptr<Column> const_float_feature_;
   unique_ptr<Column> const_string_feature_;
   unique_ptr<Column> irrelevant_feature_;
-  // The feature is 0 when g_ is even and 1 if g_ is odd.
+  // The feature is 0 when gradient is even and 1 if gradient is odd.
   unique_ptr<Column> parity_feature_;
   // Feature that indicates zeros.
   unique_ptr<Column> zero_feature_;
@@ -78,9 +79,13 @@ class TreeBuildingTest : public testing::Test {
   unique_ptr<Column> three_feature1_;
   TreeConfig tree_config_;
   SamplingConfig sampling_config_;
-  vector<double> g_ = {1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4};
+  vector<GradientData> gradient_data_vec_ =
+  {
+    {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},
+    {2.0, 1.0}, {2.0, 1.0}, {2.0, 1.0}, {2.0, 1.0},
+    {3.0, 1.0}, {3.0, 1.0}, {3.0, 1.0}, {3.0, 1.0},
+    {4.0, 1.0}, {4.0, 1.0}, {4.0, 1.0}, {4.0, 1.0}};
   vector<float> w_ = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-  vector<double> h_ = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
   vector<uint> allsamples_;
 };
@@ -95,7 +100,7 @@ TEST_F(TreeBuildingTest, BuildTree) {
                                      zero_feature_.get(),
                                      three_feature0_.get(),
                                      three_feature1_.get() };
-  TreeNode t = FitTreeToGradients(w_, g_, h_, features, tree_config_, sampling_config_);
+  TreeNode t = FitTreeToGradients(w_, gradient_data_vec_, features, tree_config_, sampling_config_);
   RemoveGains(&t);
   string expected_tree =
       "score: 2.5\n"
@@ -157,7 +162,7 @@ TEST_F(TreeBuildingTest, BuildTreeWithIrrlevantFeatures) {
                                      const_string_feature_.get(),
                                      irrelevant_feature_.get() };
 
-  TreeNode t = FitTreeToGradients(w_, g_, h_, features, tree_config_, sampling_config_);
+  TreeNode t = FitTreeToGradients(w_, gradient_data_vec_, features, tree_config_, sampling_config_);
   EXPECT_FALSE(t.has_left_child());
   EXPECT_FALSE(t.has_right_child());
   EXPECT_FALSE(t.has_split());

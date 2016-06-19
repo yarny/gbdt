@@ -84,7 +84,8 @@ cc_library(
     hdrs = [ "split_algo.h" ],
     deps = [
          "//src/base:base",
-	 "//src/data_store:column",
+         "//src/data_store:column",
+         "//src/loss_func:gradient_data",
     	 "//src/proto:config_proto_cc",
          "//src/proto:tree_proto_cc",
 	 "//src/utils:vector_slice",
@@ -176,8 +177,9 @@ cc_test(
     srcs = [ "tree_algo_test.cc" ],
     deps = [
         "//external:gtest_main",
+        "//src/loss_func:gradient_data",
 	"//src/proto:config_proto_cc",
-	"//src/proto:tree_proto_cc",
+        "//src/proto:tree_proto_cc",
 	":subsampling",
 	":tree_algo",
     ],

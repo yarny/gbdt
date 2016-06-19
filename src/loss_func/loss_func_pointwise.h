@@ -28,13 +28,12 @@ namespace gbdt {
 // compute the loss, negative gradient and hessian.
 class Pointwise : public LossFunc {
 public:
-  typedef std::function<LossFunc::Data(double, double)> PointwiseLossFunc;
+  typedef std::function<LossFuncData(double, double)> PointwiseLossFunc;
   Pointwise(PointwiseLossFunc loss_func);
   virtual bool Init(DataStore* data_store, const vector<float>& w) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
-                                                     vector<double>* g,
-                                                     vector<double>* h,
+                                                     vector<GradientData>* gradient_data_vec,
                                                      string* progress) override;
 
 protected:

@@ -40,17 +40,17 @@ class GBDTAlgoTest : public ::testing::Test {
         "  feature_sampling_rate: 1.0"
         "}"
         "data_config { "
-        "  feature: ["
-        "   'color', "
+        "  float_feature: ["
         "   'width', "
         "   'height' "
         "  ]"
+        " categorical_feature: ["
+        "   'color' "
+        " ]"
         "}"
         "loss_func_config {"
         "  loss_func: 'mse' "
-        "  regression_target {"
-        "    target_column: 'label'"
-        "  }"
+        "  target_column: 'label'"
         "}";
     CHECK(google::protobuf::TextFormat::ParseFromString(config_text, &config_))
         << "Failed to parse proto " << config_text;

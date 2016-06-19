@@ -20,12 +20,13 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "loss_func_math.h"
 
 namespace gbdt {
 
 class MockPointwise : public Pointwise {
  public:
-  MockPointwise(std::function<Pointwise::Data(double, double)> loss_func,
+  MockPointwise(std::function<LossFuncData(double, double)> loss_func,
                 const vector<float>& y)
       : Pointwise(loss_func), mock_y_(y) {}
  protected:
@@ -37,53 +38,48 @@ class MockPointwise : public Pointwise {
   vector<float> mock_y_;
 };
 
-TEST(PointwiseTest, TestRMSE) {
-  auto loss_func = [](double y, double f) {
-    return Pointwise::Data((y - f) * (y -f),
-                           y - f,
-                           1.0);
-  };
+TEST(PointwiseTest, TestMSE) {
   vector<double> f = { 2, 2, 2, 2, 2, 2, 2, 2 };
   vector<float> w =  {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   vector<float> y = {0, 0, 0, 0, 1, 1, 1, 1};
-  vector<double> g, h;
+  vector<GradientData> gradient_data_vec;
   double c;
 
-  MockPointwise mse(loss_func, y);
+  MockPointwise mse(ComputeMSE, y);
   mse.Init(nullptr, w);
-  mse.ComputeFunctionalGradientsAndHessians(f, &c, &g, &h, nullptr);
+  mse.ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   EXPECT_FLOAT_EQ(-1.5, c);
 
-  EXPECT_EQ(vector<double>({ -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5 }),  g);
-  EXPECT_EQ(vector<double>({ 1, 1, 1, 1, 1, 1, 1, 1 }),  h);
-  EXPECT_FLOAT_EQ(0, accumulate(g.begin(), g.end(), 0.0));
+  vector<GradientData> expected =
+      {{-0.5, 1}, {-0.5, 1}, {-0.5, 1}, {-0.5, 1}, {0.5, 1}, {0.5, 1}, {0.5, 1}, {0.5, 1}};
+
+  for (int i = 0; i < gradient_data_vec.size(); ++i) {
+    EXPECT_FLOAT_EQ(expected[i].g, gradient_data_vec[i].g);
+    EXPECT_FLOAT_EQ(expected[i].h, gradient_data_vec[i].h);
+  }
+  auto total = accumulate(gradient_data_vec.begin(), gradient_data_vec.end(), GradientData());
+  EXPECT_FLOAT_EQ(0, total.g);
 }
 
 TEST(PointwiseTest, TestLogLoss) {
-  auto loss_func = [](double y, double f) {
-    double e = exp(-y * f);
-    return Pointwise::Data(log(1 + e),
-                           y * e / (1 + e),
-                           e / ((1 + e) * (1 + e)));
-  };
-
   vector<float> w = {1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
   vector<double> f = { 0, 0, 0, 0, 0, 0, 0, 0 };
   vector<float> y = {-1, -1, -1, -1, 1, 1, 1, 1};
-  vector<double> g, h;
+  vector<GradientData> gradient_data_vec;
   double c;
-  MockPointwise logloss(loss_func, y);
+  MockPointwise logloss(ComputeLogLoss, y);
   logloss.Init(nullptr, w);
-  logloss.ComputeFunctionalGradientsAndHessians(f, &c, &g, &h, nullptr);
+  logloss.ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
 
   EXPECT_FLOAT_EQ(log(2.0), c);
 
-  vector<double> expected_g =
-      { -2.0/3.0, -2.0/3.0, -2.0/3.0, -2.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/3.0};
-  vector<double> expected_h = vector<double>(g.size(), 2/9.0);
-  for (int i = 0; i < g.size(); ++i) {
-    EXPECT_FLOAT_EQ(expected_g[i], g[i]);
-    EXPECT_FLOAT_EQ(expected_h[i], h[i]);
+  vector<GradientData> expected =
+      { {-2.0/3.0, 2/9.0}, {-2.0/3.0, 2/9.0}, {-2.0/3.0, 2/9.0}, {-2.0/3.0, 2/9.0},
+        {1.0/3.0, 2/9.0}, {1.0/3.0, 2/9.0}, {1.0/3.0, 2/9.0}, {1.0/3.0, 2/9.0}};
+
+  for (int i = 0; i < gradient_data_vec.size(); ++i) {
+    EXPECT_FLOAT_EQ(expected[i].g, gradient_data_vec[i].g);
+    EXPECT_FLOAT_EQ(expected[i].h, gradient_data_vec[i].h);
   }
 }
 

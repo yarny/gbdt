@@ -21,28 +21,28 @@
 
 namespace gbdt {
 
-LossFunc::Data ComputeMSE(double y, double f) {
-  return LossFunc::Data((y - f) * (y -f),
-                         y - f,
-                         1.0);
+LossFuncData ComputeMSE(double y, double f) {
+  return LossFuncData((y - f) * (y -f),
+                      y - f,
+                      1.0);
 }
 
-LossFunc::Data ComputeLogLoss(double y, double f) {
+LossFuncData ComputeLogLoss(double y, double f) {
   double e = exp(-y * f);
-  return LossFunc::Data(log(1 + e),
-                        y * e / (1 + e),
-                        e / ((1 + e) * (1 + e)));
+  return LossFuncData(log(1 + e),
+                      y * e / (1 + e),
+                      e / ((1 + e) * (1 + e)));
 };
 
-LossFunc::Data ComputeHuberizedHinge(double y, double f) {
+LossFuncData ComputeHuberizedHinge(double y, double f) {
   double e = y * f;
   if (e >= 1) {
     // Margin is greater than 1.0. Hinge loss is 0.
-    return LossFunc::Data(0.0, 0.0, 0.0);
+    return LossFuncData(0.0, 0.0, 0.0);
   } else if (e >= 0) {
-    return LossFunc::Data(0.5 * (1 - e) * (1 - e), (1 - e) * y, 1);
+    return LossFuncData(0.5 * (1 - e) * (1 - e), (1 - e) * y, 1);
   } else {
-    return LossFunc::Data(0.5 - e, y, 0);
+    return LossFuncData(0.5 - e, y, 0);
   }
 }
 

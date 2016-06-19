@@ -40,12 +40,12 @@ using namespace std::placeholders;
 
 namespace gbdt {
 
-GradientData ComputeWeightedSum(const vector<float>& w, const vector<double>& g,
-                             const vector<double>& h, const VectorSlice<uint>& samples) {
+GradientData ComputeWeightedSum(const vector<float>& w,
+                                const vector<GradientData>& gradient_data_vec,
+                                const VectorSlice<uint>& samples) {
   GradientData total;
   for (auto index : samples) {
-    total.g += w[index] * g[index];
-    total.h += w[index] * h[index];
+    total += w[index] * gradient_data_vec[index];
   }
   return total;
 }
@@ -63,8 +63,7 @@ struct NodeData {
 // Finds the best split for the samples.
 pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& features,
                                                    const vector<float>& w,
-                                                   const vector<double>& g,
-                                                   const vector<double>& h,
+                                                   const vector<GradientData>& gradient_data_vec,
                                                    const VectorSlice<uint>& samples,
                                                    const GradientData& total,
                                                    const TreeConfig& config,
@@ -75,20 +74,24 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
   {
     auto task = [] (const Column* feature,
                     const vector<float>* w,
-                    const vector<double>* g,
-                    const vector<double>* h,
+                    const vector<GradientData>* gradient_data_vec,
                     const VectorSlice<uint>& samples,
                     const SplitConfig& config,
                     const GradientData* total,
                     Split* split) {
-      FindBestSplit(feature, w, g, h, samples, config, *total, split);
+      FindBestSplit(feature, w, gradient_data_vec, samples, config, *total, split);
     };
     ThreadPool pool(FLAGS_num_threads);
 
     for (uint i = 0; i < sample_features.size(); ++i) {
       pool.Enqueue(std::bind(
           task,
-          features[sample_features[i]], &w, &g, &h,samples, config.split_config(), &total,
+          features[sample_features[i]],
+          &w,
+          &gradient_data_vec,
+          samples,
+          config.split_config(),
+          &total,
           &splits[i]));
     }
   }
@@ -115,8 +118,7 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
 }
 
 TreeNode FitTreeToGradients(const vector<float>& w,
-                            const vector<double>& g,
-                            const vector<double>& h,
+                            const vector<GradientData>& gradient_data_vec,
                             const vector<const Column*>& features,
                             const TreeConfig& tree_config,
                             const SamplingConfig& sampling_config) {
@@ -129,12 +131,12 @@ TreeNode FitTreeToGradients(const vector<float>& w,
 
   // Subsampling.
   auto subsamples = Subsampling::UniformSubsample(
-      g.size(), sampling_config.example_sampling_rate());
-  GradientData total = ComputeWeightedSum(w, g, h, subsamples);
+      gradient_data_vec.size(), sampling_config.example_sampling_rate());
+  GradientData total = ComputeWeightedSum(w, gradient_data_vec, subsamples);
 
-  tree.set_score(NodeScore(total, lambda));
+  tree.set_score(total.Score(lambda));
   auto root_split = FindBestFeatureAndSplit(
-      features, w, g, h, subsamples, total, tree_config, sampling_config);
+      features, w, gradient_data_vec, subsamples, total, tree_config, sampling_config);
   if (root_split.first.gain() > 0) {
     *(tree.mutable_split()) = std::move(root_split.first);
   }
@@ -151,23 +153,23 @@ TreeNode FitTreeToGradients(const vector<float>& w,
     // Partition.
     auto sub_slices = Partition(feature, node->split(), subsamples_slice);
 
-    GradientData left_total = ComputeWeightedSum(w, g, h, sub_slices.first);
-    GradientData right_total = ComputeWeightedSum(w, g, h, sub_slices.second);
+    GradientData left_total = ComputeWeightedSum(w, gradient_data_vec, sub_slices.first);
+    GradientData right_total = ComputeWeightedSum(w, gradient_data_vec, sub_slices.second);
 
     // Left.
     auto* left_child = node->mutable_left_child();
-    left_child->set_score(NodeScore(left_total, lambda));
+    left_child->set_score(left_total.Score(lambda));
     auto left_split = FindBestFeatureAndSplit(
-        features, w, g, h, sub_slices.first, left_total, tree_config, sampling_config);
+        features, w, gradient_data_vec, sub_slices.first, left_total, tree_config, sampling_config);
     if (left_split.first.gain() > 0) {
       *left_child->mutable_split() = std::move(left_split.first);
     }
 
     // Right.
     auto* right_child = node->mutable_right_child();
-    right_child->set_score(NodeScore(right_total, lambda));
+    right_child->set_score(right_total.Score(lambda));
     auto right_split = FindBestFeatureAndSplit(
-        features, w, g, h, sub_slices.second, right_total, tree_config, sampling_config);
+        features, w, gradient_data_vec, sub_slices.second, right_total, tree_config, sampling_config);
     if (right_split.first.gain() > 0) {
       *right_child->mutable_split() = std::move(right_split.first);
     }
