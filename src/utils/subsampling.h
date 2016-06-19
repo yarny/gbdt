@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <random>
+#include <utility>
 #include <vector>
 
 #include "src/base/base.h"
@@ -39,6 +40,7 @@ public:
 
   // Divide samples uniformly into gropus.
   static vector<VectorSlice<uint>> DivideSamples(VectorSlice<uint> samples, int num_groups);
+  static vector<pair<uint, uint>> DivideSamples(int num_samples, int num_groups);
 
 private:
   static unique_ptr<std::default_random_engine> generator_;

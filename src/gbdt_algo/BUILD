@@ -11,28 +11,6 @@ C_TEST_OPTS = [ "-Iexternal/googletest/googletest/include",
 	        "-Iexternal/googletest/googlemock/include" ]
 
 cc_library(
-    name = "subsampling",
-    srcs = [ "subsampling.cc" ],
-    hdrs = [ "subsampling.h" ],
-    deps = [
-        "//src/proto:config_proto_cc",
-	"//src/utils:utils",
-    ],
-)
-
-cc_test(
-    name = "subsampling_test",
-    srcs = [ "subsampling_test.cc" ],
-    deps = [
-        "//external:gtest_main",
-	"//src/utils:utils",
-	":subsampling",
-    ],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-)
-
-cc_library(
     name = "compute_tree_scores",
     srcs = [ "compute_tree_scores.cc" ],
     hdrs = [ "compute_tree_scores.h" ],
@@ -40,12 +18,12 @@ cc_library(
         "//src:flags",
         "//src/base:base",
 	"//src/data_store:column",
-	"//src/data_store:data_store",
-    	"//src/proto:tree_proto_cc",
+        "//src/data_store:data_store",
+        "//src/proto:tree_proto_cc",
+        "//src/utils:subsampling",
 	"//src/utils:threadpool",
-	"//src/utils:vector_slice",
-	":split_algo",
-	":subsampling",
+        "//src/utils:vector_slice",
+        ":split_algo",
     ],
 )
 
@@ -119,13 +97,13 @@ cc_library(
 	"//src/loss_func:loss_func_factory",
 	"//src/proto:config_proto_cc",
 	"//src/proto:tree_proto_cc",
-	"//src/utils:stopwatch",
+        "//src/utils:stopwatch",
+        "//src/utils:subsampling",
 	"//src/utils:threadpool",
 	"//src/utils:utils",
 	"//src/utils:vector_slice",
 	":compute_tree_scores",
-	":split_algo",
-	":subsampling",
+        ":split_algo",
 	":tree_algo",
 	":utils",
     ],
@@ -164,11 +142,11 @@ cc_library(
         "//external:cppformat-lib",
 	"//src/proto:config_proto_cc",
 	"//src/proto:tree_proto_cc",
-	"//src/utils:stopwatch",
+        "//src/utils:stopwatch",
+        "//src/utils:subsampling",
 	"//src/utils:threadpool",
 	"//src/utils:utils",
-	":split_algo",
-	":subsampling",
+        ":split_algo",
     ],
 )
 
@@ -180,7 +158,7 @@ cc_test(
         "//src/loss_func:gradient_data",
 	"//src/proto:config_proto_cc",
         "//src/proto:tree_proto_cc",
-	":subsampling",
+        "//src/utils:subsampling",
 	":tree_algo",
     ],
     copts = C_TEST_OPTS,

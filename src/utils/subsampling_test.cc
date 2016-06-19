@@ -58,4 +58,27 @@ TEST(SubsamplingTest, DivideSamples) {
   EXPECT_EQ(vector<uint>({7, 8}), VectorSliceToVector(slices[3]));
 }
 
+TEST(SubsamplingTest, DivideSamples2) {
+  auto slices = Subsampling::DivideSamples(9, 3);
+  EXPECT_EQ(3, slices.size());
+  EXPECT_EQ(0, slices[0].first);
+  EXPECT_EQ(3, slices[0].second);
+  EXPECT_EQ(3, slices[1].first);
+  EXPECT_EQ(6, slices[1].second);
+  EXPECT_EQ(6, slices[2].first);
+  EXPECT_EQ(9, slices[2].second);
+
+
+  slices = Subsampling::DivideSamples(9, 4);
+  EXPECT_EQ(4, slices.size());
+  EXPECT_EQ(0, slices[0].first);
+  EXPECT_EQ(3, slices[0].second);
+  EXPECT_EQ(3, slices[1].first);
+  EXPECT_EQ(5, slices[1].second);
+  EXPECT_EQ(5, slices[2].first);
+  EXPECT_EQ(7, slices[2].second);
+  EXPECT_EQ(7, slices[3].first);
+  EXPECT_EQ(9, slices[3].second);
+}
+
 }  // namespace gbdt

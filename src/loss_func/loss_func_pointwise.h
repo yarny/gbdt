@@ -48,6 +48,8 @@ private:
   const vector<float>* w_;
   double initial_loss_ = -1;
   double weight_sum_ = 0;
+  // Division of [1, sample_size] into slices to help multithreading.
+  vector<pair<uint, uint>> slices_;
 };
 
 }  // namespace gbdt

@@ -34,10 +34,10 @@
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/stopwatch.h"
+#include "src/utils/subsampling.h"
 #include "src/utils/threadpool.h"
 #include "src/utils/utils.h"
 #include "src/utils/vector_slice.h"
-#include "subsampling.h"
 #include "tree_algo.h"
 #include "utils.h"
 

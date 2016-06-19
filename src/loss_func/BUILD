@@ -170,6 +170,9 @@ cc_library(
     deps = [
         "//external:cppformat-lib",
         "//src/base:base",
+        "//src/utils:subsampling",
+        "//src/utils:threadpool",
+        "//src:flags",
 	":loss_func",
     ],
 )

@@ -19,9 +19,9 @@
 #include "src/base/base.h"
 #include "src/data_store/data_store.h"
 #include "src/proto/tree.pb.h"
+#include "src/utils/subsampling.h"
 #include "src/utils/threadpool.h"
 #include "src/utils/vector_slice.h"
-#include "subsampling.h"
 
 DECLARE_int32(num_threads);
 
