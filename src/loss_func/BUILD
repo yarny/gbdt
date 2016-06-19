@@ -105,7 +105,8 @@ cc_library(
     deps = [
         "//src/base:base",
         "//src/proto:config_proto_cc",
-	"//src/data_store:data_store",
+        "//src/data_store:data_store",
+        ":gradient_data"
     ],
 )
 
@@ -179,6 +180,7 @@ cc_test(
     deps = [
         "//external:gtest_main",
         "//src/base:base",
+        ":loss_func_math",
 	":loss_func_pointwise",
     ],
     copts = C_TEST_OPTS,
@@ -248,5 +250,12 @@ cc_library(
     hdrs = [ "loss_func_math.h" ],
     deps = [
         ":loss_func"
+    ],
+)
+
+cc_library(
+    name = "gradient_data",
+    hdrs = [ "gradient_data.h" ],
+    deps = [
     ],
 )

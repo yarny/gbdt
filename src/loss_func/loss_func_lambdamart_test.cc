@@ -40,25 +40,25 @@ class PairwiseTest : public ::testing::Test {
 
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
   vector<double> f = { 1, 0, 3, 2};
-  vector<double> g, h;
+  vector<GradientData> gradient_data_vec;
   double c;
   LossFuncConfig config;
   auto* pairwise_target_config = config.mutable_pairwise_target();
-  pairwise_target_config->set_target_column("target");
+  config.set_target_column("target");
   pairwise_target_config->set_group_column("group0");
   pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
   unique_ptr<Pairwise> lambdamart(new LambdaMART(config));
   lambdamart->Init(&data_store_, sample_weights_);
-  lambdamart->ComputeFunctionalGradientsAndHessians(f, &c, &g, &h, nullptr);
+  lambdamart->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);
 
   // The gradients reflect the relative order of the original targets.
   vector<double> expected_g = {-0.28, -0.022, -0.113, 0.416};
   vector<double> expected_h = {0.4, 0.16, 0.4, 0.38};
-  for (int i = 0; i < g.size(); ++i) {
-    EXPECT_LT(fabs(expected_g[i] - g[i] / kSamplingRate_), 5e-2);
-    EXPECT_LT(fabs(expected_h[i] - h[i] / kSamplingRate_), 5e-2);
+  for (int i = 0; i < gradient_data_vec.size(); ++i) {
+    EXPECT_LT(fabs(expected_g[i] - gradient_data_vec[i].g / kSamplingRate_), 5e-2);
+    EXPECT_LT(fabs(expected_h[i] - gradient_data_vec[i].h / kSamplingRate_), 5e-2);
   }
 }
 

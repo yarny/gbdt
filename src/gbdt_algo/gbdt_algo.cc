@@ -131,8 +131,7 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
   unique_ptr<Forest> forest(new Forest);
 
   vector<double> f(num_rows, 0);  // current function values
-  vector<double> g(num_rows, 0);  // gradients
-  vector<double> h(num_rows, 0);  // hessians.
+  vector<GradientData> gradient_data(num_rows);
   ComputeTreeScores compute_tree_scores(data_store);
 
   StopWatch stopwatch;
@@ -154,7 +153,7 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
     // Compute gradients and constant
     double constant = 0;
     string loss_func_progress;
-    loss_func->ComputeFunctionalGradientsAndHessians(f, &constant, &g, &h, &loss_func_progress);
+    loss_func->ComputeFunctionalGradientsAndHessians(f, &constant, &gradient_data, &loss_func_progress);
 
     // Log progress
     LOG(INFO) << fmt::format("{0}: {1}{2}", i, time_progress, loss_func_progress);
@@ -162,7 +161,7 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
     // Add a tree to forest
     auto* tree = forest->add_tree();
     // Fit a tree to gradients and apply the shrinkage
-    *tree = FitTreeToGradients(w, g, h, features, tree_config, sampling_config);
+    *tree = FitTreeToGradients(w, gradient_data, features, tree_config, sampling_config);
 
     // Apply Shrinkage to the tree
     ApplyShrinkage(tree, tree_config.shrinkage());

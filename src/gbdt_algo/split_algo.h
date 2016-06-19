@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/base/base.h"
+#include "src/loss_func/gradient_data.h"
 #include "src/utils/utils.h"
 #include "src/utils/vector_slice.h"
 
@@ -31,32 +32,13 @@ class IntegerizedColumn;
 class Split;
 class SplitConfig;
 
-struct GradientData {
-  inline GradientData operator - (const GradientData& data) {
-    GradientData res;
-    res.g = g - data.g;
-    res.h = h - data.h;
-    return res;
-  }
-  inline GradientData operator + (const GradientData& data) {
-    GradientData res;
-    res.g = g + data.g;
-    res.h = h + data.h;
-    return res;
-  }
-
-  double g = 0;
-  double h = 0;
-};
-
 // Histogram contains weighted sums of gradients and hessians
 // for each bucktized feature values.
 class Histogram {
-public:
+ public:
   Histogram(const IntegerizedColumn& feature,
             const vector<float>& w,
-            const vector<double>& g,
-            const vector<double>& h,
+            const vector<GradientData>& gradient_data_vec,
             const VectorSlice<uint>& samples);
   inline int size() const {
     return non_zero_values_.size();
@@ -71,11 +53,11 @@ public:
   inline const GradientData& DataOnMissing() const;
 
   void SortOnNodeScore(double lambda);
-private:
+
+ private:
   void ComputeHistograms(const IntegerizedColumn& feature,
                          const vector<float>& w,
-                         const vector<double>& g,
-                         const vector<double>& h,
+                         const vector<GradientData>& gradient_data,
                          const VectorSlice<uint>& samples);
   vector<GradientData> histograms_;
   vector<uint> non_zero_values_;
@@ -93,24 +75,11 @@ Partition(const Column* feature, const Split& split, VectorSlice<uint> samples);
 // 2. total is inputs to the algorithm to save one pass over the data.
 bool FindBestSplit(const Column* feature,
                    const vector<float>* w,
-                   const vector<double>* g,
-                   const vector<double>* h,
+                   const vector<GradientData>* gradient_data_vec,
                    const VectorSlice<uint>& samples,
                    const SplitConfig& config,
                    const GradientData& total,
                    Split* split);
-
-// Computes optimal node score given negative gradient and hessian.
-inline double NodeScore(const GradientData& data, double lambda) {
-  double h_smoothed = data.h + lambda;
-  return h_smoothed == 0 ? 0.0 : data.g / h_smoothed;
-}
-
-// Gain = Energy(total) - Energy(left) - Energy(right).
-inline double Energy(const GradientData& data, double lambda) {
-  double h_smoothed = data.h + lambda;
-  return h_smoothed == 0 ? 0 : data.g * data.g / h_smoothed;
-}
 
 }  // namespace gbdt
 

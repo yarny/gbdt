@@ -40,40 +40,35 @@ bool Pointwise::Init(DataStore* data_store, const vector<float>& w) {
 
 void Pointwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                       double* c,
-                                                      vector<double>* g,
-                                                      vector<double>* h,
+                                                      vector<GradientData>* gradient_data_vec,
                                                       string* progress) {
   // Resize g and h if they haven't be resized yet.
-  if (g->size() != f.size()) {
-    g->resize(f.size());
-    h->resize(f.size());
+  if (gradient_data_vec->size() != f.size()) {
+    gradient_data_vec->resize(f.size());
   }
 
   int k = 0;
   *c = 0;
   double delta_c = 0;
-  double total_loss = 0;
+  LossFuncData total;
   do {
-    total_loss = 0;
-    double total_g = 0;
-    double total_h = 0;
-    for (int i = 0; i < g->size(); ++i) {
+    total = LossFuncData();
+    for (int i = 0; i < gradient_data_vec->size(); ++i) {
       double f_current = f[i] + *c;
-      Data loss = loss_func_(y_[i], f_current);
+      LossFuncData loss = loss_func_(y_[i], f_current);
       double w = (*w_)[i];
-      (*g)[i] = loss.g;
-      (*h)[i] = loss.h;
-      total_loss += w * loss.loss;
-      total_g += w * loss.g;
-      total_h += w * loss.h;
+      auto& gradient_data = (*gradient_data_vec)[i];
+      gradient_data = loss.gradient_data;
+      total.loss += w * loss.loss;
+      total.gradient_data += w * loss.gradient_data;
     }
-    delta_c = total_h == 0 ? 0 : total_g / total_h;
+    delta_c = total.gradient_data.Score(0);
     *c += delta_c;
     ++k;
   } while (fabs(delta_c) > kConvergenceThreshold && k < kMaxIterations);
 
   if (progress) {
-    *progress = PrepareProgressMessage(total_loss / weight_sum_);
+    *progress = PrepareProgressMessage(total.loss / weight_sum_);
   }
 }
 

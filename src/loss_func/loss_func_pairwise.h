@@ -37,14 +37,13 @@ class DataStore;
 // Base class for pairwise loss funcs.
 class Pairwise : public LossFunc {
  public:
-  typedef std::function<LossFunc::Data(uint, uint, const vector<double>* f)> PairwiseLossFunc;
+  typedef std::function<LossFuncData(uint, uint, const vector<double>* f)> PairwiseLossFunc;
   Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
 
   virtual bool Init(DataStore* data_store, const vector<float>& w) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
-                                                     vector<double>* g,
-                                                     vector<double>* h,
+                                                     vector<GradientData>* gradient_data_vec,
                                                      string* progress) override;
 
  protected:

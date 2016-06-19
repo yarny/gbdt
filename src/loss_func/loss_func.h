@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "gradient_data.h"
 #include "src/base/base.h"
 
 namespace gbdt {
@@ -30,13 +31,6 @@ class DataStore;
 
 class LossFunc {
  public:
-  struct Data {
-    Data(double loss_arg, double g_arg, double h_arg) : loss(loss_arg), g(g_arg), h(h_arg) {}
-    double loss;
-    double g;
-    double h;
-  };
-
   virtual ~LossFunc() {}
 
   virtual bool Init(DataStore* data_store, const vector<float>& sample_weights) = 0;
@@ -45,8 +39,7 @@ class LossFunc {
   // which won't be scaled down by shrinkage helps the algorithm converge faster.
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
-                                                     vector<double>* g,
-                                                     vector<double>* h,
+                                                     vector<GradientData>* g,
                                                      string* progress) = 0;
 };
 

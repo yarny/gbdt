@@ -29,38 +29,20 @@ namespace gbdt {
 class TargetTest : public ::testing::Test {
  protected:
   void SetUp() {
-    auto height_column = Column::CreateRawFloatColumn(
-        "height", vector<float>({1, 6, 3, 2, 5, 7, 0, 20}));
-    auto color_column = Column::CreateStringColumn(
-        "color",
-        vector<string>({"red", "green", "yellow", "green", "red", "blue", "yellow", "red"}));
-    data_store_.AddColumn(height_column->name(), std::move(height_column));
-    data_store_.AddColumn(color_column->name(), std::move(color_column));
-    num_rows_ = data_store_.GetColumn("height")->size();
+    auto target_column = Column::CreateRawFloatColumn(
+        "target", vector<float>({0, 1, 0, -0.5, -1, 0.8, 0, 1.3}));
+    data_store_.AddColumn(target_column->name(), std::move(target_column));
   }
 
   MemDataStore data_store_;
-  uint num_rows_ = 0;
 };
 
 TEST_F(TargetTest, ComputeFloatBinaryTargets) {
-  BinaryTargetConfig config;
-  config.set_target_column("height");
-  config.set_threshold(5);
+  LossFuncConfig config;
+  config.set_target_column("target");
   vector<float> targets;
-  EXPECT_TRUE(ComputeBinaryTargets(&data_store_, num_rows_, config, &targets));
+  EXPECT_TRUE(ComputeBinaryTargets(&data_store_, config, &targets));
   EXPECT_EQ(vector<float>({-1, 1, -1, -1, -1, 1, -1, 1}), targets);
-}
-
-TEST_F(TargetTest, ComputeStringBinaryTargets) {
-  BinaryTargetConfig config;
-  config.set_target_column("color");
-  config.mutable_category()->add_category("red");
-  config.mutable_category()->add_category("blue");
-  vector<float> targets;
-
-  EXPECT_TRUE(ComputeBinaryTargets(&data_store_, num_rows_, config, &targets));
-  EXPECT_EQ(vector<float>({1, -1, -1, -1, 1, 1, -1, 1}), targets);
 }
 
 }  // namespace gbdt
