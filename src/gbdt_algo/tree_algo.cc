@@ -43,11 +43,22 @@ namespace gbdt {
 GradientData ComputeWeightedSum(const vector<float>& w,
                                 const vector<GradientData>& gradient_data_vec,
                                 const VectorSlice<uint>& samples) {
-  GradientData total;
-  for (auto index : samples) {
-    total += w[index] * gradient_data_vec[index];
+  // Divide samples into slices to parallelize the computation.
+  auto slices = Subsampling::DivideSamples(samples, FLAGS_num_threads * 5);
+  vector<GradientData> totals(slices.size());
+
+  {
+    ThreadPool pool(FLAGS_num_threads);
+    for (int i = 0; i < slices.size(); ++i) {
+      pool.Enqueue([&, &slice=slices[i], &total=totals[i]]() {
+          for (auto index : slice) {
+            total += w[index] * gradient_data_vec[index];
+          }
+        });
+    }
   }
-  return total;
+
+  return std::accumulate(totals.begin(), totals.end(), GradientData());
 }
 
 struct NodeData {
