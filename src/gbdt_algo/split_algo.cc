@@ -108,7 +108,11 @@ void Histogram::ComputeHistograms(const IntegerizedColumn& feature,
   const auto& col = feature.col();
   // Compute histograms.
   for(auto index : samples) {
-    histograms_[col[index]] += w[index] * gradient_data_vec[index];
+    auto& histogram = histograms_[col[index]];
+    const auto& weight = w[index];
+    const auto& gradient_data = gradient_data_vec[index];
+    histogram.g += weight * gradient_data.g;
+    histogram.h += weight * gradient_data.h;
   }
 
   for (uint i = 0; i < max_int; ++i) {
