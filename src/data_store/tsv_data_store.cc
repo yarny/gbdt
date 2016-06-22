@@ -103,7 +103,9 @@ void TSVDataStore::Finalize() {
 
 void TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& config) {
   // Read header from first tsv.
+  CHECK(FileExists(first_tsv)) << first_tsv << " does not exist.";
   vector<string> headers = strings::split(ReadFirstLine(first_tsv), "\t");
+
   unordered_map<string, int> map_from_header_to_index;
   for (int i = 0; i < headers.size(); ++i) {
     TrimWhiteSpace(&headers[i]);
