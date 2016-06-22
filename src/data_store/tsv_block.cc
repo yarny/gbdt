@@ -55,6 +55,7 @@ void TSVBlock::ReadTSV(const string& tsv,
   while (!in.eof()) {
     string line;
     std::getline(in, line);
+    RTrimWhiteSpace(&line);
     if (line.empty()) continue;
     auto row = strings::split(line, "\t");
     ++num_rows;
