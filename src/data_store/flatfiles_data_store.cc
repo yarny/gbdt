@@ -50,8 +50,7 @@ bool FlatfilesDataStore::LoadColumn(const string& column_name) {
 
   std::ifstream in(flatfile);
   // Read the first line to get the type.
-  string column_type;
-  std::getline(in, column_type);
+  string column_type = ReadLine(in);
   // Reset the stream.
   in.seekg(0);
 
@@ -88,8 +87,7 @@ bool FlatfilesDataStore::LoadColumn(const string& column_name) {
 unique_ptr<Column> FlatfilesDataStore::LoadStringColumn(ifstream& in, const string& column_name) {
   vector<string> raw_strings;
   while (!in.eof()) {
-    string line;
-    std::getline(in, line);
+    string line = ReadLine(in);
     if (strings::HasPrefix(line, "#") || (line.empty() && !in.good())) {
       continue;
     }
@@ -104,8 +102,7 @@ unique_ptr<Column> FlatfilesDataStore::LoadFloatColumn(ifstream& in,
                                                        bool binned) {
   vector<float> raw_floats;
   while (!in.eof()) {
-    string line;
-    std::getline(in, line);
+    string line = ReadLine(in);
     if (strings::HasPrefix(line, "#") || (line.empty() && !in.good())) {
       continue;
     }

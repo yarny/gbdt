@@ -99,3 +99,37 @@ bool HasSuffix(const string& s, const string& suffix) {
 }
 
 }  // namespace strings
+
+string ReadLine(istream& is) {
+  string line;
+  line.clear();
+
+  // The characters in the stream are read one-by-one using a std::streambuf.
+  // That is faster than reading them one-by-one using the std::istream.
+  // Code that uses streambuf this way must be guarded by a sentry object.
+  // The sentry object performs various tasks,
+  // such as thread synchronization and updating the stream state.
+
+  std::istream::sentry se(is, true);
+  std::streambuf* sb = is.rdbuf();
+
+  for(;;) {
+    int c = sb->sbumpc();
+    switch (c) {
+      case '\n':
+        return line;
+      case '\r':
+        if(sb->sgetc() == '\n')
+          sb->sbumpc();
+        return line;
+      case EOF:
+        // Also handle the case when the last line has no line ending
+        if(line.empty())
+          is.setstate(std::ios::eofbit);
+        return line;
+      default:
+        line += (char)c;
+    }
+  }
+  return line;
+}
