@@ -36,9 +36,7 @@ namespace {
 
 string ReadFirstLine(const string& tsv) {
   std::ifstream in(tsv);
-  string line;
-  std::getline(in, line);
-  return line;
+  return ReadLine(in);
 }
 
 }  // namespace

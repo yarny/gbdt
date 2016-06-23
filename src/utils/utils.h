@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -54,5 +55,7 @@ inline void TrimWhiteSpace(string *s) {
   LTrimWhiteSpace(s);
   RTrimWhiteSpace(s);
 }
+
+string ReadLine(istream& in);
 
 #endif  // UTILS_H_
