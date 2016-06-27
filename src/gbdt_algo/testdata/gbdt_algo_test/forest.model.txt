@@ -53,3 +53,55 @@ tree {
     score: -0.022499999
   }
 }
+tree {
+  split {
+    feature: "color"
+    cat_split {
+      category: "red"
+    }
+  }
+  left_child {
+    score: 0.02475
+    split {
+      feature: "height"
+      float_split {
+        threshold: 6
+      }
+    }
+    left_child {
+      score: -0.0051700003
+    }
+    right_child {
+      score: 0.06215
+    }
+  }
+  right_child {
+    score: -0.02025
+  }
+}
+tree {
+  split {
+    feature: "color"
+    cat_split {
+      category: "red"
+    }
+  }
+  left_child {
+    score: 0.022274999
+    split {
+      feature: "height"
+      float_split {
+        threshold: 5
+      }
+    }
+    left_child {
+      score: -0.021533
+    }
+    right_child {
+      score: 0.044179
+    }
+  }
+  right_child {
+    score: -0.018225
+  }
+}
