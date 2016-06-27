@@ -53,7 +53,7 @@ ComputeTreeScores::ComputeTreeScores(DataStore* data_store)
 }
 
 void ComputeTreeScores::AddTreeScores(const TreeNode& tree, double constant,
-                                      vector<double>* scores) {
+                                      vector<double>* scores) const {
   // Compute tree scores
   ThreadPool pool(FLAGS_num_threads);
   for (auto slice : slices_) {
@@ -61,7 +61,7 @@ void ComputeTreeScores::AddTreeScores(const TreeNode& tree, double constant,
   }
 }
 
-void ComputeTreeScores::AddTreeScores(const TreeNode& tree, vector<double>* scores) {
+void ComputeTreeScores::AddTreeScores(const TreeNode& tree, vector<double>* scores) const {
   AddTreeScores(tree, 0, scores);
 }
 

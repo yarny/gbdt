@@ -103,7 +103,27 @@ void ClearInternalFields(Forest* forest) {
   }
 }
 
-unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
+void InitializeWithBaseForest(const Forest* base_forest,
+                              const ComputeTreeScores& compute_tree_scores,
+                              Forest* forest,
+                              vector<double>* f) {
+  // Initialize forest with base forest.
+  auto* constant_tree = forest->mutable_tree(0);
+  constant_tree->set_score(constant_tree->score() + base_forest->tree(0).score());
+  for (const auto& tree : base_forest->tree()) {
+    // Update function scores.
+    compute_tree_scores.AddTreeScores(tree, f);
+    if (!tree.has_left_child()) {
+      // Single node tree contains constant only.
+      constant_tree->set_score(constant_tree->score() + tree.score());
+    } else{
+      *forest->add_tree() = tree;
+    }
+  }
+  LOG(INFO) << "Finished initializing forest with " << base_forest->tree_size() << " trees.";
+}
+
+unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const Forest* base_forest) {
   const auto& tree_config = config.tree_config();
   const auto& sampling_config = config.sampling_config();
 
@@ -139,6 +159,10 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store) {
   // updating the constant. The main reason for doing that is to exclude constant
   // from being scaled down by shrinkage.
   auto* constant_tree = forest->add_tree();
+  if (base_forest) {
+    InitializeWithBaseForest(base_forest, compute_tree_scores, forest.get(), &f);
+  }
+
   for (int i = 0; i < tree_config.num_iterations(); ++i) {
     string time_progress;
     if (i > 0) {

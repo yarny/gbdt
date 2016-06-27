@@ -40,6 +40,7 @@ DECLARE_string(mode);
 DECLARE_string(flatfiles_dirs);
 DECLARE_string(tsvs);
 DECLARE_string(testing_model_file);
+DECLARE_string(base_model_file);
 DECLARE_string(output_dir);
 DECLARE_string(output_model_name);
 DECLARE_int32(seed);
@@ -90,6 +91,15 @@ unique_ptr<DataStore> LoadDataStore(const DataConfig& config) {
   return nullptr;
 }
 
+Forest LoadForestOrDie(string& forest_file) {
+  Forest forest;
+  string forest_text = ReadFileToStringOrDie(forest_file);
+  CHECK(JsonUtils::FromJson(forest_text, &forest))
+      << "Failed to parse json " << forest_text;
+  LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
+  return forest;
+}
+
 void Train() {
   CHECK(!FLAGS_config_file.empty()) << "Please specify --config_file.";
   CHECK(!FLAGS_output_dir.empty()) << "Please specify --output_dir.";
@@ -111,8 +121,15 @@ void Train() {
   auto data_store = LoadDataStore(config.data_config());
   CHECK(data_store) << "Failed to load DataStore.";
 
+  // Load Base Forest if provided.
+  unique_ptr<Forest> base_forest;
+  if (!FLAGS_base_model_file.empty()) {
+    base_forest.reset(new Forest);
+    *base_forest = LoadForestOrDie(FLAGS_base_model_file);
+  }
+
   // Start learning.
-  unique_ptr<Forest> forest = TrainGBDT(config, data_store.get());
+  unique_ptr<Forest> forest = TrainGBDT(config, data_store.get(), base_forest.get());
   CHECK(forest) << "Failed to train a forest";
 
   // Write the model into a file.
@@ -145,11 +162,7 @@ void Test() {
       << "Failed to parse json to proto " << config_text;
 
   // Load testing_model_file.
-  string forest_text = ReadFileToStringOrDie(FLAGS_testing_model_file);
-  Forest forest;
-  CHECK(JsonUtils::FromJson(forest_text, &forest))
-      << "Failed to parse json " << forest_text;
-  LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
+  Forest forest = LoadForestOrDie(FLAGS_testing_model_file);
 
   // Load DataStore.
   auto data_store = LoadDataStore(config.data_config());
