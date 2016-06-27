@@ -27,11 +27,14 @@ namespace gbdt {
 class Column;
 class DataStore;
 class Forest;
+class TreeNode;
 
 vector<const Column*> LoadFeaturesOrDie(unordered_set<string>& feature_names,
                                         DataStore* data_store);
 vector<pair<string, double>> ComputeFeatureImportance(const Forest& forest);
 unordered_set<string> CollectAllFeatures(const Forest& forest);
+
+bool IsSingleNodeTree(const TreeNode& tree);
 
 }  // namespace gbdt
 

@@ -118,4 +118,8 @@ unordered_set<string> CollectAllFeatures(const Forest& forest) {
   return feature_names;
 }
 
+bool IsSingleNodeTree(const TreeNode& tree) {
+  return !tree.has_left_child();
+}
+
 }  // namespace gbdt

@@ -109,11 +109,10 @@ void InitializeWithBaseForest(const Forest* base_forest,
                               vector<double>* f) {
   // Initialize forest with base forest.
   auto* constant_tree = forest->mutable_tree(0);
-  constant_tree->set_score(constant_tree->score() + base_forest->tree(0).score());
   for (const auto& tree : base_forest->tree()) {
     // Update function scores.
     compute_tree_scores.AddTreeScores(tree, f);
-    if (!tree.has_left_child()) {
+    if (IsSingleNodeTree(tree)) {
       // Single node tree contains constant only.
       constant_tree->set_score(constant_tree->score() + tree.score());
     } else{
@@ -178,7 +177,6 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const 
     double constant = 0;
     string loss_func_progress;
     loss_func->ComputeFunctionalGradientsAndHessians(f, &constant, &gradient_data, &loss_func_progress);
-
     // Log progress
     LOG(INFO) << fmt::format("{0}: {1}{2}", i, time_progress, loss_func_progress);
 
