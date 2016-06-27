@@ -48,7 +48,7 @@ class Forest;
 //   function, and tree building params.
 // * DataStore is a container of data. It is not a const variable because some of our data
 //   can be loaded in a lazy fashion.
-unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store);
+unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const Forest* base_forest);
 
 }  // namespace gbdt
 

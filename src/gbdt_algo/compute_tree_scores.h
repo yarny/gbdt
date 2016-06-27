@@ -31,8 +31,8 @@ class ComputeTreeScores {
  public:
   ComputeTreeScores(DataStore* data_store);
 
-  void AddTreeScores(const TreeNode& tree, vector<double>* scores);
-  void AddTreeScores(const TreeNode& tree, double constant, vector<double>* scores);
+  void AddTreeScores(const TreeNode& tree, vector<double>* scores) const;
+  void AddTreeScores(const TreeNode& tree, double constant, vector<double>* scores) const;
 
  private:
   DataStore* data_store_ = nullptr;
