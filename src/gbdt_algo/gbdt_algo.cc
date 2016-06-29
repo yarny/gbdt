@@ -177,6 +177,14 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const 
     double constant = 0;
     string loss_func_progress;
     loss_func->ComputeFunctionalGradientsAndHessians(f, &constant, &gradient_data, &loss_func_progress);
+
+    // When constant is NaN of Inf, the learning diverges and should be stopped.
+    if (std::isnan(constant) || std::isinf(constant)) {
+      LOG(INFO) << "Stopped learning early because it diverges. "
+          "Please try adding regularization to the config.";
+      break;
+    }
+
     // Log progress
     LOG(INFO) << fmt::format("{0}: {1}{2}", i, time_progress, loss_func_progress);
 
