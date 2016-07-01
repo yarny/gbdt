@@ -61,7 +61,8 @@ void TSVBlock::ReadTSV(const string& tsv,
       int index = string_column_indices[i];
       CHECK_LT(index, row.size())
           << line << " has only " << row.size() << " columns "
-          << " while we are accessing columm #" << index;
+          << "while we are accessing columm #" << index
+          << " at row#" << num_rows;
       string_columns_[i].push_back(row[index]);
     }
 
