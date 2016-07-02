@@ -23,6 +23,7 @@ namespace gbdt {
 LossFuncData ComputeMSE(double y, double f);
 LossFuncData ComputeHuberizedHinge(double y, double f);
 LossFuncData ComputeLogLoss(double y, double f);
+LossFuncData ComputeSquaredHinge(double y, double f);
 
 }  // namespace gbdt
 

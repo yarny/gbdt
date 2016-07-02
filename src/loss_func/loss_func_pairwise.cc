@@ -156,8 +156,10 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
               auto pos_sample = group.group()[p.first];
               auto neg_sample = group.group()[p.second];
               double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
+              double delta_target = (*target_column_)[pos_sample] - (*target_column_)[neg_sample];
+              double delta_func = f[pos_sample] - f[neg_sample];
 
-              auto data = loss_func_(pos_sample, neg_sample, &f);
+              auto data = loss_func_(delta_target, delta_func);
               auto& pos_gradient_data = (*gradient_data_vec)[pos_sample];
               auto& neg_gradient_data = (*gradient_data_vec)[neg_sample];
               pos_gradient_data.g += data.gradient_data.g * weight;

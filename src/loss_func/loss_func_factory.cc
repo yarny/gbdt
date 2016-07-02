@@ -18,11 +18,13 @@
 #include <unordered_map>
 #include <utility>
 
+#include "loss_func_auc.h"
+#include "loss_func_gbrank.h"
+#include "loss_func_huberized_hinge.h"
+#include "loss_func_lambdamart.h"
 #include "loss_func_logloss.h"
 #include "loss_func_mse.h"
-#include "loss_func_huberized_hinge.h"
-#include "loss_func_pairwise.h"
-#include "loss_func_lambdamart.h"
+#include "loss_func_pairwise_logloss.h"
 #include "src/proto/config.pb.h"
 
 namespace gbdt {
@@ -33,6 +35,7 @@ unordered_map<string, LossFuncFactory::Creator> LossFuncFactory::loss_func_creat
   {"huberized_hinge", [](const LossFuncConfig& config) { return new HuberizedHinge(config);}},
   {"auc", [](const LossFuncConfig& config) { return new AUC(config);}},
   {"pairwise_logloss", [](const LossFuncConfig& config) { return new PairwiseLogLoss(config);}},
+  {"gbrank", [](const LossFuncConfig& config) { return new GBRank(config);}},
   {"lambdamart", [](const LossFuncConfig& config) { return new LambdaMART(config);}}
 };
 

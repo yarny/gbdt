@@ -37,7 +37,7 @@ class DataStore;
 // Base class for pairwise loss funcs.
 class Pairwise : public LossFunc {
  public:
-  typedef std::function<LossFuncData(uint, uint, const vector<double>* f)> PairwiseLossFunc;
+  typedef std::function<LossFuncData(double delta_target, double delta_func)> PairwiseLossFunc;
   Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
 
   virtual bool Init(DataStore* data_store, const vector<float>& w) override;
@@ -97,24 +97,6 @@ class Pairwise : public LossFunc {
   PairwiseLossFunc loss_func_;
 };
 
-// AUC: \sum_(\forall pairs) max(0, f_n + 1.0 - f_p). We huberize the hinge loss so we
-// can get hessian out of it.
-class AUC : public Pairwise {
- public:
-  AUC(const LossFuncConfig& config)
-      : Pairwise(config,
-                 [](uint i, uint j, const vector<double>* f) {
-                   return ComputeHuberizedHinge(1, (*f)[i] - (*f)[j]); }) {}
-};
-
-// PairwiseLogloss: \sum_(\forall pairs) log(1+exp(fn - fp)).
-class PairwiseLogLoss : public Pairwise {
- public:
-  PairwiseLogLoss(const LossFuncConfig& config)
-      : Pairwise(config,
-                 [](uint i, uint j, const vector<double>* f) {
-                   return ComputeLogLoss(1, (*f)[i] - (*f)[j]); }) {}
-};
 
 }  // namespace gbdt
 
