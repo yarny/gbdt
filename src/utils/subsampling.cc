@@ -22,15 +22,13 @@
 #include "src/utils/utils.h"
 #include "src/utils/vector_slice.h"
 
+DECLARE_int32(seed);
+
 namespace gbdt {
 
-unique_ptr<std::default_random_engine> Subsampling::generator_(
-    new std::default_random_engine);
-std::uniform_real_distribution<double> Subsampling::uniform_01_(0.0, 1.0);
+unique_ptr<std::mt19937> Subsampling::generator_(new std::mt19937(FLAGS_seed));
 
-void Subsampling::Reseed(int seed) {
-  generator_.reset(new std::default_random_engine(seed));
-}
+std::uniform_real_distribution<double> Subsampling::uniform_01_(0.0, 1.0);
 
 vector<uint> Subsampling::UniformSubsample(uint n, double rate) {
   vector<uint> samples;

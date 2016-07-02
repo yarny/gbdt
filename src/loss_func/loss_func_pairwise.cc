@@ -28,8 +28,13 @@
 using namespace std::placeholders;
 
 DECLARE_int32(num_threads);
+DECLARE_int32(seed);
 
 namespace gbdt {
+
+// TOOD(criver): make the random number generator deterministic and have a pool of generator to
+// reduce contention.
+unique_ptr<std::mt19937> Pairwise::generator_(new std::mt19937(FLAGS_seed));
 
 Pairwise::Group::Group(vector<uint>&& group, const RawFloatColumn* target_column,
                        std::mt19937* generator)
@@ -64,11 +69,6 @@ pair<uint, uint> Pairwise::Group::SamplePair() const {
   uint neg_index = start_of_neg + local_pair_index / block_size;
   return make_pair(pos_index, neg_index);
 }
-
-// TOOD(criver): figure out the how to deal with the genrator.
-// One strategy is to use binary-wide generator, but the problem is if we have multi-thread,
-// we might need per-thread seed.
-unique_ptr<std::mt19937> Pairwise::generator_(new std::mt19937);
 
 Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss_func)
     : config_(config), loss_func_(loss_func) {

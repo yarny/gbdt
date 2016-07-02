@@ -108,9 +108,6 @@ void Train() {
   stopwatch.Start();
   LOG(INFO) << "Start training.";
 
-  // Reseed.
-  Subsampling::Reseed(FLAGS_seed);
-
   // Load config.
   Config config;
   string config_text = ReadFileToStringOrDie(FLAGS_config_file);
