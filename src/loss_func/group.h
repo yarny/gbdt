@@ -48,19 +48,19 @@ class Group {
   inline uint operator [] (uint i) const {
     return group_[i];
   }
-  inline uint num_pairs() const {
+  inline uint64 num_pairs() const {
     return num_pairs_;
   }
 
 private:
   vector<uint> group_;
-  uint num_pairs_ = 0;
+  uint64 num_pairs_ = 0;
 
   // The following data structure is used to map pair index to the actual
   // pair. Each entry represent a target block (instances with the
   // same target value), the key is the total accumulated up to this
   // target block. The value is (num_instances_in_block, start_of_negative) pair.
-  map<uint, pair<uint, uint>> pair_map_;
+  map<uint64, pair<uint, uint64>> pair_map_;
 };
 
 }  // namespace gbdt
