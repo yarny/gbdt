@@ -118,11 +118,13 @@ cc_library(
 	"//src/base:base",
         "//src/proto:config_proto_cc",
         ":loss_func",
+        ":loss_func_auc",
+        ":loss_func_gbrank",
 	":loss_func_huberized_hinge",
 	":loss_func_lambdamart",
 	":loss_func_logloss",
 	":loss_func_mse",
-	":loss_func_pairwise",
+        ":loss_func_pairwise_logloss",
     ],
 )
 
@@ -216,10 +218,41 @@ cc_test(
 	"//src/data_store:column",
 	"//src/data_store:mem_data_store",
 	":loss_func_math",
-	":loss_func_pairwise",
+        ":loss_func_pairwise",
+        ":loss_func_pairwise_logloss",
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+)
+
+cc_library(
+    name = "loss_func_pairwise_logloss",
+    hdrs = [ "loss_func_pairwise_logloss.h" ],
+    deps = [
+        "//src/base:base",
+        ":loss_func_pairwise",
+        ":loss_func_math",
+    ],
+)
+
+cc_library(
+    name = "loss_func_auc",
+    hdrs = [ "loss_func_auc.h" ],
+    deps = [
+        "//src/base:base",
+        ":loss_func_pairwise",
+        ":loss_func_math",
+    ],
+)
+
+cc_library(
+    name = "loss_func_gbrank",
+    hdrs = [ "loss_func_gbrank.h" ],
+    deps = [
+        "//src/base:base",
+        ":loss_func_pairwise",
+        ":loss_func_math",
+    ],
 )
 
 cc_library(

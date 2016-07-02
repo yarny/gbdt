@@ -46,4 +46,13 @@ LossFuncData ComputeHuberizedHinge(double y, double f) {
   }
 }
 
+LossFuncData ComputeSquaredHinge(double y, double f) {
+  double e = y - f;
+  if (e * y > 0) {
+    return LossFuncData(e * e, e, 1.0);
+  } else {
+    return LossFuncData(0, 0, 0);
+  }
+}
+
 }  // namespace gbdt

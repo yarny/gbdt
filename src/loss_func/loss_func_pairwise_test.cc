@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 
 #include "loss_func_math.h"
+#include "loss_func_pairwise_logloss.h"
 #include "src/data_store/mem_data_store.h"
 
 namespace gbdt {
