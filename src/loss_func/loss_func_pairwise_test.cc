@@ -39,12 +39,12 @@ class PairwiseTest : public ::testing::Test {
 
   MemDataStore data_store_;
   vector<float> sample_weights_ = {1.0, 1.0, 1.0, 1.0};
-  const int kSamplingRate_ = 1000;
+  vector<double> f_ = { 0, 0, 0, 0};
+  const int kSamplingRate_ = 10000;
 };
 
 // All instances are in one group.
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansOneGroup) {
-  vector<double> f = { 0, 0, 0, 0};
   vector<GradientData> gradient_data_vec;
   double c;
   LossFuncConfig config;
@@ -55,7 +55,32 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansOneGroup) {
   pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
   unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config));
   pairwise->Init(&data_store_, sample_weights_);
-  pairwise->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
+  pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
+  // c is zero for all pairwise losses.
+  EXPECT_FLOAT_EQ(0, c);
+
+  // The gradients reflect the relative order of the original targets.
+  vector<double> expected_g = { -1.5, -0.5, 0.5, 1.5 };
+  vector<double> expected_h = { 1.5, 1.5, 1.5, 1.5};
+  for (int i = 0; i < gradient_data_vec.size(); ++i) {
+    EXPECT_LT(fabs(expected_g[i] - gradient_data_vec[i].g / kSamplingRate_), 5e-2);
+    EXPECT_LT(fabs(expected_h[i] - gradient_data_vec[i].h / kSamplingRate_), 5e-2);
+  }
+}
+
+// All instances are in one group although no group is specified.
+TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansNoGroup) {
+  // When no group specified, every instance is put in one gropu.
+  vector<GradientData> gradient_data_vec;
+  double c;
+  LossFuncConfig config;
+  // Set sampleing_rate to 10000 so that g and h are more stable.
+  auto* pairwise_target_config = config.mutable_pairwise_target();
+  config.set_target_column("target");
+  pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
+  unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config));
+  pairwise->Init(&data_store_, sample_weights_);
+  pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);
 
@@ -70,7 +95,6 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansOneGroup) {
 
 // All instances are in two group.
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansTwoGroups) {
-  vector<double> f = { 0, 0, 0, 0};
   vector<GradientData> gradient_data_vec;
   double c;
   LossFuncConfig config;
@@ -80,7 +104,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansTwoGroups) {
   pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
   unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config));
   pairwise->Init(&data_store_, sample_weights_);
-  pairwise->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
+  pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
 
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);
