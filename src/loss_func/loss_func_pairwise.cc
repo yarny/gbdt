@@ -184,7 +184,13 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
 // Basic pairwise loss uses uniform weighting.
 function<double(const pair<uint, uint>&)> Pairwise::GeneratePairWeightingFunc(
     const vector<uint>& group, const vector<double>& f) {
-  return [](const pair<uint, uint>& p) { return 1.0;};
+  if (config_.pairwise_target().weight_by_delta_target()) {
+    return [&, this] (const pair<uint, uint>& p) {
+      return (*target_column_)[group[p.first]] - (*target_column_)[group[p.second]];
+    };
+  } else {
+    return [](const pair<uint, uint>& p) { return 1;};
+  }
 }
 
 string Pairwise::PrepareProgressMessage(double loss) {
