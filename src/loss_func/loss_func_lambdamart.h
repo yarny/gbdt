@@ -21,8 +21,7 @@
 namespace gbdt {
 
 // LambdaMART (http://research.microsoft.com/pubs/132652/MSR-TR-2010-82.pdf)
-// is implemented as pairwise logloss with pair weighted by dcg diff if the pair is switched
-// place.
+// is implemented as pairwise logloss with pair weighted by dcg diff.
 class LambdaMART : public Pairwise {
  public:
   LambdaMART(const LossFuncConfig& config);

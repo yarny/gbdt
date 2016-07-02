@@ -31,23 +31,25 @@ class PairwiseTest : public ::testing::Test {
     auto group0 = Column::CreateStringColumn("group0", {"1", "1", "1", "1"});
     data_store_.AddColumn(target->name(), std::move(target));
     data_store_.AddColumn(group0->name(), std::move(group0));
+
+    config_.set_target_column("target");
+    auto* pairwise_target_config = config_.mutable_pairwise_target();
+    pairwise_target_config->set_group_column("group0");
+    pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
   }
 
   MemDataStore data_store_;
   vector<float> sample_weights_ = {1.0, 1.0, 1.0, 1.0};;
   const int kSamplingRate_ = 1000;
+  LossFuncConfig config_;
 };
 
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
   vector<double> f = { 1, 0, 3, 2};
   vector<GradientData> gradient_data_vec;
   double c;
-  LossFuncConfig config;
-  auto* pairwise_target_config = config.mutable_pairwise_target();
-  config.set_target_column("target");
-  pairwise_target_config->set_group_column("group0");
-  pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
-  unique_ptr<Pairwise> lambdamart(new LambdaMART(config));
+
+  unique_ptr<Pairwise> lambdamart(new LambdaMART(config_));
   lambdamart->Init(&data_store_, sample_weights_);
   lambdamart->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   // c is zero for all pairwise losses.

@@ -35,10 +35,8 @@ Pairwise::Group::Group(vector<uint>&& group, const RawFloatColumn* target_column
                        std::mt19937* generator)
     : group_(group), generator_(generator) {
   // Sort groups on the descending order of targets.
-  auto sort_by_target_desc = [](uint i, uint j, const RawFloatColumn* target) {
-    return (*target)[i] > (*target)[j];
-  };
-  sort(group_.begin(), group_.end(), std::bind(sort_by_target_desc, _1, _2, target_column));
+  sort(group_.begin(), group_.end(),
+       [&] (uint i, uint j) { return (*target_column)[i] > (*target_column)[j]; });
 
   // Find change boundaries of targets.
   int last_boundary = 0;
@@ -149,9 +147,9 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
       pool.Enqueue([&, this, &slice=slices_[j], &loss=losses[j], &weight_sum=weight_sums[j]]() {
           for (int group_index = slice.first; group_index < slice.second; ++group_index) {
             const auto& group = groups_[group_index];
-            int sample_pairs = group.num_pairs() * sampling_rate;
+            int num_sample_pairs = group.num_pairs() * sampling_rate;
             auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
-            for (int i = 0; i < sample_pairs; ++i) {
+            for (int i = 0; i < num_sample_pairs; ++i) {
               auto p = group.SamplePair();
               auto pos_sample = group.group()[p.first];
               auto neg_sample = group.group()[p.second];
@@ -162,11 +160,11 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
               auto data = loss_func_(delta_target, delta_func);
               auto& pos_gradient_data = (*gradient_data_vec)[pos_sample];
               auto& neg_gradient_data = (*gradient_data_vec)[neg_sample];
-              pos_gradient_data.g += data.gradient_data.g * weight;
-              neg_gradient_data.g -= data.gradient_data.g * weight;
+              pos_gradient_data.g += weight * data.gradient_data.g;
+              neg_gradient_data.g -= weight * data.gradient_data.g;
               pos_gradient_data.h += 2.0 * weight * data.gradient_data.h;
               neg_gradient_data.h += 2.0 * weight * data.gradient_data.h;
-              loss += data.loss * weight;
+              loss += weight * data.loss;
               weight_sum += weight;
             }
           }

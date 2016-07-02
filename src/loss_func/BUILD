@@ -230,6 +230,7 @@ cc_library(
     hdrs = [ "loss_func_pairwise_logloss.h" ],
     deps = [
         "//src/base:base",
+        "//src/data_store:column",
         ":loss_func_pairwise",
         ":loss_func_math",
     ],
