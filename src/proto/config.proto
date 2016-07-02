@@ -47,8 +47,9 @@ message SamplingConfig {
 }
 
 message PairwiseTargetConfig {
-  string group_column = 2;
-  float pair_sampling_rate = 3;
+  string group_column = 1;
+  float pair_sampling_rate = 2;
+  bool weight_by_delta_target = 3;
 }
 
 message LambdaMartParams {
