@@ -41,6 +41,9 @@ public:
   // Divide samples uniformly into gropus.
   static vector<VectorSlice<uint>> DivideSamples(VectorSlice<uint> samples, int num_groups);
   static vector<pair<uint, uint>> DivideSamples(int num_samples, int num_groups);
+  static std::mt19937* get_generator() {
+    return &generator_;
+  }
 
 private:
   static std::mt19937 generator_;
