@@ -31,38 +31,6 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-Pairwise::Group::Group(vector<uint>&& group, const RawFloatColumn* target_column) : group_(group) {
-  // Sort groups on the descending order of targets.
-  sort(group_.begin(), group_.end(),
-       [&] (uint i, uint j) { return (*target_column)[i] > (*target_column)[j]; });
-
-  // Find change boundaries of targets.
-  int last_boundary = 0;
-  for (int i = 1; i < group_.size(); ++i) {
-    if ((*target_column)[group_[i - 1]] != (*target_column)[group_[i]]) {
-      // The pairs consists of this target group and all items following it.
-      int block_size = (i - last_boundary);
-      num_pairs_ += block_size * (group_.size() - i);
-      pair_map_.insert(make_pair(num_pairs_, make_pair(block_size, i)));
-      last_boundary = i;
-    }
-  }
-}
-
-pair<uint, uint> Pairwise::Group::SamplePair(std::mt19937* generator) const {
-  std::uniform_int_distribution<uint> sampler(0, num_pairs_ - 1);
-  uint pair_index = sampler(*generator);
-  // Given a pair_index, try to find the actual pair.
-  // TODO(criver): describe the algorithm.
-  auto it = pair_map_.lower_bound(pair_index + 1);
-  int block_size = it->second.first;
-  int start_of_neg = it->second.second;
-  int local_pair_index = it->first - pair_index - 1;
-  uint pos_index = start_of_neg - 1 - local_pair_index % block_size;
-  uint neg_index = start_of_neg + local_pair_index / block_size;
-  return make_pair(pos_index, neg_index);
-}
-
 Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss_func)
     : config_(config), loss_func_(loss_func) {
   CHECK(config_.pairwise_target().pair_sampling_rate() > 0)
@@ -129,7 +97,6 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
   std::for_each(gradient_data_vec->begin(), gradient_data_vec->end(), set_zero);
 
   double sampling_rate = config_.pairwise_target().pair_sampling_rate();
-  if (sampling_rate <= 0) return;
 
   // Sample pairs and compute pairwise loss.
   vector<double> losses(slices_.size(), 0.0);
@@ -145,8 +112,8 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
             auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
             for (int i = 0; i < num_sample_pairs; ++i) {
               auto p = group.SamplePair(generator);
-              auto pos_sample = group.group()[p.first];
-              auto neg_sample = group.group()[p.second];
+              auto pos_sample = group[p.first];
+              auto neg_sample = group[p.second];
               double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
               double delta_target = (*target_column_)[pos_sample] - (*target_column_)[neg_sample];
               double delta_func = f[pos_sample] - f[neg_sample];
