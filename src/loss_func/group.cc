@@ -32,7 +32,7 @@ Group::Group(vector<uint>&& group, const RawFloatColumn* target_column) : group_
   for (int i = 1; i < group_.size(); ++i) {
     if ((*target_column)[group_[i - 1]] != (*target_column)[group_[i]]) {
       // The pairs consists of this target group and all items following it.
-      int block_size = (i - last_boundary);
+      uint block_size = (i - last_boundary);
       num_pairs_ += block_size * (group_.size() - i);
       pair_map_.insert(make_pair(num_pairs_, make_pair(block_size, i)));
       last_boundary = i;
@@ -42,13 +42,13 @@ Group::Group(vector<uint>&& group, const RawFloatColumn* target_column) : group_
 
 // TODO(criver): describe the algorithm.
 pair<uint, uint> Group::SamplePair(std::mt19937* generator) const {
-  std::uniform_int_distribution<uint> sampler(0, num_pairs_ - 1);
-  uint pair_index = sampler(*generator);
+  std::uniform_int_distribution<uint64> sampler(0, num_pairs_ - 1);
+  uint64 pair_index = sampler(*generator);
   // Given a pair_index, try to find the actual pair.
   auto it = pair_map_.lower_bound(pair_index + 1);
   int block_size = it->second.first;
-  int start_of_neg = it->second.second;
-  int local_pair_index = it->first - pair_index - 1;
+  uint64 start_of_neg = it->second.second;
+  uint64 local_pair_index = it->first - pair_index - 1;
   uint pos_index = start_of_neg - 1 - local_pair_index % block_size;
   uint neg_index = start_of_neg + local_pair_index / block_size;
   return make_pair(pos_index, neg_index);

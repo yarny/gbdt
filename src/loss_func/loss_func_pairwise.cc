@@ -108,7 +108,7 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
           std::mt19937* generator = Subsampling::get_generator();
           for (int group_index = slice.first; group_index < slice.second; ++group_index) {
             const auto& group = groups_[group_index];
-            int num_sample_pairs = group.num_pairs() * sampling_rate;
+            uint64 num_sample_pairs = group.num_pairs() * sampling_rate;
             auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
             for (int i = 0; i < num_sample_pairs; ++i) {
               auto p = group.SamplePair(generator);
