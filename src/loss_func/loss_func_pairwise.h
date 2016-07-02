@@ -58,14 +58,13 @@ class Pairwise : public LossFunc {
  private:
   class Group {
    public:
-    Group(vector<uint>&& group, const RawFloatColumn* target_column,
-          std::mt19937* generator);
+    Group(vector<uint>&& group, const RawFloatColumn* target_column);
 
     // NOTE: Positive and negative are relative in this setting. Each pair has a positive and
     // a negative but each item can be positive in one pair but negative in another.
 
     // Randomly sample a pair from the group.
-    pair<uint, uint> SamplePair() const;
+    pair<uint, uint> SamplePair(std::mt19937* generator) const;
     const vector<uint>& group() const {
       return group_;
     }
@@ -76,7 +75,6 @@ class Pairwise : public LossFunc {
 
    private:
     vector<uint> group_;
-    std::mt19937* generator_;
     uint num_pairs_ = 0;
 
     // The following data structure is used to map pair index to the actual
@@ -93,7 +91,6 @@ class Pairwise : public LossFunc {
   vector<pair<uint, uint>> slices_;
   double initial_loss_ = -1;
   LossFuncConfig config_;
-  static unique_ptr<std::mt19937> generator_;
   const vector<float>* w_;
 
   PairwiseLossFunc loss_func_;

@@ -31,9 +31,7 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-Pairwise::Group::Group(vector<uint>&& group, const RawFloatColumn* target_column,
-                       std::mt19937* generator)
-    : group_(group), generator_(generator) {
+Pairwise::Group::Group(vector<uint>&& group, const RawFloatColumn* target_column) : group_(group) {
   // Sort groups on the descending order of targets.
   sort(group_.begin(), group_.end(),
        [&] (uint i, uint j) { return (*target_column)[i] > (*target_column)[j]; });
@@ -51,9 +49,9 @@ Pairwise::Group::Group(vector<uint>&& group, const RawFloatColumn* target_column
   }
 }
 
-pair<uint, uint> Pairwise::Group::SamplePair() const {
+pair<uint, uint> Pairwise::Group::SamplePair(std::mt19937* generator) const {
   std::uniform_int_distribution<uint> sampler(0, num_pairs_ - 1);
-  uint pair_index = sampler(*generator_);
+  uint pair_index = sampler(*generator);
   // Given a pair_index, try to find the actual pair.
   // TODO(criver): describe the algorithm.
   auto it = pair_map_.lower_bound(pair_index + 1);
@@ -64,11 +62,6 @@ pair<uint, uint> Pairwise::Group::SamplePair() const {
   uint neg_index = start_of_neg + local_pair_index / block_size;
   return make_pair(pos_index, neg_index);
 }
-
-// TOOD(criver): figure out the how to deal with the genrator.
-// One strategy is to use binary-wide generator, but the problem is if we have multi-thread,
-// we might need per-thread seed.
-unique_ptr<std::mt19937> Pairwise::generator_(new std::mt19937);
 
 Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss_func)
     : config_(config), loss_func_(loss_func) {
@@ -116,7 +109,7 @@ bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
 
   groups_.reserve(groups.size());
   for (auto& group : groups) {
-    groups_.emplace_back(std::move(group), target_column, generator_.get());
+    groups_.emplace_back(std::move(group), target_column);
   }
   slices_ = Subsampling::DivideSamples(groups_.size(), FLAGS_num_threads * 5);
 
@@ -145,12 +138,13 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
     ThreadPool pool(FLAGS_num_threads);
     for (int j = 0; j < slices_.size(); ++j) {
       pool.Enqueue([&, this, &slice=slices_[j], &loss=losses[j], &weight_sum=weight_sums[j]]() {
+          std::mt19937* generator = Subsampling::get_generator();
           for (int group_index = slice.first; group_index < slice.second; ++group_index) {
             const auto& group = groups_[group_index];
             int num_sample_pairs = group.num_pairs() * sampling_rate;
             auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
             for (int i = 0; i < num_sample_pairs; ++i) {
-              auto p = group.SamplePair();
+              auto p = group.SamplePair(generator);
               auto pos_sample = group.group()[p.first];
               auto neg_sample = group.group()[p.second];
               double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
