@@ -24,19 +24,19 @@
 
 namespace gbdt {
 
-unique_ptr<std::default_random_engine> Subsampling::generator_(
-    new std::default_random_engine);
+std::mt19937 Subsampling::generator_;
+
 std::uniform_real_distribution<double> Subsampling::uniform_01_(0.0, 1.0);
 
 void Subsampling::Reseed(int seed) {
-  generator_.reset(new std::default_random_engine(seed));
+  generator_.seed(seed);
 }
 
 vector<uint> Subsampling::UniformSubsample(uint n, double rate) {
   vector<uint> samples;
   samples.reserve(max(1, int(rate * n)));
   for (uint i = 0; i < n; ++i) {
-    if (uniform_01_(*generator_) < rate) {
+    if (uniform_01_(generator_) < rate) {
       samples.emplace_back(i);
     }
   }
