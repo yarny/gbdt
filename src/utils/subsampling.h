@@ -43,7 +43,7 @@ public:
   static vector<pair<uint, uint>> DivideSamples(int num_samples, int num_groups);
 
 private:
-  static unique_ptr<std::default_random_engine> generator_;
+  static std::mt19937 generator_;
   static std::uniform_real_distribution<double> uniform_01_;
 };
 
