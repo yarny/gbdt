@@ -193,6 +193,28 @@ cc_test(
 )
 
 cc_library(
+    name = "group",
+    srcs = [ "group.cc" ],
+    hdrs = [ "group.h" ],
+    deps = [
+        "//src/base:base",
+        "//src/data_store:column"
+    ]
+)
+
+cc_test(
+    name = "group_test",
+    srcs = [ "group_test.cc" ],
+    deps = [
+        "//external:gtest_main",
+        "//src/base:base",
+        ":group",
+    ],
+    copts = C_TEST_OPTS,
+    linkopts = LINK_OPTS,
+)
+
+cc_library(
     name = "loss_func_pairwise",
     srcs = [ "loss_func_pairwise.cc" ],
     hdrs = [ "loss_func_pairwise.h" ],
@@ -203,6 +225,7 @@ cc_library(
         "//src:flags",
         "//src/utils:subsampling",
         "//src/utils:threadpool",
+        ":group",
         ":loss_func",
         ":loss_func_math",
     ],

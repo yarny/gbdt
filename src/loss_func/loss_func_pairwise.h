@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+#include "group.h"
 #include "loss_func.h"
 #include "loss_func_math.h"
 #include "src/base/base.h"
@@ -55,37 +56,9 @@ class Pairwise : public LossFunc {
       const vector<uint>& group, const vector<double>& f);
   const RawFloatColumn* target_column_ = nullptr;
 
- private:
-  class Group {
-   public:
-    Group(vector<uint>&& group, const RawFloatColumn* target_column);
-
-    // NOTE: Positive and negative are relative in this setting. Each pair has a positive and
-    // a negative but each item can be positive in one pair but negative in another.
-
-    // Randomly sample a pair from the group.
-    pair<uint, uint> SamplePair(std::mt19937* generator) const;
-    const vector<uint>& group() const {
-      return group_;
-    }
-
-    uint num_pairs() const {
-      return num_pairs_;
-    }
-
-   private:
-    vector<uint> group_;
-    uint num_pairs_ = 0;
-
-    // The following data structure is used to map pair index to the actual
-    // pair. Each entry represent a target block (instances with the
-    // same target value), the key is the total accumulated up to this
-    // target block. The value is (num_instances_in_block, start_of_negative) pair.
-    map<uint, pair<uint, uint>> pair_map_;
-  };
-
   string PrepareProgressMessage(double loss);
 
+ private:
   vector<Group> groups_;
   // Division of [1, group_size] into slices to help multithreading.
   vector<pair<uint, uint>> slices_;
