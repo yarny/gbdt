@@ -37,6 +37,8 @@ class DataStore;
 // Base class for pairwise loss funcs.
 class Pairwise : public LossFunc {
  public:
+  // delta_target is always positive since we only generates pairs where the first has larger target
+  // value.
   typedef std::function<LossFuncData(double delta_target, double delta_func)> PairwiseLossFunc;
   Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
 
