@@ -95,23 +95,25 @@ bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
   }
   target_column_ = target_column;
 
-  if (group_column_name.empty()) {
-    LOG(ERROR) << "Please specify group_column for Pairwise loss.";
-    return false;
-  }
-  auto group_column = data_store->GetStringColumn(group_column_name);
-  if (!group_column) {
-    LOG(ERROR) << "Failed to get group column " << group_column_name;
-    return false;
-  }
-
   // Construct groups.
   vector<vector<uint>> groups;
-  groups.resize(group_column->max_int() - 1);
-  const auto& group_col = group_column->col();
-  for (int i = 0; i < group_column->size(); ++i) {
-    uint group_id = group_col[i];
-    groups[group_id - 1].push_back(i);
+  if (group_column_name.empty()) {
+    // When group is not specified, every thing is one group.
+    groups.resize(1);
+    groups[0] = Subsampling::CreateAllSamples(w_->size());
+  } else {
+    auto group_column = data_store->GetStringColumn(group_column_name);
+    if (!group_column) {
+      LOG(ERROR) << "Failed to get group column " << group_column_name;
+      return false;
+    }
+
+    groups.resize(group_column->max_int() - 1);
+    const auto& group_col = group_column->col();
+    for (int i = 0; i < group_column->size(); ++i) {
+      uint group_id = group_col[i];
+      groups[group_id - 1].push_back(i);
+    }
   }
 
   groups_.reserve(groups.size());
