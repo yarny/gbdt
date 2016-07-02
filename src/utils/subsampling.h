@@ -32,6 +32,8 @@ class UniformSamplingConfig;
 
 class Subsampling {
 public:
+  static void Reseed(int seed);
+
   // Construct the sample set [0,n-1]
   static vector<uint> CreateAllSamples(uint n);
   static vector<uint> UniformSubsample(uint n, double rate);
@@ -41,7 +43,7 @@ public:
   static vector<pair<uint, uint>> DivideSamples(int num_samples, int num_groups);
 
 private:
-  static unique_ptr<std::mt19937> generator_;
+  static unique_ptr<std::default_random_engine> generator_;
   static std::uniform_real_distribution<double> uniform_01_;
 };
 
