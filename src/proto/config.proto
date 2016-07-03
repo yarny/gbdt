@@ -46,21 +46,21 @@ message SamplingConfig {
   float feature_sampling_rate = 2;
 }
 
-message PairwiseTargetConfig {
+message PairwiseConfig {
   string group_column = 1;
   float pair_sampling_rate = 2;
   bool weight_by_delta_target = 3;
 }
 
-message LambdaMartParams {
+message LambdaMartConfig {
   float dcg_base = 1;
 }
 
 message LossFuncConfig {
   string loss_func = 1;
   string target_column = 2;
-  PairwiseTargetConfig pairwise_target = 3;
-  LambdaMartParams lambdamart_params = 4;
+  PairwiseConfig pairwise_config = 3;
+  LambdaMartConfig lambdamart_config = 4;
 }
 
 message EvalConfig {

@@ -33,13 +33,13 @@ namespace gbdt {
 
 Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss_func)
     : config_(config), loss_func_(loss_func) {
-  CHECK(config_.pairwise_target().pair_sampling_rate() > 0)
+  CHECK(config_.pairwise_config().pair_sampling_rate() > 0)
       << "Please specify a non-zero pair sampling rate.";
 }
 
 bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
   const string& target_column_name = config_.target_column();
-  const string& group_column_name = config_.pairwise_target().group_column();
+  const string& group_column_name = config_.pairwise_config().group_column();
 
   w_ = &w;
 
@@ -96,7 +96,7 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
   auto set_zero = [](GradientData& x) { x = GradientData(); };
   std::for_each(gradient_data_vec->begin(), gradient_data_vec->end(), set_zero);
 
-  double sampling_rate = config_.pairwise_target().pair_sampling_rate();
+  double sampling_rate = config_.pairwise_config().pair_sampling_rate();
 
   // Sample pairs and compute pairwise loss.
   vector<double> losses(slices_.size(), 0.0);
@@ -145,7 +145,7 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
 // Basic pairwise loss uses uniform weighting.
 function<double(const pair<uint, uint>&)> Pairwise::GeneratePairWeightingFunc(
     const vector<uint>& group, const vector<double>& f) {
-  if (config_.pairwise_target().weight_by_delta_target()) {
+  if (config_.pairwise_config().weight_by_delta_target()) {
     return [&, this] (const pair<uint, uint>& p) {
       return (*target_column_)[group[p.first]] - (*target_column_)[group[p.second]];
     };

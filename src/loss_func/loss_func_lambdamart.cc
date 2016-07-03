@@ -37,8 +37,8 @@ inline double discount(uint rank, float base) {
 LambdaMART::LambdaMART(const LossFuncConfig& config)
     : Pairwise(config, [](double delta_target, double delta_func) {
                  return ComputeLogLoss(1, delta_func); }) {
-  if (config.lambdamart_params().dcg_base() > 0) {
-    dcg_base_ = config.lambdamart_params().dcg_base();
+  if (config.lambdamart_config().dcg_base() > 0) {
+    dcg_base_ = config.lambdamart_config().dcg_base();
   }
   precomputed_discounts_.reserve(kNumPrecomputedDiscounts);
   for (int i = 0; i < kNumPrecomputedDiscounts; ++i) {
