@@ -1,19 +1,16 @@
 # Loss Functions
 The package supports two basic families of loss functions:
-* Pointwise
-* Pairwise
-Pointwise loss functions are the family of loss functions where the loss can be decomposed into
+* **Pointwise**
+  * Pointwise loss functions are the family of loss functions where the loss can be decomposed into
 each instance. The family includes MSE, LogLoss and Huberized Hinge.
-
-Pairwise loss functions are the family of loss functions where the loss can be decomposed into
+* Pairwise
+  * Pairwise loss functions are the family of loss functions where the loss can be decomposed into
 pairs of training instances. This includes Pairwise Logloss, [GBRank](http://www.cc.gatech.edu/~zha/papers/fp086-zheng.pdf) [LambdaMART](http://research-srv.microsoft.com/pubs/132652/MSR-TR-2010-82.pdf).
-LambdaMART is a listwise loss function, but it is implemented via rank-based weighting on pairs.
-
-For the Pairwise loss, the package assumes that instances are divided into groups. A natural example
+LambdaMART is a listwise loss function, but it is implemented via rank-based weighting on pairs. For the Pairwise loss, the package assumes that instances are divided into groups. A natural example
 of group are documents retrieved by a query in search engines.
 Random sampling of pairs are used to make the computation feasible.
 
-# Newton Steps
+# Newton Step
 The package implements a general tree building algorithm that takes a Newton step at each leaf node.
 It takes takes inputs of negative gradients
 `g` and hessians `h`. It computes
