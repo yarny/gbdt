@@ -132,7 +132,7 @@ Status TSVDataStore::Finalize() {
 Status TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& config) {
   // Read header from first tsv.
   if (!FileExists(first_tsv)) {
-    return Status(error::NOT_FOUND, fmt::format("{0} does not exit.", first_tsv));
+    return Status(error::NOT_FOUND, fmt::format("TSV {0} does not exit.", first_tsv));
   }
   vector<string> headers = strings::split(ReadFirstLine(first_tsv), "\t");
 

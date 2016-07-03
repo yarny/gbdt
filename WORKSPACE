@@ -29,6 +29,18 @@ new_http_archive(
 )
 
 bind(
+    name = "pybind11-lib",
+    actual = "@pybind11//:pybind11"
+)
+
+new_git_repository(
+    name = "pybind11",
+    remote = "https://github.com/pybind/pybind11.git",
+    tag = "v1.8",
+    build_file = "pybind11.BUILD",
+)
+
+bind(
   name = "gtest",
   actual = "@gmock_archive//:gtest",
 )

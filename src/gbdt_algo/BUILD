@@ -8,7 +8,7 @@ exports_files([
 
 LINK_OPTS = [ "-lprotobuf", "-lglog", "-lgflags", "-pthread", "-ltcmalloc_minimal", "-lm" ]
 C_TEST_OPTS = [ "-Iexternal/googletest/googletest/include",
-	        "-Iexternal/googletest/googlemock/include" ]
+                "-Iexternal/googletest/googlemock/include" ]
 
 cc_library(
     name = "compute_tree_scores",

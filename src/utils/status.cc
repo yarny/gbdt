@@ -19,4 +19,8 @@ const string& Status::error_msg() const {
   return msg_;
 }
 
+error::ErrorCode Status::error_code() const {
+  return code_;
+}
+
 }  // namespace gbdt
