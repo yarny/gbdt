@@ -1,25 +1,23 @@
-Gradient Boosting Decision Tree Algorithms
+Gradient Boosting Decision Trees Algorithms (GBDT)
 =======
 Author: Jiang Chen (criver@gmail.com)
 -----------
-# Overview
-High performance C++ implementation of Jerome H. Fiedman's Gradient Boosting Decision Tree GBDT
-family of algorithms (http://statweb.stanford.edu/~jhf/ftp/stobst.pdf) with many practical features
-suited for problems and datasets of industrial grade.
+GBDT is a high performance and full featured C++ implementation of [Jerome H. Friedman's Gradient Boosting Decision Trees Algorithm](http://statweb.stanford.edu/~jhf/ftp/stobst.pdf) and its modern offsprings,. It features high efficiency, low memory footprint, collections of loss functions and built-in mechanisms to handle categorical features and missing values.
 
-# Algorithmic highlights
-1. Implmentations of various pointwise, pairwise, listwise loss functions including: MSE,
-LogLoss, Huberized Hinge Loss, Pairwise Logloss, LambdaMART.
-2. Easily extensible to new loss function.
-3. Uses Hessian for fast convergence.
-4. Built-in intelligent missing value handling.
-5. Categorical feature spports.
 
-# Implmentation highlights
-1. Heavily optimized for both memory footprint and computation time.
-See BENCHMARK.md for the performance numbers. The key idea is to binning of float features,
-which not only cuts the memory footprint significantly and reduce the core splitting algorithm's
-complexity from O(Nlog(N)) to O(N).
-2. Modern build tool [bazel](bazel.io).
-3. Compliance to Google Style Guide and Excellent test coverage.
-4. State-of-the-art google libraries: gtest, gflags, glog, protobuf3.
+When is GBDT good for you?
+-----------
+* **You are looking beyond linear models.**
+  * Gradient Boosting Decision Trees Algorithms is one of the best offshelf ML algorithms with built-in capabilities of non-linear transformation and feature crossing.
+* **Your data is too big to load into memory with existing ML packages.**
+  * GBDT reduces memory footprint dramatically with feature bucketization. For some tested datasets, it used 1/8 to 1/4 of the memory of its counterpart and took only 1/2 time to train. See docs/PERFORMANCE_BENCHMARK.md for more details.
+* **You want better handling of categorical features and missing values.**
+  * GBDT has built-in mechanisms to figure out how to split categorical features and place missing values in the trees.
+* **You want to try different loss functions.**
+  * GBDT implements various pointwise, pairwise, listingwis loss functions including mse, logloss, huberized hinge loss, pairwise logloss,
+[GBRank](http://www.cc.gatech.edu/~zha/papers/fp086-zheng.pdf) and [LambdaMart](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/MSR-TR-2010-82.pdf). It supports easily addition of your own custom loss functions.
+
+TUTORIALS
+---------
+* Installation instruction can be found at docs/INSTALL.md.
+* Example usages can be found at examples/benchm-ml/TUTORIAL.md.
