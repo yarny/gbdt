@@ -19,6 +19,6 @@ When is GBDT good for you?
 
 Documentations
 ---------
-* Installation instruction can be found at [docs/INSTALL.md](https://github.com/yarny/gbdt/blob/master/docs/INSTALL.md).
+* Installation instructions can be found at [docs/INSTALL.md](https://github.com/yarny/gbdt/blob/master/docs/INSTALL.md).
 * Example usages can be found at [examples/benchm-ml/TUTORIAL.md](https://github.com/yarny/gbdt/blob/master/examples/benchm-ml/TUTORIAL.md).
-* Some details of the algorithms can be found at [docs/ALGORITHMS.md](https://github.com/yarny/gbdt/blob/master/docs/ALGORITHMS.md)
+* Some details of the algorithms can be found at [docs/ALGORITHMS.md](https://github.com/yarny/gbdt/blob/master/docs/ALGORITHMS.md).
