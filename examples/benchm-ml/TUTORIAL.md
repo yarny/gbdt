@@ -10,15 +10,7 @@ We also include a convenient script `run.py` to run training, testing and auc co
 * `./run.py logloss` or `./run.py mse`.
 
 # Writing Configuration file
-The package uses json formatted config file with schema defined by `src/proto/config.proto`. A
-configuration file includes the following sections:
-* tree_config
-* sampling_config
-* loss_func_config
-* data_config
-* eval_config.
-
-Examples with can be found in `examples/benchm-ml/benchm-ml.*.config`.
+The package uses json formatted config file with schema defined by [`src/proto/config.proto`](https://github.com/yarny/gbdt/blob/master/src/proto/config.proto). Example configs can be found in `examples/benchm-ml/benchm-ml.*.config`.
 
 # Large TSVs
 When the tsvs are large, you can break it into blocks as long as the first block contains header or contains simply the header. The package will load blocks in parallel.
