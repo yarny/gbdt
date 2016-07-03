@@ -33,9 +33,21 @@ class PairwiseTest : public ::testing::Test {
     data_store_.AddColumn(group0->name(), std::move(group0));
 
     config_.set_target_column("target");
-    auto* pairwise_target_config = config_.mutable_pairwise_target();
-    pairwise_target_config->set_group_column("group0");
-    pairwise_target_config->set_pair_sampling_rate(kSamplingRate_);
+    auto* pairwise_config = config_.mutable_pairwise_config();
+    pairwise_config->set_group_column("group0");
+    pairwise_config->set_pair_sampling_rate(kSamplingRate_);
+  }
+
+  void ExpectGradientEqual(const vector<GradientData>& expected,
+                           const vector<GradientData>& gradient_data_vec) {
+    for (int i = 0; i < expected.size(); ++i) {
+      double avg_g = gradient_data_vec[i].g / kSamplingRate_;
+      double avg_h = gradient_data_vec[i].h / kSamplingRate_;
+      EXPECT_LT(fabs(expected[i].g - avg_g), 5e-2)
+          << " at " << i << " actual " << avg_g << " vs " << expected[i].g;
+      EXPECT_LT(fabs(expected[i].h - avg_h), 5e-2)
+          << " at " << i << " actual " << avg_h << " vs " << expected[i].h;
+    }
   }
 
   MemDataStore data_store_;
@@ -56,12 +68,8 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
   EXPECT_FLOAT_EQ(0, c);
 
   // The gradients reflect the relative order of the original targets.
-  vector<double> expected_g = {-0.28, -0.022, -0.113, 0.416};
-  vector<double> expected_h = {0.4, 0.16, 0.4, 0.38};
-  for (int i = 0; i < gradient_data_vec.size(); ++i) {
-    EXPECT_LT(fabs(expected_g[i] - gradient_data_vec[i].g / kSamplingRate_), 5e-2);
-    EXPECT_LT(fabs(expected_h[i] - gradient_data_vec[i].h / kSamplingRate_), 5e-2);
-  }
+  vector<GradientData> expected = { {-0.28, 0.4}, {-0.022, 0.16}, {-0.113, 0.4}, {0.416, 0.38} };
+  ExpectGradientEqual(expected, gradient_data_vec);
 }
 
 }  // namespace gbdt
