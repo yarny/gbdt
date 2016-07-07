@@ -139,14 +139,20 @@ class BinnedFloatColumn : public IntegerizedColumn {
   inline float get_row_max(uint i) const {
     return get_bin_max((*col_)[i]);
   }
+  inline float get_row_min(uint i) const {
+    return get_bin_min((*col_)[i]);
+  }
   inline float get_bin_max(uint bin_index) const {
-    return bins_[bin_index];
+    return bin_maxs_[bin_index];
+  }
+  inline float get_bin_min(uint bin_index) const {
+    return bin_mins_[bin_index];
   }
 
   // max_int is num_bins + 1. All values exceeding the max upper bound are
   // put in the bin #bins_.size().
   inline uint max_int() const override {
-    return bins_.size();
+    return bin_maxs_.size();
   }
 
   void BuildBins();
@@ -161,11 +167,13 @@ class BinnedFloatColumn : public IntegerizedColumn {
   vector<float> buffer_;
 
   bool finalized_ = false;
-  // Map from the upper bounds to the bin ids.
+
+  // bin_max to bin index map.
   map<float, uint> bin_map_;
-  // A vector of upper bounds of the bins. The first bin is NAN representing
-  // missing. The last bin is numeric_limits<float>::max().
-  vector<float> bins_;
+  // The first bin is NaN representing missing the last bin is always
+  // numeric_limits<float>::max(). The bins are represented as [bin_min, bin_max].
+  vector<float> bin_maxs_;
+  vector<float> bin_mins_;
 };
 
 // Simply holds a vector of floats.
