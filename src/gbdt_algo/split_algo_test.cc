@@ -39,7 +39,7 @@ TEST_F(FindSplitPointTest, FindFloatSplitPoint) {
   Split split;
 
   CHECK(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
-  EXPECT_FLOAT_EQ(5.0, split.float_split().threshold());
+  EXPECT_FLOAT_EQ(4.0, split.float_split().threshold());
   EXPECT_FLOAT_EQ(4.0, split.gain());
 }
 
@@ -49,7 +49,7 @@ TEST_F(FindSplitPointTest, FindFloatSplitPointWithMissingValues) {
 
   Split split;
   CHECK(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
-  EXPECT_FLOAT_EQ(5.0, split.float_split().threshold());
+  EXPECT_FLOAT_EQ(4.0, split.float_split().threshold());
   EXPECT_TRUE(split.float_split().missing_to_right_child());
   EXPECT_FLOAT_EQ(4.0, split.gain());
 }

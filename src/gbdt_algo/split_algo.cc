@@ -217,7 +217,8 @@ bool FindBestFloatSplit(const BinnedFloatColumn& feature,
   split->mutable_float_split()->set_missing_to_right_child(split_point.missing_on_right);
   
   split->mutable_float_split()->set_threshold(
-      feature.get_bin_max(histogram.value(split_point.left_point + 1)));
+      (feature.get_bin_max(histogram.value(split_point.left_point)) +
+       feature.get_bin_min(histogram.value(split_point.left_point + 1))) / 2.0);
   return true;
 }
 

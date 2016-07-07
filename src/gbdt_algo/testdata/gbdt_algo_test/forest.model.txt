@@ -13,7 +13,7 @@ tree {
     split {
       feature: "height"
       float_split {
-        threshold: 6
+        threshold: 5.5
       }
     }
     left_child {
@@ -39,7 +39,7 @@ tree {
     split {
       feature: "height"
       float_split {
-        threshold: 5
+        threshold: 4
       }
     }
     left_child {
@@ -65,7 +65,7 @@ tree {
     split {
       feature: "height"
       float_split {
-        threshold: 6
+        threshold: 5.5
       }
     }
     left_child {
@@ -91,7 +91,7 @@ tree {
     split {
       feature: "height"
       float_split {
-        threshold: 5
+        threshold: 4
       }
     }
     left_child {
