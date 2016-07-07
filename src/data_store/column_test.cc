@@ -100,13 +100,14 @@ class FloatColumnTest : public ::testing::Test {
     ASSERT_NE(nullptr, column);
     EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
 
-    vector<float> expected_max(column->size());
+    vector<float> expected(column->size());
     for (int i = 0; i < column->size(); ++i) {
-      expected_max[i] = raw_floats[i];
+      expected[i] = raw_floats[i];
     }
 
     auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
-    EXPECT_EQ(expected_max, GetMax(*float_column));
+    EXPECT_EQ(expected, GetMax(*float_column));
+    EXPECT_EQ(expected, GetMin(*float_column));
   }
 
   // Generates a random float vector of length n with k unique values.
@@ -140,6 +141,13 @@ class FloatColumnTest : public ::testing::Test {
     }
     return array;
   }
+  static vector<float> GetMin(const BinnedFloatColumn& column) {
+    vector<float> array(column.size());
+    for (int i = 0; i < column.size(); ++i) {
+      array[i] = column.get_row_min(i);
+    }
+    return array;
+  }
 
   unique_ptr<std::default_random_engine> generator_;
 };
@@ -152,9 +160,22 @@ TEST_F(FloatColumnTest, TestSimpleCreatBinnedFloatColumn) {
 
   auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
   EXPECT_EQ(vector<uint>({ 3, 2, 1, 3, 2, 4, 5, 6, 6, 5 }), GetCol(*float_column));
+  EXPECT_EQ(raw_floats, GetMax(*float_column));
+  EXPECT_EQ(raw_floats, GetMin(*float_column));
+}
 
-  EXPECT_EQ(vector<float>({0.2, 0.1, -0.34, 0.2, 0.1, 0.7, 0.8, 23.4, 23.4, 0.8}),
+TEST_F(FloatColumnTest, TestSimpleCreatBinnedFloatColumnNotEnoughBins) {
+  vector<float> raw_floats = {0.2, 0.1, -0.34, 0.2, 0.1, 0.7, 0.8, 23.4, 23.4, 0.8};
+  auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, 3);
+  ASSERT_NE(nullptr, column);
+  EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
+
+  auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+  EXPECT_EQ(vector<uint>({ 1, 1, 1, 1, 1, 2, 2, 2, 2, 2}), GetCol(*float_column));
+  EXPECT_EQ(vector<float>({0.2, 0.2, 0.2, 0.2, 0.2, 23.4, 23.4, 23.4, 23.4, 23.4}),
             GetMax(*float_column));
+  EXPECT_EQ(vector<float>({-0.34, -0.34, -0.34, -0.34, -0.34, 0.7, 0.7, 0.7, 0.7, 0.7}),
+            GetMin(*float_column));
 }
 
 TEST_F(FloatColumnTest, TestAddAfterBinBuilding) {
@@ -168,6 +189,7 @@ TEST_F(FloatColumnTest, TestAddAfterBinBuilding) {
 
   EXPECT_EQ(vector<uint>({1, 2, 3, 1, 3, 4}), GetCol(*column));
   EXPECT_EQ(vector<float>({1, 2, 3, 1, 3, numeric_limits<float>::max()}), GetMax(*column));
+  EXPECT_EQ(vector<float>({ 0.5, 2, 2.5, 0.5, 2.5, 3.5 }), GetMin(*column));
 }
 
 TEST_F(FloatColumnTest, TestImbalancedDistributionWithEnoughBins) {

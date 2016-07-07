@@ -181,7 +181,8 @@ BinnedFloatColumn::~BinnedFloatColumn() {
 
 template <typename INT> void AddBinnedVecHelper(const vector<float>& raw_floats,
                                                 const map<float, uint>& bin_map,
-                                                vector<INT>* col) {
+                                                vector<INT>* col,
+                                                vector<float>* bin_mins) {
   col->reserve(col->size() + raw_floats.size());
   for (auto v : raw_floats) {
     // NAN represents missing and has index 0.
@@ -190,24 +191,26 @@ template <typename INT> void AddBinnedVecHelper(const vector<float>& raw_floats,
     } else {
       auto it = bin_map.lower_bound(v);
       CHECK(it != bin_map.end()) << "This should not happen because the last bin is the max float value.";
-      col->push_back(it->second);
+      int bin_id = it->second;
+      col->push_back(bin_id);
+      (*bin_mins)[bin_id] = min((*bin_mins)[bin_id], v);
     }
   }
 }
 
 void BinnedFloatColumn::AddBinnedVec(const vector<float>& raw_floats) {
-  if (bins_.size() <= kMaxUInt8) {
-    AddBinnedVecHelper<uint8>(raw_floats, bin_map_, &col_8_);
-  } else if (bins_.size() <= kMaxUInt16) {
-    AddBinnedVecHelper<uint16>(raw_floats, bin_map_, &col_16_);
+  if (max_int() <= kMaxUInt8) {
+    AddBinnedVecHelper<uint8>(raw_floats, bin_map_, &col_8_, &bin_mins_);
+  } else if (max_int() <= kMaxUInt16) {
+    AddBinnedVecHelper<uint16>(raw_floats, bin_map_, &col_16_, &bin_mins_);
   } else {
-    AddBinnedVecHelper<uint32>(raw_floats, bin_map_, &col_32_);
+    AddBinnedVecHelper<uint32>(raw_floats, bin_map_, &col_32_, &bin_mins_);
   }
 }
 
 void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
   CHECK(!finalized_) << "Cannot run Add when finalized.";
-  if (bins_.size() == 0) {
+  if (bin_maxs_.size() == 0) {
     // Stage 0: build binning.
     buffer_.reserve(buffer_.size() + raw_floats->size());
     for (const float v : *raw_floats) {
@@ -222,7 +225,7 @@ void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
 }
 
 void BinnedFloatColumn::Finalize() {
-  if (bins_.size() == 0) {
+  if (bin_maxs_.size() == 0) {
     BuildBins();
   }
   bin_map_.clear();
@@ -243,13 +246,14 @@ void BinnedFloatColumn::BuildBins() {
   }
   uint bin_capacity = max(static_cast<unsigned long>(1), raw_floats.size() / num_bins_);
 
-  bins_.push_back(NAN);
+  // Put NaN at the beginning of the bins.
+  bin_maxs_.push_back(NAN);
   int left_over = raw_floats.size();
   // First, any single value with counts > average bin capacity is put in their own bins.
   auto it = histograms.begin();
   while (it != histograms.end()) {
     if (it->second >= bin_capacity) {
-      bins_.push_back(it->first);
+      bin_maxs_.push_back(it->first);
       left_over -= it->second;
       it = histograms.erase(it);
     } else {
@@ -258,17 +262,18 @@ void BinnedFloatColumn::BuildBins() {
   }
   // Use uniform binning for the rest.
   uint left_over_capacity =
-      max(static_cast<unsigned long>(1), left_over / (num_bins_ - bins_.size()));
-  UniformBinning(histograms, left_over_capacity, &bins_);
-  sort(bins_.begin() + 1, bins_.end());
-  bins_.push_back(numeric_limits<float>::max());
+      max(static_cast<unsigned long>(1), left_over / (num_bins_ - bin_maxs_.size()));
+  UniformBinning(histograms, left_over_capacity, &bin_maxs_);
+  sort(bin_maxs_.begin() + 1, bin_maxs_.end());
+  bin_maxs_.push_back(numeric_limits<float>::max());
 
-  // Put NaN at the beginning of the bins.
-  for (int i = 1; i < bins_.size(); ++i) {
-    bin_map_[bins_[i]] = i;
+  for (int i = 1; i < bin_maxs_.size(); ++i) {
+    bin_map_[bin_maxs_[i]] = i;
   }
 
-  bins_.shrink_to_fit();
+  bin_maxs_.shrink_to_fit();
+  // Initialize bin_mins_ to be bins_maxs_.
+  bin_mins_ = bin_maxs_;
   AddBinnedVec(buffer_);
   buffer_.clear();
   buffer_.shrink_to_fit();
