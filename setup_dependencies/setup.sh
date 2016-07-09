@@ -70,10 +70,10 @@ function InstallProtoBuf3() {
     fi
     WORK_DIR=$PWD
     cd /tmp
-    wget https://github.com/google/protobuf/archive/v3.0.0-beta-2.tar.gz
-    tar zxvf v3.0.0-beta-2.tar.gz
+    wget https://github.com/google/protobuf/archive/v3.0.0-beta-3.1.tar.gz
+    tar zxvf v3.0.0-beta-3.1.tar.gz
 
-    cd protobuf-3.0.0-beta-2
+    cd protobuf-3.0.0-beta-3.1
     ./autogen.sh
     ./configure --disable-shared --prefix=$1
     export CXXFLAGS="-fPIC"
