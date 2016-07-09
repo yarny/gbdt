@@ -82,6 +82,18 @@ cc_library(
    ]
 )
 
+cc_test(
+    name = "json_utils_test",
+    srcs = [ "json_utils_test.cc" ],
+    deps = [
+        "//external:gtest_main",
+        "//src/proto:tree_proto_cc",
+        ":json_utils",
+    ],
+    copts = C_TEST_OPTS,
+    linkopts = LINK_OPTS,
+)
+
 cc_library(
     name = "subsampling",
     srcs = [ "subsampling.cc" ],

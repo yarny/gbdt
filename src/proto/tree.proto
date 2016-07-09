@@ -32,10 +32,8 @@ message FloatSplit {
 
 message Split {
   string feature = 1;
-  oneof split {
-    FloatSplit float_split = 2;
-    CategoricalSplit cat_split = 3;
-  }
+  FloatSplit float_split = 2;
+  CategoricalSplit cat_split = 3;
 
   double gain = 5;
 }
