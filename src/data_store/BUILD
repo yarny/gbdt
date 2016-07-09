@@ -37,7 +37,8 @@ cc_library(
     hdrs = [ "data_store.h" ],
     srcs = [ "data_store.cc" ],
     deps = [
-    	 "//src/base:base",
+         "//external:cppformat-lib",
+         "//src/base:base",
 	 ":column"
     ],
 )
