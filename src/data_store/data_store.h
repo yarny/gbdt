@@ -34,6 +34,8 @@ public:
   const StringColumn* GetStringColumn(const string& column_name);
   virtual const Column* GetColumn(const string& column_name);
   uint num_rows() const;
+  uint num_cols() const;
+  string Description() const;
 
 protected:
   unordered_map<string, unique_ptr<Column>> column_map_;
