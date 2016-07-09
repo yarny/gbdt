@@ -28,7 +28,7 @@ function InstallGPerf()  {
     git clone https://github.com/gperftools/gperftools.git
     cd gperftools
     ./autogen.sh
-    ./configure --prefix=$1 --enable-static --enable-shared=no
+    ./configure --prefix=$1 --enable-static --enable-shared
     make
     sudo make install
     cd $WORK_DIR
@@ -43,7 +43,7 @@ function InstallGlog()  {
     git clone git://github.com/google/glog
     cd glog
     mkdir -p build && cd build
-    export CXXFLAGS="-fPIC" && cmake -DCMAKE_INSTALL_PREFIX=$1 .. && make VERBOSE=1
+    export CXXFLAGS="-fPIC" && cmake -DCMAKE_INSTALL_PREFIX=$1 -DBUILD_SHARED_LIBS=on .. && make VERBOSE=1
     sudo make install
     cd $WORK_DIR
 }
@@ -58,7 +58,7 @@ function InstallGflags() {
     cd gflags
     mkdir -p build && cd build
     export CXXFLAGS="-fPIC"
-    cmake -DCMAKE_INSTALL_PREFIX=$1 -DGFLAGS_NAMESPACE=google ..
+    cmake -DCMAKE_INSTALL_PREFIX=$1 -DGFLAGS_NAMESPACE=google -DBUILD_SHARED_LIBS=on ..
     make && sudo make install
     cd $WORK_DIR
 }
@@ -75,7 +75,7 @@ function InstallProtoBuf3() {
 
     cd protobuf-3.0.0-beta-3.1
     ./autogen.sh
-    ./configure --disable-shared --prefix=$1
+    ./configure --prefix=$1
     export CXXFLAGS="-fPIC"
     make && sudo make install
     cd $WORD_DIR
