@@ -6,7 +6,7 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [ "-lprotobuf", "-lglog", "-lgflags", "-lpthread", "-ltcmalloc_minimal", "-lm" ]
+LINK_OPTS = [ "-lprotobuf", "-lglog", "-lgflags", "-pthread", "-ltcmalloc_minimal", "-lm" ]
 C_TEST_OPTS = [ "-Iexternal/googletest/googletest/include",
 	        "-Iexternal/googletest/googlemock/include" ]
 

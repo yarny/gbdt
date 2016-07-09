@@ -6,7 +6,7 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-lpthread", "-ltcmalloc_minimal", "-lm" ]
+LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-pthread", "-ltcmalloc_minimal", "-lm" ]
 
 cc_library(
     name = "flags",
