@@ -14,48 +14,17 @@
  * limitations under the License.
  */
 
-#include "gbdt_py_base.h"
+#include "datastore_py.h"
 
 #include <memory>
 #include <string>
 
+#include "gbdt_py_base.h"
 #include "src/data_store/data_store.h"
 #include "src/data_store/tsv_data_store.h"
 #include "src/proto/config.pb.h"
 
 using gbdt::DataStore;
-
-class DataStorePy {
- public:
-  DataStorePy() {
-  }
-
-  void LoadTSV(const vector<string>& tsvs,
-               const vector<string>& binned_float_cols,
-               const vector<string>& raw_float_cols,
-               const vector<string>& string_cols);
-  string Description() const {
-    return (data_store_) ? data_store_->Description() : "Empty data store.";
-  }
-  int num_rows() const {
-    return (data_store_) ? data_store_->num_rows() : 0;
-  }
-  int num_cols() {
-    return (data_store_) ? data_store_->num_cols() : 0;
-  }
-  int num_binned_float_cols() const {
-    return (data_store_) ? data_store_->num_binned_float_cols() : 0;
-  }
-  int num_raw_float_cols() const {
-    return (data_store_) ? data_store_->num_raw_float_cols() : 0;
-  }
-  int num_string_cols() const {
-    return (data_store_) ? data_store_->num_string_cols() : 0;
-  }
-
- private:
-  unique_ptr<DataStore> data_store_;
-};
 
 void DataStorePy::LoadTSV(const vector<string>& tsvs,
                           const vector<string>& binned_float_cols,

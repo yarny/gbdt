@@ -17,7 +17,26 @@
 #ifndef FOREST_PY_H_
 #define FOREST_PY_H_
 
+#include <vector>
+
 #include "gbdt_py_base.h"
+#include "src/proto/tree.pb.h"
+
+using gbdt::Forest;
+
+class DataStorePy;
+
+class ForestPy {
+ public:
+  ForestPy(const string& str);
+  ForestPy(Forest&& forest) : forest_(forest) {}
+
+  string ToJson() const;
+  vector<double> Predict(DataStorePy* data_store_py) const;
+
+ private:
+  Forest forest_;
+};
 
 void InitForestPy(py::module &m);
 

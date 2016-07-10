@@ -101,4 +101,18 @@ bool EvaluateForest(DataStore* data_store,
   return true;
 }
 
+Status EvaluateForest(DataStore* data_store,
+                      const Forest& forest,
+                      vector<double>* scores) {
+  auto feature_names = CollectAllFeatures(forest);
+  LoadFeaturesOrDie(feature_names, data_store);
+  ComputeTreeScores compute_tree_scores(data_store);
+  scores->clear();
+  scores->resize(data_store->num_rows(), 0.0);
+  for (const auto& tree : forest.tree()) {
+    compute_tree_scores.AddTreeScores(tree, scores);
+  }
+  return Status::OK();
+}
+
 }  // namespace gbdt

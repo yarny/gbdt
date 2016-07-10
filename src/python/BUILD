@@ -53,8 +53,10 @@ cc_library(
    hdrs = [ "forest_py.h" ],
    deps = [
        "//external:pybind11-lib",
+       "//src/gbdt_algo:evaluation",
        "//src/proto:tree_proto_cc",
        "//src/utils:json_utils",
+       ":datastore_py",
        ":gbdt_py_base",
    ],
    copts = [ "-I/usr/include/python2.7",  ],
