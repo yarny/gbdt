@@ -27,6 +27,8 @@ namespace error {
     OK = 1,
     NOT_FOUND = 2,
     OUT_OF_RANGE = 3,
+    INVALID_ARGUMENT = 4,
+    INVALID_OPERATION = 5,
   };
 }  // error
 

@@ -19,24 +19,30 @@
 #include <string>
 #include <vector>
 
+#include "external/cppformat/format.h"
 #include "src/base/base.h"
 #include "src/utils/utils.h"
 #include "src/utils/stopwatch.h"
 
 namespace gbdt {
 
+unordered_set<string> TSVBlock::kValidNaNValues_ = {"NAN", "nan", "NaN", "?", "_", "-", "*"};
+
 TSVBlock::TSVBlock(const string& tsv,
                    const vector<int>& float_column_indices,
                    const vector<int>& string_column_indices,
                    bool skip_header) {
-  ReadTSV(tsv, float_column_indices, string_column_indices, skip_header);
+  status_ = ReadTSV(tsv, float_column_indices, string_column_indices, skip_header);
 }
 
-void TSVBlock::ReadTSV(const string& tsv,
+Status TSVBlock::ReadTSV(const string& tsv,
                        const vector<int>& float_column_indices,
                        const vector<int>& string_column_indices,
                        bool skip_header) {
-  CHECK(FileExists(tsv)) << "TSV " << tsv << " does not exist.";
+  if (!FileExists(tsv)) {
+    return Status(error::NOT_FOUND,
+                  fmt::format("TSV {0} does not exit.", tsv));
+  }
   StopWatch stopwatch;
   stopwatch.Start();
 
@@ -59,30 +65,33 @@ void TSVBlock::ReadTSV(const string& tsv,
     // Load String Columns.
     for (int i = 0; i < string_column_indices.size(); ++i) {
       int index = string_column_indices[i];
-      CHECK_LT(index, row.size())
-          << line << " has only " << row.size() << " columns "
-          << "while we are accessing columm #" << index
-          << " at row#" << num_rows;
+      if (index >= row.size()) {
+        return Status(error::OUT_OF_RANGE,
+                      fmt::format("{0} has only {1} columns while we are accessing column#{2} at row#{3}",
+                                  line, row.size(), index, num_rows));
+      }
       string_columns_[i].push_back(row[index]);
     }
 
     // Load Float Columns.
     for (int i = 0; i < float_column_indices.size(); ++i) {
       int index = float_column_indices[i];
-      CHECK_LT(index, row.size())
-          << line << " has only " << row.size() << " columns "
-          << " while we are accessing columm #" << index;
+      if (index >= row.size()) {
+        return Status(error::OUT_OF_RANGE,
+                      fmt::format("{0} has only {1} columns while we are accessing column#{2} at row#{3}",
+                                  line, row.size(), index, num_rows));
+      }
       float v;
       if (strings::StringCast(row[index], &v)) {
         float_columns_[i].push_back(v);
       } else {
-        CHECK(row[index] == "nan" ||
-              row[index] == "NAN" ||
-              row[index] == "_" ||
-              row[index] == "?" ||
-              row[index] == "-" ||
-              row[index] == "*")
-            << "Invalid input at row " << num_rows << " column " << index + 1 << ": " << row[index];
+        if (kValidNaNValues_.find(row[index]) == kValidNaNValues_.end()) {
+          return Status(error::INVALID_ARGUMENT,
+                        fmt::format("Invalid input at row {0} column {1}: {2}",
+                                    num_rows,
+                                    index + 1,
+                                    row[index]));
+        }
         float_columns_[i].push_back(NAN);
       }
     }
@@ -92,6 +101,7 @@ void TSVBlock::ReadTSV(const string& tsv,
             << " and " << string_columns_.size() << " string columns, each with "
             << num_rows << " rows from " << tsv
             << " in " << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs());
+  return Status::OK();
 }
 
 }  // namespace gbdt

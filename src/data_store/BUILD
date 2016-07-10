@@ -15,7 +15,9 @@ cc_library(
     srcs = [ "column.cc" ],
     hdrs = [ "column.h" ],
     deps = [
+        "//external:cppformat-lib",
         "//src/base:base",
+        "//src/utils:status",
     ],
 )
 
@@ -23,7 +25,6 @@ cc_test(
     name = "column_test",
     srcs = [ "column_test.cc" ],
     deps = [
-    	 "//external:cppformat-lib",
     	 "//external:gtest_main",
          "//src/base:base",
 	 ":column"
@@ -39,6 +40,7 @@ cc_library(
     deps = [
          "//external:cppformat-lib",
          "//src/base:base",
+        "//src/utils:status",
 	 ":column"
     ],
 )
@@ -104,7 +106,9 @@ cc_library(
     srcs = [ "tsv_block.cc" ],
     hdrs = [ "tsv_block.h" ],
     deps = [
+        "//external:cppformat-lib",
         "//src/base:base",
+        "//src/utils:status",
         "//src/utils:stopwatch",
         "//src/utils:utils",
     ],
@@ -134,10 +138,12 @@ cc_library(
     srcs = [ "tsv_data_store.cc" ],
     hdrs = [ "tsv_data_store.h" ],
     deps = [
+        "//external:cppformat-lib",
         "//src/base:base",
         "//src:flags",
         "//src/proto:config_proto_cc",
         "//src/utils:threadpool",
+        "//src/utils:status",
         "//src/utils:stopwatch",
         "//src/utils:utils",
         ":column",
