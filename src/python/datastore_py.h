@@ -19,6 +19,6 @@
 
 #include "gbdt_py_base.h"
 
-void InitTSVDataStorePy(py::module &m);
+void InitDataStorePy(py::module &m);
 
 #endif // DATASTORE_PY_H_
