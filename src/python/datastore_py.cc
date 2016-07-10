@@ -48,6 +48,10 @@ void DataStorePy::LoadTSV(const vector<string>& tsvs,
   data_store_ = std::move(data_store);
 }
 
+void DataStorePy::Clear() {
+  data_store_.reset(nullptr);
+}
+
 void InitDataStorePy(py::module &m) {
   py::class_<DataStorePy>(m, "DataStore")
       .def(py::init<>())
@@ -61,5 +65,6 @@ void InitDataStorePy(py::module &m) {
       .def("num_binned_float_cols", &DataStorePy::num_binned_float_cols)
       .def("num_raw_float_cols", &DataStorePy::num_raw_float_cols)
       .def("num_string_cols", &DataStorePy::num_string_cols)
+      .def("clear", &DataStorePy::Clear)
       .def("__str__", &DataStorePy::Description);
 }

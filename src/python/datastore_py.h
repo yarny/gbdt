@@ -34,6 +34,7 @@ class DataStorePy {
   string Description() const {
     return (data_store_) ? data_store_->Description() : "Empty data store.";
   }
+  void Clear();
   int num_rows() const {
     return (data_store_) ? data_store_->num_rows() : 0;
   }
