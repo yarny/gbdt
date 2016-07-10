@@ -33,6 +33,9 @@ class ForestPy {
 
   string ToJson() const;
   vector<double> Predict(DataStorePy* data_store_py) const;
+  void PredictAndOutput(DataStorePy* data_store_py,
+                        const list<int>& test_points,
+                        const string& output_dir) const;
 
  private:
   Forest forest_;

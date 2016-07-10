@@ -177,8 +177,11 @@ void Test() {
 
   // Evaluate forest and write score out.
   mkdir(FLAGS_output_dir.c_str(), 0744);
-  CHECK(EvaluateForest(data_store.get(), config, forest, FLAGS_output_dir))
-      << "Failed to evaluate the forest.";
+  status = EvaluateForest(data_store.get(),
+                          forest,
+                          GetTestPoints(config.eval_config(), forest.tree_size()),
+                          FLAGS_output_dir);
+  CHECK(status.ok()) << "Failed to evaluate the forest: " << status.ToString();
 
   LOG(INFO) << "Wrote testing outputs to " << FLAGS_output_dir;
   stopwatch.End();

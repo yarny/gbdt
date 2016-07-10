@@ -27,15 +27,24 @@ vector<double> ForestPy::Predict(DataStorePy* data_store_py) const {
   auto status = EvaluateForest(data_store_py->data_store(),
                                forest_,
                                &scores);
-  if (!status.ok()) {
-    ThrowException(status);
-  }
+  if (!status.ok()) ThrowException(status);
   return scores;
+}
+
+void ForestPy::PredictAndOutput(DataStorePy* data_store_py,
+                                const list<int>& test_points,
+                                const string& output_dir) const {
+  auto status = EvaluateForest(data_store_py->data_store(),
+                               forest_,
+                               test_points,
+                               output_dir);
+  if (!status.ok()) ThrowException(status);
 }
 
 void InitForestPy(py::module &m) {
   py::class_<ForestPy>(m, "Forest")
       .def(py::init<const string&>())
       .def("as_json", &ForestPy::ToJson)
-      .def("predict", &ForestPy::Predict);
+      .def("predict", &ForestPy::Predict)
+      .def("predict_and_output", &ForestPy::PredictAndOutput);
 }

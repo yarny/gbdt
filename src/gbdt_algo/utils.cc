@@ -25,6 +25,7 @@
 #include "src/base/base.h"
 #include "src/data_store/column.h"
 #include "src/data_store/data_store.h"
+#include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/stopwatch.h"
 #include "src/utils/threadpool.h"
@@ -33,28 +34,30 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-vector<const Column*> LoadFeaturesOrDie(unordered_set<string>& feature_names,
-                                        DataStore* data_store) {
+Status LoadFeatures(unordered_set<string>& feature_names,
+                    DataStore* data_store,
+                    vector<const Column*>* columns) {
   vector<const Column*> features;
   LOG(INFO) << "Loading features...";
   StopWatch stopwatch;
   stopwatch.Start();
 
   {
-    auto task = [](DataStore* data_store, const string& feature_name) {
-      data_store->GetColumn(feature_name);
-    };
-    // Load features in multi-threaded way.
     ThreadPool pool(FLAGS_num_threads);
     for (const auto& feature_name : feature_names) {
-      pool.Enqueue(std::bind(task, data_store, feature_name));
+      pool.Enqueue([&]() { data_store->GetColumn(feature_name); });
     }
   }
 
   features.reserve(feature_names.size());
   for (const auto& feature_name : feature_names) {
     const auto* feature = data_store->GetColumn(feature_name);
-    CHECK(feature != nullptr) << "Failed to load feature " << feature_name;
+    if (feature == nullptr) {
+      return Status(error::NOT_FOUND, "Failed to load feature " + feature_name);
+    }
+    if (!feature->status().ok()) {
+      return feature->status();
+    }
     features.emplace_back(feature);
   }
 
@@ -64,7 +67,10 @@ vector<const Column*> LoadFeaturesOrDie(unordered_set<string>& feature_names,
       features.size(),
       data_store->num_rows(),
       StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()));
-  return features;
+  if (columns) {
+    (*columns) = std::move(features);
+  }
+  return Status::OK;
 }
 
 void ComputeFeatureImportance(const TreeNode& node,
@@ -120,6 +126,23 @@ unordered_set<string> CollectAllFeatures(const Forest& forest) {
 
 bool IsSingleNodeTree(const TreeNode& tree) {
   return !tree.has_left_child();
+}
+
+list<int> GetTestPoints(const EvalConfig& config, int forest_size) {
+  // Load test points
+  // By default, we output the test scores of the final forest,
+  // but if eval_interval is specified, we will test the forest at the intervals.
+  list<int> test_points;
+  if (config.eval_interval() > 0) {
+    for (int test_point = forest_size; test_point > 0;
+         test_point -= config.eval_interval()) {
+      test_points.push_back(test_point);
+    }
+    std::reverse(test_points.begin(), test_points.end());
+  } else {
+    test_points.push_back(forest_size);
+  }
+  return test_points;
 }
 
 }  // namespace gbdt

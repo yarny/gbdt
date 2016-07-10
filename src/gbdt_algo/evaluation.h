@@ -16,21 +16,21 @@
 #ifndef EVALUATION_H_
 #define EVALUATION_H_
 
+#include <list>
 #include <string>
 
 #include "src/base/base.h"
 
 namespace gbdt {
 
-class Config;
 class DataStore;
 class Forest;
 
 // Evaluates forest on data and outputs score files.
-bool EvaluateForest(DataStore* data_store,
-                    const Config& config,
-                    const Forest& forest,
-                    const string& output_dir);
+Status EvaluateForest(DataStore* data_store,
+                      const Forest& forest,
+                      const list<int>& test_points,
+                      const string& output_dir);
 
 Status EvaluateForest(DataStore* data_store,
                       const Forest& forest,
