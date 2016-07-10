@@ -28,6 +28,8 @@
 #include "src/gbdt_algo/evaluation.h"
 #include "src/gbdt_algo/gbdt_algo.h"
 #include "src/gbdt_algo/utils.h"
+#include "src/loss_func/loss_func.h"
+#include "src/loss_func/loss_func_factory.h"
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/json_utils.h"
@@ -49,6 +51,9 @@ using gbdt::Config;
 using gbdt::DataConfig;
 using gbdt::DataStore;
 using gbdt::FlatfilesDataStore;
+using gbdt::LoadForestOrDie;
+using gbdt::LossFunc;
+using gbdt::LossFuncFactory;
 using gbdt::TSVDataStore;
 using gbdt::Forest;
 using gbdt::Subsampling;
@@ -97,15 +102,6 @@ unique_ptr<DataStore> LoadDataStoreOrDie(const DataConfig& config) {
   return std::move(data_store);
 }
 
-Forest LoadForestOrDie(string& forest_file) {
-  Forest forest;
-  string forest_text = ReadFileToStringOrDie(forest_file);
-  auto status = JsonUtils::FromJson(forest_text, &forest);
-  CHECK(status.ok()) << "Failed to parse json " << forest_text;
-  LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
-  return forest;
-}
-
 void Train() {
   CHECK(!FLAGS_config_file.empty()) << "Please specify --config_file.";
   CHECK(!FLAGS_output_dir.empty()) << "Please specify --output_dir.";
@@ -133,9 +129,25 @@ void Train() {
     *base_forest = LoadForestOrDie(FLAGS_base_model_file);
   }
 
+  // Load Sampling weights.
+  const vector<float> w = GetSampleWeightsOrDie(config.data_config(), data_store.get());
+
+  // Initialize Loss Function.
+  unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config.loss_func_config());
+  CHECK(loss_func) << "Failed to initialize loss func from config "
+                   << config.loss_func_config().DebugString();
+  LOG(INFO) << "LossFuncConfig:\n" << config.loss_func_config().DebugString();
+
   // Start learning.
-  unique_ptr<Forest> forest = TrainGBDT(config, data_store.get(), base_forest.get());
-  CHECK(forest) << "Failed to train a forest";
+  unique_ptr<Forest> forest;
+  status = TrainGBDT(data_store.get(),
+                     GetFeaturesSetFromConfig(config.data_config()),
+                     loss_func.get(),
+                     w,
+                     config,
+                     base_forest.get(),
+                     &forest);
+  CHECK(status.ok()) << "Failed to train a forest. Error message: " << status.ToString();
 
   // Write the model into a file.
   mkdir(FLAGS_output_dir.c_str(), 0744);

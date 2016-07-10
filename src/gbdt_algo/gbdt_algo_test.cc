@@ -8,10 +8,14 @@
 
 #include <google/protobuf/text_format.h>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "src/data_store/flatfiles_data_store.h"
+#include "src/gbdt_algo/utils.h"
+#include "src/loss_func/loss_func.h"
+#include "src/loss_func/loss_func_factory.h"
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/utils.h"
@@ -57,6 +61,12 @@ class GBDTAlgoTest : public ::testing::Test {
     CHECK(google::protobuf::TextFormat::ParseFromString(
         ReadFileToStringOrDie("src/gbdt_algo/testdata/gbdt_algo_test/forest.model.txt"),
         &expected_forest_));
+
+    loss_func_ = LossFuncFactory::CreateLossFunc(config_.loss_func_config());
+    CHECK(loss_func_);
+    feature_names_ = GetFeaturesSetFromConfig(config_.data_config());
+    LoadFeatures(feature_names_, data_store_.get(), nullptr);
+    w_ = GetSampleWeightsOrDie(config_.data_config(), data_store_.get());
   }
 
   void RemoveGains(TreeNode* t) {
@@ -77,10 +87,21 @@ class GBDTAlgoTest : public ::testing::Test {
   Config config_;
   Forest expected_forest_;
   unique_ptr<DataStore> data_store_;
+  unique_ptr<LossFunc> loss_func_;
+  unordered_set<string> feature_names_;
+  vector<float> w_;
 };
 
 TEST_F(GBDTAlgoTest, TestBuildForest) {
-  unique_ptr<Forest> forest = TrainGBDT(config_, data_store_.get(), nullptr);
+  unique_ptr<Forest> forest;
+  auto status = TrainGBDT(data_store_.get(),
+                          feature_names_,
+                          loss_func_.get(),
+                          w_,
+                          config_,
+                          nullptr,
+                          &forest);
+  CHECK(status.ok()) << status.ToString();
   CHECK(forest) << "Failed to train forest.";
   for (auto& tree : *forest->mutable_tree()) {
     RemoveGains(&tree);
@@ -101,9 +122,19 @@ TEST_F(GBDTAlgoTest, TestBuildForestWithBaseForest) {
 
   // Train with base forest and train for additional 2 iterations.
   config_.mutable_tree_config()->set_num_iterations(2);
-  unique_ptr<Forest> forest = TrainGBDT(config_, data_store_.get(), &base_forest);
+
+  unique_ptr<Forest> forest;
+  auto status = TrainGBDT(data_store_.get(),
+                          feature_names_,
+                          loss_func_.get(),
+                          w_,
+                          config_,
+                          &base_forest,
+                          &forest);
+  CHECK(status.ok()) << status.ToString();
   CHECK(forest) << "Failed to train forest.";
-    for (auto& tree : *forest->mutable_tree()) {
+
+  for (auto& tree : *forest->mutable_tree()) {
     RemoveGains(&tree);
   }
 

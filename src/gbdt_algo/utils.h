@@ -18,6 +18,7 @@
 #define GBDT_ALGO_UTILS_H_
 
 #include <list>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -27,19 +28,27 @@ namespace gbdt {
 
 class Column;
 class DataStore;
+class DataConfig;
 class EvalConfig;
 class Forest;
 class TreeNode;
 
-Status LoadFeatures(unordered_set<string>& feature_names,
+Status LoadFeatures(const unordered_set<string>& feature_names,
                     DataStore* data_store,
                     vector<const Column*>* columns);
+
 vector<pair<string, double>> ComputeFeatureImportance(const Forest& forest);
 unordered_set<string> CollectAllFeatures(const Forest& forest);
 
 bool IsSingleNodeTree(const TreeNode& tree);
 
-list<int> GetTestPoints(const EvalConfig& config, int forest_size) ;
+list<int> GetTestPoints(const EvalConfig& config, int forest_size);
+
+unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config);
+
+vector<float> GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store);
+
+Forest LoadForestOrDie(const string& forest_file);
 
 }  // namespace gbdt
 

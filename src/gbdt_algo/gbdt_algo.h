@@ -28,6 +28,8 @@ namespace gbdt {
 class Config;
 class DataStore;
 class Forest;
+class LossFunc;
+class TreeConfig;
 
 // GBDT algorithnm
 // Gradient Boosting Decision Tree (GBDT) Algorithm.
@@ -40,15 +42,20 @@ class Forest;
 //
 // The generic framework allows us to implement a variety of algorithms by writing custom
 // loss function.
-// A General Boosting Method and its Application to Learning Ranking Functions for Web Search
-// by Zheng et.al. describes an algorithm that uses Hessian to compute both weights and gradients.
 //
 // Inputs:
 // * Config contains a collection of configurations including generate training params, loss
 //   function, and tree building params.
 // * DataStore is a container of data. It is not a const variable because some of our data
 //   can be loaded in a lazy fashion.
-unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const Forest* base_forest);
+
+Status TrainGBDT(DataStore* data_store,
+                 const unordered_set<string>& feature_names,
+                 LossFunc* loss_func,
+                 const vector<float>& w,
+                 const Config& config,
+                 const Forest* base_forest,
+                 unique_ptr<Forest>* forest);
 
 }  // namespace gbdt
 

@@ -27,14 +27,16 @@
 #include "src/data_store/data_store.h"
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
+#include "src/utils/json_utils.h"
 #include "src/utils/stopwatch.h"
 #include "src/utils/threadpool.h"
+#include "src/utils/utils.h"
 
 DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-Status LoadFeatures(unordered_set<string>& feature_names,
+Status LoadFeatures(const unordered_set<string>& feature_names,
                     DataStore* data_store,
                     vector<const Column*>* columns) {
   vector<const Column*> features;
@@ -143,6 +145,36 @@ list<int> GetTestPoints(const EvalConfig& config, int forest_size) {
     test_points.push_back(forest_size);
   }
   return test_points;
+}
+
+unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config) {
+  unordered_set<string> feature_names(config.float_feature().begin(), config.float_feature().end());
+  feature_names.insert(config.categorical_feature().begin(), config.categorical_feature().end());
+  return feature_names;
+}
+
+vector<float> GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store) {
+  vector<float> weights(data_store->num_rows(), 1.0);
+  const string& weight_column_name = config.sample_weight_column();
+  if (!weight_column_name.empty()) {
+    const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
+    CHECK(sample_weights) << "Failed to load sample weights";
+
+    for (uint i = 0; i < sample_weights->size(); ++i) {
+      weights[i] = (*sample_weights)[i];
+    }
+  }
+
+  return weights;
+}
+
+Forest LoadForestOrDie(const string& forest_file) {
+  Forest forest;
+  string forest_text = ReadFileToStringOrDie(forest_file);
+  auto status = JsonUtils::FromJson(forest_text, &forest);
+  CHECK(status.ok()) << "Failed to parse json " << forest_text;
+  LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
+  return forest;
 }
 
 }  // namespace gbdt
