@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-#include "datastore_py.h"
-#include "forest_py.h"
+#ifndef FOREST_PY_H_
+#define FOREST_PY_H_
+
 #include "gbdt_py_base.h"
 
-PYBIND11_PLUGIN(gbdt) {
-    py::module m("gbdt", "gbdt py library");
-    InitDataStorePy(m);
-    InitForestPy(m);
-    return m.ptr();
-}
+void InitForestPy(py::module &m);
+
+#endif // FOREST_PY_H_

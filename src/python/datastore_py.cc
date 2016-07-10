@@ -25,31 +25,31 @@
 
 using gbdt::DataStore;
 
-class TSVDataStorePy {
+class DataStorePy {
  public:
-  TSVDataStorePy() {
+  DataStorePy() {
   }
 
   void LoadTSV(const vector<string>& tsvs,
                const vector<string>& binned_float_cols,
                const vector<string>& raw_float_cols,
                const vector<string>& string_cols);
-  string Description() {
+  string Description() const {
     return (data_store_) ? data_store_->Description() : "Empty data store.";
   }
-  int num_rows() {
+  int num_rows() const {
     return (data_store_) ? data_store_->num_rows() : 0;
   }
   int num_cols() {
     return (data_store_) ? data_store_->num_cols() : 0;
   }
-  int num_binned_float_cols() {
+  int num_binned_float_cols() const {
     return (data_store_) ? data_store_->num_binned_float_cols() : 0;
   }
-  int num_raw_float_cols() {
+  int num_raw_float_cols() const {
     return (data_store_) ? data_store_->num_raw_float_cols() : 0;
   }
-  int num_string_cols() {
+  int num_string_cols() const {
     return (data_store_) ? data_store_->num_string_cols() : 0;
   }
 
@@ -57,10 +57,10 @@ class TSVDataStorePy {
   unique_ptr<DataStore> data_store_;
 };
 
-void TSVDataStorePy::LoadTSV(const vector<string>& tsvs,
-                             const vector<string>& binned_float_cols,
-                             const vector<string>& raw_float_cols,
-                             const vector<string>& string_cols) {
+void DataStorePy::LoadTSV(const vector<string>& tsvs,
+                          const vector<string>& binned_float_cols,
+                          const vector<string>& raw_float_cols,
+                          const vector<string>& string_cols) {
   gbdt::DataConfig config;
   for (const auto& col : binned_float_cols) {
     config.add_float_feature(col);
@@ -79,18 +79,18 @@ void TSVDataStorePy::LoadTSV(const vector<string>& tsvs,
   data_store_ = std::move(data_store);
 }
 
-void InitTSVDataStorePy(py::module &m) {
-    py::class_<TSVDataStorePy>(m, "DataStore")
-        .def(py::init<>())
-        .def("load_tsv", &TSVDataStorePy::LoadTSV,
-             py::arg("tsvs"),
-             py::arg("binned_float_cols") = vector<string>(),
-             py::arg("raw_float_cols") = vector<string>(),
-             py::arg("string_cols") = vector<string>())
-        .def("num_cols", &TSVDataStorePy::num_cols)
-        .def("num_rows", &TSVDataStorePy::num_rows)
-        .def("num_binned_float_cols", &TSVDataStorePy::num_binned_float_cols)
-        .def("num_raw_float_cols", &TSVDataStorePy::num_raw_float_cols)
-        .def("num_string_cols", &TSVDataStorePy::num_string_cols)
-        .def("__str__", &TSVDataStorePy::Description);
+void InitDataStorePy(py::module &m) {
+  py::class_<DataStorePy>(m, "DataStore")
+      .def(py::init<>())
+      .def("load_tsv", &DataStorePy::LoadTSV,
+           py::arg("tsvs"),
+           py::arg("binned_float_cols") = vector<string>(),
+           py::arg("raw_float_cols") = vector<string>(),
+           py::arg("string_cols") = vector<string>())
+      .def("num_cols", &DataStorePy::num_cols)
+      .def("num_rows", &DataStorePy::num_rows)
+      .def("num_binned_float_cols", &DataStorePy::num_binned_float_cols)
+      .def("num_raw_float_cols", &DataStorePy::num_raw_float_cols)
+      .def("num_string_cols", &DataStorePy::num_string_cols)
+      .def("__str__", &DataStorePy::Description);
 }

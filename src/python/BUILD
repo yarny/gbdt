@@ -26,6 +26,7 @@ cc_library(
        "//external:pybind11-lib",
        "//src/utils:status",
        ":datastore_py",
+       ":forest_py",
        ":gbdt_py_base",
    ],
    copts = [ "-I/usr/include/python2.7" ],
@@ -45,6 +46,20 @@ cc_library(
    ],
    copts = [ "-I/usr/include/python2.7",  ],
 )
+
+cc_library(
+   name = "forest_py",
+   srcs = [ "forest_py.cc" ],
+   hdrs = [ "forest_py.h" ],
+   deps = [
+       "//external:pybind11-lib",
+       "//src/proto:tree_proto_cc",
+       "//src/utils:json_utils",
+       ":gbdt_py_base",
+   ],
+   copts = [ "-I/usr/include/python2.7",  ],
+)
+
 
 cc_binary(
    name = "gbdt.so",

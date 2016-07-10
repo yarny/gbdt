@@ -25,7 +25,8 @@
 namespace py = pybind11;
 
 using namespace std;
+using gbdt::Status;
 
-void ThrowException(const gbdt::Status& status);
+void ThrowException(const Status& status);
 
 #endif // GBDT_PY_BASE_H_
