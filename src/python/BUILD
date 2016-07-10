@@ -14,7 +14,7 @@ cc_library(
    hdrs = [ "gbdt_py_base.h" ],
    deps = [
        "//external:pybind11-lib",
-       "//src/utils:status",
+       "//src/base:base",
    ],
    copts = [ "-I/usr/include/python2.7" ],
 )
@@ -24,7 +24,6 @@ cc_library(
    srcs = [ "gbdt_py.cc" ],
    deps = [
        "//external:pybind11-lib",
-       "//src/utils:status",
        ":datastore_py",
        ":forest_py",
        ":gbdt_py_base",

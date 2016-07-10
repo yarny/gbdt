@@ -115,12 +115,3 @@ cc_test(
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
 )
-
-cc_library(
-    name = "status",
-    srcs = [ "status.cc" ],
-    hdrs = [ "status.h" ],
-    deps = [
-         "//src/base:base",
-    ],
-)

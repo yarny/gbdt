@@ -19,8 +19,11 @@
 #include <cmath>
 #include <stdint.h>
 #include <glog/logging.h>
+#include <google/protobuf/stubs/status.h>
 
 using namespace std;
+using google::protobuf::util::Status;
+using namespace google::protobuf::util;
 
 // Integer types
 typedef int8_t int8;
@@ -32,5 +35,6 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 typedef uint32_t uint;
+
 
 #endif  // BASE_H_

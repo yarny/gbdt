@@ -8,16 +8,18 @@
 
 ForestPy::ForestPy(const string& str) {
   Forest forest;
-  if (!JsonUtils::FromJson(str, &forest)) {
-    ThrowException(Status(gbdt::error::INVALID_ARGUMENT,
-                          "Failed to parse Json."));
+  auto status = JsonUtils::FromJson(str, &forest);
+  if (!status.ok()) ThrowException(status);
 
-  }
   forest_ = std::move(forest);
 }
 
 string ForestPy::ToJson() const {
-  return JsonUtils::ToJsonOrDie(forest_);
+  string json_str;
+  auto status = JsonUtils::ToJson(forest_, &json_str);
+  if (!status.ok()) ThrowException(status);
+
+  return json_str;
 }
 
 vector<double> ForestPy::Predict(DataStorePy* data_store_py) const {

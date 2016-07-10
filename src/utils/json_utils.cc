@@ -46,24 +46,22 @@ unique_ptr<TypeResolver> JsonUtils::resolver_(NewTypeResolverForDescriptorPool(
 JsonUtils::JsonUtils() {
 }
 
-string JsonUtils::ToJsonOrDie(const Message& message) {
-  static google::protobuf::util::JsonOptions options;
+Status JsonUtils::ToJson(const Message& message, string* str) {
+  google::protobuf::util::JsonOptions options;
   options.always_print_primitive_fields = true;
 
-  string result;
-  auto status = BinaryToJsonString(resolver_.get(),
-                                   GetTypeUrl(message.GetDescriptor()),
-                                   message.SerializeAsString(), &result, options);
-  CHECK_EQ(Status::OK, status) << "Failed to convert proto to Json.";
-  return result;
+  return BinaryToJsonString(resolver_.get(),
+                            GetTypeUrl(message.GetDescriptor()),
+                            message.SerializeAsString(), str, options);
 }
 
-bool JsonUtils::FromJson(const string& json, Message* message) {
+Status JsonUtils::FromJson(const string& json, Message* message) {
   string binary;
-  if (JsonToBinaryString(
-          resolver_.get(), GetTypeUrl(message->GetDescriptor()), json, &binary) ==
-      Status::OK) {
-    return message->ParseFromString(binary);
+  auto status = JsonToBinaryString(
+      resolver_.get(), GetTypeUrl(message->GetDescriptor()), json, &binary);
+  if (!status.ok()) return status;
+  if (!message->ParseFromString(binary)) {
+    return Status(error::INTERNAL, "Failed to parse protobuf.");
   }
-  return false;
+  return Status::OK;
 }

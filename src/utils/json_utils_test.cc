@@ -52,12 +52,14 @@ class JsonUtilsTest : public ::testing::Test {
 };
 
 TEST_F(JsonUtilsTest, TestToJson) {
-  EXPECT_EQ(tree_json_, JsonUtils::ToJsonOrDie(tree_));
+  string tree_json_text;
+  EXPECT_TRUE(JsonUtils::ToJson(tree_, &tree_json_text).ok());
+  EXPECT_EQ(tree_json_, tree_json_text);
 }
 
 TEST_F(JsonUtilsTest, FromJson) {
   TreeNode tree;
-  EXPECT_TRUE(JsonUtils::FromJson(tree_json_, &tree));
+  EXPECT_TRUE(JsonUtils::FromJson(tree_json_, &tree).ok());
   EXPECT_EQ(tree_.DebugString(), tree.DebugString());
 }
 

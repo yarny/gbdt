@@ -25,8 +25,8 @@ class JsonUtils {
  public:
   JsonUtils();
 
-  static string ToJsonOrDie(const google::protobuf::Message& message);
-  static bool FromJson(const string& json, google::protobuf::Message* message);
+  static Status ToJson(const google::protobuf::Message& message, string* str);
+  static Status FromJson(const string& json, google::protobuf::Message* message);
 
  private:
   static std::unique_ptr<google::protobuf::util::TypeResolver> resolver_;

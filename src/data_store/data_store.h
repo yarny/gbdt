@@ -21,7 +21,6 @@
 
 #include "column.h"
 #include "src/base/base.h"
-#include "src/utils/status.h"
 
 namespace gbdt {
 
