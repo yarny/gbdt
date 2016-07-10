@@ -24,6 +24,6 @@ DEFINE_string(output_model_name, "forest", "The output model name.");
 DEFINE_string(testing_model_file, "", "The testing model file.");
 DEFINE_string(base_model_file, "", "The base model file.");
 DEFINE_string(config_file, "", "The config file.");
-DEFINE_int32(num_threads, 1, "The number of threads.");
+DEFINE_int32(num_threads, 16, "The number of threads.");
 DEFINE_string(mode, "train", "The running mode.");
 DEFINE_int32(seed, 123467, "The random seed.");

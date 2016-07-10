@@ -40,6 +40,7 @@ class Status {
   static Status OK();
   bool ok() const;
   const string& error_msg() const;
+  error::ErrorCode error_code() const;
 
  private:
    error::ErrorCode code_ = error::OK;

@@ -72,32 +72,41 @@ uint DataStore::num_cols() const {
   return column_map_.size();
 }
 
+uint CountColumn(const unordered_map<string, unique_ptr<Column>>& column_map,
+                 Column::ColumnType type) {
+  int count = 0;
+  for (const auto& p : column_map) {
+    if (p.second->type() == type) {
+      ++count;
+    }
+  }
+
+  return count;
+}
+uint DataStore::num_binned_float_cols() const {
+  return CountColumn(column_map_, Column::kBinnedFloatColumn);
+}
+
+uint DataStore::num_raw_float_cols() const {
+  return CountColumn(column_map_, Column::kRawFloatColumn);
+}
+
+uint DataStore::num_string_cols() const {
+  return CountColumn(column_map_, Column::kStringColumn);
+}
+
 const Column* DataStore::GetColumn(const string& column_name) {
   auto it = column_map_.find(column_name);
   return it == column_map_.end() ? nullptr : it->second.get();
 }
 
 string DataStore::Description() const {
-  int num_raw_float_cols = 0;
-  int num_binned_float_cols = 0;
-  int num_string_cols = 0;
-  for (const auto& p : column_map_) {
-    const auto& column = p.second;
-    if (column->type() == Column::kRawFloatColumn) {
-      ++num_raw_float_cols;
-    } else if (column->type() != Column::kStringColumn) {
-      ++num_string_cols;
-    } else if (column->type() == Column::kBinnedFloatColumn) {
-      ++num_binned_float_cols;
-    }
-  }
-
   return fmt::format("DataStore with {0} binned float, {1} raw float and "
                      "{2} string columns, each with {3} row.",
-                     num_rows(),
-                     num_binned_float_cols,
-                     num_raw_float_cols,
-                     num_string_cols);
+                     num_binned_float_cols(),
+                     num_raw_float_cols(),
+                     num_string_cols(),
+                     num_rows());
 }
 
 }  // namespace gbdt
