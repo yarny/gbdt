@@ -19,6 +19,7 @@
 #include <string>
 
 #include "src/base/base.h"
+#include "src/utils/status.h"
 
 namespace gbdt {
 
@@ -29,8 +30,12 @@ class Forest;
 // Evaluates forest on data and outputs score files.
 bool EvaluateForest(DataStore* data_store,
                     const Config& config,
-                    const Forest& internal_forest,
+                    const Forest& forest,
                     const string& output_dir);
+
+Status EvaluateForest(DataStore* data_store,
+                      const Forest& forest,
+                      vector<double>* scores);
 
 }  // namespace gbdt
 

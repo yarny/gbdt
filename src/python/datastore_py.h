@@ -18,6 +18,45 @@
 #define DATASTORE_PY_H_
 
 #include "gbdt_py_base.h"
+#include "src/data_store/data_store.h"
+
+using gbdt::DataStore;
+
+class DataStorePy {
+ public:
+  DataStorePy() {
+  }
+
+  void LoadTSV(const vector<string>& tsvs,
+               const vector<string>& binned_float_cols,
+               const vector<string>& raw_float_cols,
+               const vector<string>& string_cols);
+  string Description() const {
+    return (data_store_) ? data_store_->Description() : "Empty data store.";
+  }
+  int num_rows() const {
+    return (data_store_) ? data_store_->num_rows() : 0;
+  }
+  int num_cols() {
+    return (data_store_) ? data_store_->num_cols() : 0;
+  }
+  int num_binned_float_cols() const {
+    return (data_store_) ? data_store_->num_binned_float_cols() : 0;
+  }
+  int num_raw_float_cols() const {
+    return (data_store_) ? data_store_->num_raw_float_cols() : 0;
+  }
+  int num_string_cols() const {
+    return (data_store_) ? data_store_->num_string_cols() : 0;
+  }
+
+  DataStore* data_store() {
+    return data_store_.get();
+  }
+
+ private:
+  unique_ptr<DataStore> data_store_;
+};
 
 void InitDataStorePy(py::module &m);
 
