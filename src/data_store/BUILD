@@ -17,7 +17,6 @@ cc_library(
     deps = [
         "//external:cppformat-lib",
         "//src/base:base",
-        "//src/utils:status",
     ],
 )
 
@@ -40,7 +39,6 @@ cc_library(
     deps = [
          "//external:cppformat-lib",
          "//src/base:base",
-        "//src/utils:status",
 	 ":column"
     ],
 )
@@ -108,7 +106,6 @@ cc_library(
     deps = [
         "//external:cppformat-lib",
         "//src/base:base",
-        "//src/utils:status",
         "//src/utils:stopwatch",
         "//src/utils:utils",
     ],
@@ -143,7 +140,6 @@ cc_library(
         "//src:flags",
         "//src/proto:config_proto_cc",
         "//src/utils:threadpool",
-        "//src/utils:status",
         "//src/utils:stopwatch",
         "//src/utils:utils",
         ":column",

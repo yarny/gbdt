@@ -23,7 +23,6 @@
 #include "column.h"
 #include "data_store.h"
 #include "src/base/base.h"
-#include "src/utils/status.h"
 
 namespace gbdt {
 

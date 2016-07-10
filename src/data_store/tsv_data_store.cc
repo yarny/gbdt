@@ -46,7 +46,7 @@ Status MaybeFindFirstNotOK(const unordered_map<string, unique_ptr<Column>>& colu
       return p.second->status();
     }
   }
-  return Status::OK();
+  return Status::OK;
 }
 
 }  // namespace
@@ -93,7 +93,7 @@ Status TSVDataStore::LoadTSVs(const vector<string>& tsvs, const DataConfig& conf
   LOG(INFO) << "Finished loading tsvs in "
             << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs());
 
-  return Status::OK();
+  return Status::OK;
 }
 
 Status TSVDataStore::ProcessBlock(const TSVBlock* block) {
@@ -196,7 +196,7 @@ Status TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& con
     string_column_indices_.push_back(it->second);
   }
 
-  return Status::OK();
+  return Status::OK;
 }
 
 }  // namespace gbdt

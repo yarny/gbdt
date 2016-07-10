@@ -101,7 +101,7 @@ Status TSVBlock::ReadTSV(const string& tsv,
             << " and " << string_columns_.size() << " string columns, each with "
             << num_rows << " rows from " << tsv
             << " in " << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs());
-  return Status::OK();
+  return Status::OK;
 }
 
 }  // namespace gbdt

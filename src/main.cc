@@ -91,7 +91,7 @@ unique_ptr<DataStore> LoadDataStoreOrDie(const DataConfig& config) {
     LOG(FATAL) << "Failed to load data_store. Please either specify --flatfiles_dirs or --tsvs.";
   }
   if (!data_store->status().ok()) {
-    LOG(FATAL) << "Failed to load data_store. Error message: " + data_store->status().error_msg();
+    LOG(FATAL) << "Failed to load data_store. Error message: " + data_store->status().ToString();
   }
 
   return std::move(data_store);
@@ -100,8 +100,8 @@ unique_ptr<DataStore> LoadDataStoreOrDie(const DataConfig& config) {
 Forest LoadForestOrDie(string& forest_file) {
   Forest forest;
   string forest_text = ReadFileToStringOrDie(forest_file);
-  CHECK(JsonUtils::FromJson(forest_text, &forest))
-      << "Failed to parse json " << forest_text;
+  auto status = JsonUtils::FromJson(forest_text, &forest);
+  CHECK(status.ok()) << "Failed to parse json " << forest_text;
   LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
   return forest;
 }
@@ -120,8 +120,8 @@ void Train() {
   // Load config.
   Config config;
   string config_text = ReadFileToStringOrDie(FLAGS_config_file);
-  CHECK(JsonUtils::FromJson(config_text, &config))
-      << "Failed to parse json to proto: " << config_text;
+  auto status = JsonUtils::FromJson(config_text, &config);
+  CHECK(status.ok()) << "Failed to parse json to proto: " << config_text;
 
   // Load DataStore.
   auto data_store = LoadDataStoreOrDie(config.data_config());
@@ -140,7 +140,10 @@ void Train() {
   // Write the model into a file.
   mkdir(FLAGS_output_dir.c_str(), 0744);
   string output_model_file = FLAGS_output_dir + "/" + FLAGS_output_model_name + ".json";
-  WriteStringToFile(JsonUtils::ToJsonOrDie(*forest), output_model_file);
+  string forest_text;
+  status = JsonUtils::ToJson(*forest, &forest_text);
+  CHECK(status.ok()) << "Failed to output model to json.";
+  WriteStringToFile(forest_text, output_model_file);
   LOG(INFO) << "Wrote the model to " << output_model_file;
 
   // Write the feature importance into a file.
@@ -163,8 +166,8 @@ void Test() {
   // Load config.
   string config_text = ReadFileToStringOrDie(FLAGS_config_file);
   Config config;
-  CHECK(JsonUtils::FromJson(config_text, &config))
-      << "Failed to parse json to proto " << config_text;
+  auto status = JsonUtils::FromJson(config_text, &config);
+  CHECK(status.ok()) << "Failed to parse json to proto " << config_text;
 
   // Load testing_model_file.
   Forest forest = LoadForestOrDie(FLAGS_testing_model_file);

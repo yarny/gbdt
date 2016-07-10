@@ -112,7 +112,7 @@ Status EvaluateForest(DataStore* data_store,
   for (const auto& tree : forest.tree()) {
     compute_tree_scores.AddTreeScores(tree, scores);
   }
-  return Status::OK();
+  return Status::OK;
 }
 
 }  // namespace gbdt

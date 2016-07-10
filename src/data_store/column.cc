@@ -166,7 +166,7 @@ void StringColumn::Add(const vector<string>* raw_strings) {
 void StringColumn::Finalize() {
   if (!status_.ok()) return;
   if (finalized_) {
-    status_ = Status(error::INVALID_OPERATION, "Cannot run Add after finalized.");
+    status_ = Status(error::FAILED_PRECONDITION, "Cannot run Add after finalized.");
     return;
   }
   // According the number of unique values, convert the vector to
@@ -210,7 +210,7 @@ template <typename INT> Status AddBinnedVecHelper(const vector<float>& raw_float
       (*bin_mins)[bin_id] = min((*bin_mins)[bin_id], v);
     }
   }
-  return Status::OK();
+  return Status::OK;
 }
 
 Status BinnedFloatColumn::AddBinnedVec(const vector<float>& raw_floats) {
@@ -222,13 +222,13 @@ Status BinnedFloatColumn::AddBinnedVec(const vector<float>& raw_floats) {
   } else {
     return AddBinnedVecHelper<uint32>(raw_floats, bin_map_, &col_32_, &bin_mins_);
   }
-  return Status::OK();
+  return Status::OK;
 }
 
 void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
   if (!status_.ok()) return;
   if (finalized_) {
-    status_ = Status(error::INVALID_OPERATION, "Cannot run Add after finalized.");
+    status_ = Status(error::FAILED_PRECONDITION, "Cannot run Add after finalized.");
     return;
   }
   if (bin_maxs_.size() == 0) {
@@ -248,7 +248,7 @@ void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
 void BinnedFloatColumn::Finalize() {
   if (!status_.ok()) return;
   if (finalized_) {
-    status_ = Status(error::INVALID_OPERATION, "Cannot run Add after finalized.");
+    status_ = Status(error::FAILED_PRECONDITION, "Cannot run Add after finalized.");
     return;
   }
   if (bin_maxs_.size() == 0) {
@@ -262,7 +262,7 @@ void BinnedFloatColumn::Finalize() {
 void BinnedFloatColumn::BuildBins() {
   if (!status_.ok()) return;
   if (finalized_) {
-    status_ = Status(error::INVALID_OPERATION, "Cannot run BuildBins after it is finalized");
+    status_ = Status(error::FAILED_PRECONDITION, "Cannot run BuildBins after it is finalized");
     return;
   }
   const auto& raw_floats = buffer_;

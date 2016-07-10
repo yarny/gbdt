@@ -20,12 +20,11 @@
 
 #include "external/pybind11/include/pybind11/pybind11.h"
 #include "external/pybind11/include/pybind11/stl.h"
-#include "src/utils/status.h"
+#include "src/base/base.h"
 
 namespace py = pybind11;
 
 using namespace std;
-using gbdt::Status;
 
 void ThrowException(const Status& status);
 
