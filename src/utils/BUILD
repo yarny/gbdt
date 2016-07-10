@@ -35,7 +35,7 @@ cc_library(
     srcs = [ "utils.cc" ],
     hdrs = [ "utils.h", "utils_inl.h" ],
     deps = [
-    	 "//src/base:base",
+         "//src/base:base",
 	 ":vector_slice",
     ],
 )
@@ -114,4 +114,13 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+)
+
+cc_library(
+    name = "status",
+    srcs = [ "status.cc" ],
+    hdrs = [ "status.h" ],
+    deps = [
+         "//src/base:base",
+    ],
 )
