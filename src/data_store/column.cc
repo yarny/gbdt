@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "external/cppformat/format.h"
+
 namespace gbdt {
 
 using namespace std::placeholders;
@@ -116,6 +118,7 @@ const string& Column::name() const {
 }
 
 void IntegerizedColumn::Finalize() {
+  finalized_ = true;
   col_8_.shrink_to_fit();
   col_16_.shrink_to_fit();
   col_32_.shrink_to_fit();
@@ -145,6 +148,7 @@ const string& StringColumn::get_row_string(uint i) const {
 }
 
 void StringColumn::Add(const vector<string>* raw_strings) {
+  if (!status_.ok()) return;
   for (const auto& s : *raw_strings) {
     auto it = map_to_indices_.find(s);
     if (it == map_to_indices_.end()) {
@@ -160,6 +164,11 @@ void StringColumn::Add(const vector<string>* raw_strings) {
 }
 
 void StringColumn::Finalize() {
+  if (!status_.ok()) return;
+  if (finalized_) {
+    status_ = Status(error::INVALID_OPERATION, "Cannot run Add after finalized.");
+    return;
+  }
   // According the number of unique values, convert the vector to
   // 8bit or 16bit col.
   if (max_int() <= kMaxUInt8) {
@@ -179,7 +188,7 @@ BinnedFloatColumn::BinnedFloatColumn(const string& name, int num_bins)
 BinnedFloatColumn::~BinnedFloatColumn() {
 }
 
-template <typename INT> void AddBinnedVecHelper(const vector<float>& raw_floats,
+template <typename INT> Status AddBinnedVecHelper(const vector<float>& raw_floats,
                                                 const map<float, uint>& bin_map,
                                                 vector<INT>* col,
                                                 vector<float>* bin_mins) {
@@ -190,26 +199,38 @@ template <typename INT> void AddBinnedVecHelper(const vector<float>& raw_floats,
       col->push_back(0);
     } else {
       auto it = bin_map.lower_bound(v);
-      CHECK(it != bin_map.end()) << "This should not happen because the last bin is the max float value.";
+      if (it == bin_map.end()) {
+        return Status(error::OUT_OF_RANGE,
+                      fmt::format(
+                          "This should not happen because the last bin is the max float value. "
+                          "Value ({0})", v));
+      }
       int bin_id = it->second;
       col->push_back(bin_id);
       (*bin_mins)[bin_id] = min((*bin_mins)[bin_id], v);
     }
   }
+  return Status::OK();
 }
 
-void BinnedFloatColumn::AddBinnedVec(const vector<float>& raw_floats) {
+Status BinnedFloatColumn::AddBinnedVec(const vector<float>& raw_floats) {
+  Status status;
   if (max_int() <= kMaxUInt8) {
-    AddBinnedVecHelper<uint8>(raw_floats, bin_map_, &col_8_, &bin_mins_);
+    return AddBinnedVecHelper<uint8>(raw_floats, bin_map_, &col_8_, &bin_mins_);
   } else if (max_int() <= kMaxUInt16) {
-    AddBinnedVecHelper<uint16>(raw_floats, bin_map_, &col_16_, &bin_mins_);
+    return AddBinnedVecHelper<uint16>(raw_floats, bin_map_, &col_16_, &bin_mins_);
   } else {
-    AddBinnedVecHelper<uint32>(raw_floats, bin_map_, &col_32_, &bin_mins_);
+    return AddBinnedVecHelper<uint32>(raw_floats, bin_map_, &col_32_, &bin_mins_);
   }
+  return Status::OK();
 }
 
 void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
-  CHECK(!finalized_) << "Cannot run Add when finalized.";
+  if (!status_.ok()) return;
+  if (finalized_) {
+    status_ = Status(error::INVALID_OPERATION, "Cannot run Add after finalized.");
+    return;
+  }
   if (bin_maxs_.size() == 0) {
     // Stage 0: build binning.
     buffer_.reserve(buffer_.size() + raw_floats->size());
@@ -220,21 +241,30 @@ void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
       BuildBins();
     }
   } else {
-    AddBinnedVec(*raw_floats);
+    status_ = AddBinnedVec(*raw_floats);
   }
 }
 
 void BinnedFloatColumn::Finalize() {
+  if (!status_.ok()) return;
+  if (finalized_) {
+    status_ = Status(error::INVALID_OPERATION, "Cannot run Add after finalized.");
+    return;
+  }
   if (bin_maxs_.size() == 0) {
     BuildBins();
+    if (!status_.ok()) return;
   }
   bin_map_.clear();
   IntegerizedColumn::Finalize();
-  finalized_ = true;
 }
 
 void BinnedFloatColumn::BuildBins() {
-  CHECK(!finalized_) << "Cannot run BuildBins when finalized.";
+  if (!status_.ok()) return;
+  if (finalized_) {
+    status_ = Status(error::INVALID_OPERATION, "Cannot run BuildBins after it is finalized");
+    return;
+  }
   const auto& raw_floats = buffer_;
   // Create a histogram of the float values. NaN is treated as missing values and are
   // excluded from the histograms.
@@ -274,7 +304,7 @@ void BinnedFloatColumn::BuildBins() {
   bin_maxs_.shrink_to_fit();
   // Initialize bin_mins_ to be bins_maxs_.
   bin_mins_ = bin_maxs_;
-  AddBinnedVec(buffer_);
+  status_ = AddBinnedVec(buffer_);
   buffer_.clear();
   buffer_.shrink_to_fit();
 }
@@ -308,11 +338,13 @@ RawFloatColumn::RawFloatColumn(const string& name) : Column(name, Column::kRawFl
 }
 
 void RawFloatColumn::Add(const vector<float>* raw_floats) {
+  if (!status_.ok()) return;
   raw_floats_.reserve(raw_floats_.size() + raw_floats->size());
   raw_floats_.insert(raw_floats_.end(), raw_floats->begin(), raw_floats->end());
 }
 
 void RawFloatColumn::Finalize() {
+  if (!status_.ok()) return;
   raw_floats_.shrink_to_fit();
 }
 

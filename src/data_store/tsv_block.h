@@ -17,9 +17,11 @@
 #define TSV_BLOCK_H_
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "src/base/base.h"
+#include "src/utils/status.h"
 
 namespace gbdt {
 
@@ -38,14 +40,18 @@ public:
     return string_columns_;
   }
 
+  const Status& status() const { return status_; }
+
 private:
-  void ReadTSV(const string& tsv,
+  Status ReadTSV(const string& tsv,
                const vector<int>& float_column_indices,
                const vector<int>& string_column_indices,
                bool skip_header);
 
   vector<vector<float>> float_columns_;
   vector<vector<string>> string_columns_;
+  static unordered_set<string> kValidNaNValues_;
+  Status status_;
 };
 
 }  // namespace gbdt

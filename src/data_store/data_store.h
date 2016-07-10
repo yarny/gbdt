@@ -21,6 +21,7 @@
 
 #include "column.h"
 #include "src/base/base.h"
+#include "src/utils/status.h"
 
 namespace gbdt {
 
@@ -35,10 +36,17 @@ public:
   virtual const Column* GetColumn(const string& column_name);
   uint num_rows() const;
   uint num_cols() const;
+  uint num_binned_float_cols() const;
+  uint num_raw_float_cols() const;
+  uint num_string_cols() const;
   string Description() const;
+  const Status& status() const {
+    return status_;
+  }
 
 protected:
   unordered_map<string, unique_ptr<Column>> column_map_;
+  Status status_;
 };
 
 }  // namespace gbdt

@@ -23,6 +23,7 @@
 #include "column.h"
 #include "data_store.h"
 #include "src/base/base.h"
+#include "src/utils/status.h"
 
 namespace gbdt {
 
@@ -31,18 +32,18 @@ class TSVDataConfig;
 class DataConfig;
 
 class TSVDataStore : public DataStore {
-public:
+ public:
   // TSVs can be divided into blocks. The first tsv contains the header file.
   // data_config contains information on how to load the columns. The column
   // can be loaded as binned_floats, raw_float, or strings.
   TSVDataStore(const vector<string>& tsvs, const DataConfig& data_config);
   virtual ~TSVDataStore() {}
 
-protected:
-  void ProcessBlock(const TSVBlock* block);
-  void Finalize();
-  void SetupColumns(const string& first_tsv, const DataConfig& data_config);
-  void LoadTSVs(const vector<string>& tsvs, const DataConfig& data_config);
+ protected:
+  Status ProcessBlock(const TSVBlock* block);
+  Status Finalize();
+  Status SetupColumns(const string& first_tsv, const DataConfig& data_config);
+  Status LoadTSVs(const vector<string>& tsvs, const DataConfig& data_config);
 
   vector<pair<BinnedFloatColumn*, int>> binned_float_columns_;
   vector<pair<RawFloatColumn*, int>> raw_float_columns_;

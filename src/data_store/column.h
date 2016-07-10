@@ -26,11 +26,12 @@
 #include <vector>
 
 #include "src/base/base.h"
+#include "src/utils/status.h"
 
 namespace gbdt {
 
 class Column {
-public:
+ public:
   enum ColumnType {
     kStringColumn = 0,
     kBinnedFloatColumn = 1,
@@ -50,9 +51,13 @@ public:
   ColumnType type() const;
   const string& name() const;
   virtual uint size() const = 0;
+  const Status& status() const {
+    return status_;
+  }
 
 protected:
   Column(const string& name, ColumnType type);
+  Status status_;
 
 private:
   string name_;
@@ -85,6 +90,7 @@ class IntegerizedColumn : public Column {
  protected:
   IntegerizedColumn(const string& name, ColumnType type) : Column(name, type) {}
 
+  bool finalized_ = false;
   unique_ptr<IntegerCol> col_;
   // Depending on the number of unique string, the strings are either
   // encoded as 8 bit, 16 bit or 32 bit. The maximum we support is 32 bit.
@@ -160,13 +166,11 @@ class BinnedFloatColumn : public IntegerizedColumn {
   void Finalize() override;
 
  private:
-  void AddBinnedVec(const vector<float>& raw_floats);
+  Status AddBinnedVec(const vector<float>& raw_floats);
 
   int num_bins_ = 30000;
   // Hold the raw floats before bins is built.
   vector<float> buffer_;
-
-  bool finalized_ = false;
 
   // bin_max to bin index map.
   map<float, uint> bin_map_;

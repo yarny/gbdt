@@ -79,16 +79,22 @@ string FeatureImportanceFormatted(const vector<pair<string, double>>& feature_im
   return strings::JoinStrings(feature_importance_strs, "\n");
 }
 
-unique_ptr<DataStore> LoadDataStore(const DataConfig& config) {
+unique_ptr<DataStore> LoadDataStoreOrDie(const DataConfig& config) {
+  unique_ptr<DataStore> data_store;
   if (!FLAGS_flatfiles_dirs.empty()) {
-    return unique_ptr<DataStore>(
-    new FlatfilesDataStore(strings::split(FLAGS_flatfiles_dirs, ",")));
+    data_store.reset(
+        new FlatfilesDataStore(strings::split(FLAGS_flatfiles_dirs, ",")));
   } else if (!FLAGS_tsvs.empty()) {
-    return unique_ptr<DataStore>(new TSVDataStore(strings::split(FLAGS_tsvs, ","), config));
-  } else {
-    LOG(FATAL) << "Please specify --flatfiles_dirs or --tsvs.";
+    data_store.reset(new TSVDataStore(strings::split(FLAGS_tsvs, ","), config));
   }
-  return nullptr;
+  if (!data_store) {
+    LOG(FATAL) << "Failed to load data_store. Please either specify --flatfiles_dirs or --tsvs.";
+  }
+  if (!data_store->status().ok()) {
+    LOG(FATAL) << "Failed to load data_store. Error message: " + data_store->status().error_msg();
+  }
+
+  return std::move(data_store);
 }
 
 Forest LoadForestOrDie(string& forest_file) {
@@ -118,8 +124,7 @@ void Train() {
       << "Failed to parse json to proto: " << config_text;
 
   // Load DataStore.
-  auto data_store = LoadDataStore(config.data_config());
-  CHECK(data_store) << "Failed to load DataStore.";
+  auto data_store = LoadDataStoreOrDie(config.data_config());
 
   // Load Base Forest if provided.
   unique_ptr<Forest> base_forest;
@@ -165,8 +170,7 @@ void Test() {
   Forest forest = LoadForestOrDie(FLAGS_testing_model_file);
 
   // Load DataStore.
-  auto data_store = LoadDataStore(config.data_config());
-  CHECK(data_store) << "Failed to load DataStore.";
+  auto data_store = LoadDataStoreOrDie(config.data_config());
 
   // Evaluate forest and write score out.
   mkdir(FLAGS_output_dir.c_str(), 0744);
