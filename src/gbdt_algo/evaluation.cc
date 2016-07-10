@@ -20,6 +20,7 @@
 #include <fstream>
 #include <functional>
 #include <list>
+#include <sys/stat.h>
 #include <unordered_set>
 #include <vector>
 
@@ -53,31 +54,16 @@ bool WriteScoreFile(const string& filename,
   return true;
 }
 
-list<int> GetTestPoints(const EvalConfig& config, int forest_size) {
-  // Load test points
-  // By default, we output the test scores of the final forest,
-  // but if eval_interval is specified, we will test the forest at the intervals.
-  list<int> test_points;
-  if (config.eval_interval() > 0) {
-    for (int test_point = forest_size; test_point > 0;
-         test_point -= config.eval_interval()) {
-      test_points.push_back(test_point);
-    }
-    std::reverse(test_points.begin(), test_points.end());
-  } else {
-    test_points.push_back(forest_size);
-  }
-  return test_points;
-}
-
-bool EvaluateForest(DataStore* data_store,
-                    const Config& config,
-                    const Forest& forest,
-                    const string& output_dir) {
-  auto test_points = GetTestPoints(config.eval_config(), forest.tree_size());
-
+Status EvaluateForest(DataStore* data_store,
+                      const Forest& forest,
+                      const list<int>& test_points_arg,
+                      const string& output_dir) {
+  auto test_points = test_points_arg;
   auto feature_names = CollectAllFeatures(forest);
-  LoadFeaturesOrDie(feature_names, data_store);
+  auto status = LoadFeatures(feature_names, data_store, nullptr);
+  if (!status.ok()) return status;
+  mkdir(output_dir.c_str(), 0744);
+
   ComputeTreeScores compute_tree_scores(data_store);
 
   vector<double> scores(data_store->num_rows(), 0.0);
@@ -85,12 +71,11 @@ bool EvaluateForest(DataStore* data_store,
     compute_tree_scores.AddTreeScores(forest.tree(i), &scores);
 
     if (i+1 == test_points.front()) {
-      if (!WriteScoreFile(output_dir + "/" +
-                          fmt::format("forest.{0}.score", test_points.front()),
-                          scores)) {
-        LOG(ERROR) << "Failed to write into the score files.\n";
-	return false;
+      string score_file =fmt::format("{0}/forest.{1}.score", output_dir, test_points.front());
+      if (!WriteScoreFile(score_file, scores)) {
+        return Status(error::ABORTED, "Failed to write into the score files.");
       }
+      LOG(INFO) << fmt::format("Wrote {0}.", score_file);
     }
 
     while (!test_points.empty() && i+1 >= test_points.front()) {
@@ -98,14 +83,16 @@ bool EvaluateForest(DataStore* data_store,
     }
   }
 
-  return true;
+  return Status::OK;
 }
 
 Status EvaluateForest(DataStore* data_store,
                       const Forest& forest,
                       vector<double>* scores) {
   auto feature_names = CollectAllFeatures(forest);
-  LoadFeaturesOrDie(feature_names, data_store);
+  auto status = LoadFeatures(feature_names, data_store, nullptr);
+  if (!status.ok()) return status;
+
   ComputeTreeScores compute_tree_scores(data_store);
   scores->clear();
   scores->resize(data_store->num_rows(), 0.0);

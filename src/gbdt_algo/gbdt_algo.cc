@@ -76,7 +76,10 @@ vector<const Column*> LoadFeaturesOrDie(const DataConfig& config, DataStore* dat
   CHECK_GT(feature_names.size(), 0) << "Feature set should not be empty.";
   CHECK_EQ(config.float_feature_size() + config.categorical_feature().size(),
            feature_names.size()) << "Duplicate feature names.";
-  return LoadFeaturesOrDie(feature_names, data_store);
+  vector<const Column*> features;
+  auto status = LoadFeatures(feature_names, data_store, &features);
+  CHECK(status.ok()) << status.ToString();
+  return features;
 }
 
 void ClearInternalFields(TreeNode* tree) {
