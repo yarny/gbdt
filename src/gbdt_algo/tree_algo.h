@@ -31,7 +31,7 @@ class TreeNode;
 
 // Given gradients and weights, fit trees to minimize mse.
 // It subsamples the examples and features according to the sampling_config.
-TreeNode FitTreeToGradients(const vector<float>& w,
+TreeNode FitTreeToGradients(FloatVector w,
                             const vector<GradientData>& gradient_data_vec,
                             const vector<const Column*>& features,
                             const TreeConfig& tree_config,

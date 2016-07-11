@@ -153,19 +153,17 @@ unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config) {
   return feature_names;
 }
 
-vector<float> GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store) {
-  vector<float> weights(data_store->num_rows(), 1.0);
+FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store) {
   const string& weight_column_name = config.sample_weight_column();
   if (!weight_column_name.empty()) {
     const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
     CHECK(sample_weights) << "Failed to load sample weights";
-
-    for (uint i = 0; i < sample_weights->size(); ++i) {
-      weights[i] = (*sample_weights)[i];
-    }
+    return [&](int i) {
+      return (*sample_weights)[i];
+    };
   }
 
-  return weights;
+  return [](int) { return 1.0; };
 }
 
 Forest LoadForestOrDie(const string& forest_file) {

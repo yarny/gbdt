@@ -51,9 +51,9 @@ class PairwiseTest : public ::testing::Test {
   }
 
   MemDataStore data_store_;
-  vector<float> sample_weights_ = {1.0, 1.0, 1.0, 1.0};;
   const int kSamplingRate_ = 1000;
   LossFuncConfig config_;
+  FloatVector w_ = [](int) { return 1.0; };
 };
 
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
@@ -62,7 +62,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
   double c;
 
   unique_ptr<Pairwise> lambdamart(new LambdaMART(config_));
-  lambdamart->Init(&data_store_, sample_weights_);
+  lambdamart->Init(&data_store_, w_);
   lambdamart->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);

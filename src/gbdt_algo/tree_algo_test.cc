@@ -85,7 +85,7 @@ class TreeBuildingTest : public testing::Test {
     {2.0, 1.0}, {2.0, 1.0}, {2.0, 1.0}, {2.0, 1.0},
     {3.0, 1.0}, {3.0, 1.0}, {3.0, 1.0}, {3.0, 1.0},
     {4.0, 1.0}, {4.0, 1.0}, {4.0, 1.0}, {4.0, 1.0}};
-  vector<float> w_ = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  FloatVector w_ = [] (int) { return 1.0; };
 
   vector<uint> allsamples_;
 };

@@ -33,7 +33,7 @@ class LossFunc {
  public:
   virtual ~LossFunc() {}
 
-  virtual bool Init(DataStore* data_store, const vector<float>& sample_weights) = 0;
+  virtual bool Init(DataStore* data_store, FloatVector w) = 0;
 
   // We don't need to output the constant to make the algorithm work, but outputting a constant
   // which won't be scaled down by shrinkage helps the algorithm converge faster.

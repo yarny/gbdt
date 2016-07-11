@@ -37,18 +37,16 @@ class LossFuncLogLossTest : public ::testing::Test {
 
     logloss_.reset(new LogLoss(config));
     num_rows_ = data_store_.num_rows();
-    sample_weights_ = {1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
   }
 
   MemDataStore data_store_;
   unique_ptr<LogLoss> logloss_;
-  vector<float> sample_weights_;
+  FloatVector w_ = [](int i) { return i < 4 ? 1.0 : 2.0; };
   uint num_rows_;
 };
 
 TEST_F(LossFuncLogLossTest, TestLogLoss) {
-  CHECK(logloss_->Init(&data_store_, sample_weights_)) << "Failed to init loss func.";
-  auto weights = sample_weights_;
+  CHECK(logloss_->Init(&data_store_, w_)) << "Failed to init loss func.";
   vector<double> f = { 0, 0, 0, 0, 0, 0, 0, 0 };
   vector<double> g, h;
   vector<GradientData> gradient_data_vec;

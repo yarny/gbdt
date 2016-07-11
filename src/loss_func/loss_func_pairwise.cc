@@ -37,11 +37,11 @@ Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss
       << "Please specify a non-zero pair sampling rate.";
 }
 
-bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
+bool Pairwise::Init(DataStore* data_store, FloatVector w) {
   const string& target_column_name = config_.target_column();
   const string& group_column_name = config_.pairwise_config().group_column();
 
-  w_ = &w;
+  w_ = w;
 
   if (target_column_name.empty()) {
     LOG(ERROR) << "Please specify target_column for Pairwise loss.";
@@ -54,12 +54,13 @@ bool Pairwise::Init(DataStore* data_store, const vector<float>& w) {
   }
   target_column_ = target_column;
 
+  uint num_rows = data_store->num_rows();
   // Construct groups.
   vector<vector<uint>> groups;
   if (group_column_name.empty()) {
     // When group is not specified, every thing is one group.
     groups.resize(1);
-    groups[0] = Subsampling::CreateAllSamples(w_->size());
+    groups[0] = Subsampling::CreateAllSamples(num_rows);
   } else {
     auto group_column = data_store->GetStringColumn(group_column_name);
     if (!group_column) {
@@ -114,7 +115,7 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
               auto p = group.SamplePair(generator);
               auto pos_sample = group[p.first];
               auto neg_sample = group[p.second];
-              double weight = (*w_)[pos_sample] * (*w_)[neg_sample] * pair_weighting_func(p);
+              double weight = w_(pos_sample) * w_(neg_sample) * pair_weighting_func(p);
               double delta_target = (*target_column_)[pos_sample] - (*target_column_)[neg_sample];
               double delta_func = f[pos_sample] - f[neg_sample];
 

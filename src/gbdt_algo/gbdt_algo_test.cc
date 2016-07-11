@@ -65,7 +65,6 @@ class GBDTAlgoTest : public ::testing::Test {
     loss_func_ = LossFuncFactory::CreateLossFunc(config_.loss_func_config());
     CHECK(loss_func_);
     feature_names_ = GetFeaturesSetFromConfig(config_.data_config());
-    LoadFeatures(feature_names_, data_store_.get(), nullptr);
     w_ = GetSampleWeightsOrDie(config_.data_config(), data_store_.get());
   }
 
@@ -89,7 +88,7 @@ class GBDTAlgoTest : public ::testing::Test {
   unique_ptr<DataStore> data_store_;
   unique_ptr<LossFunc> loss_func_;
   unordered_set<string> feature_names_;
-  vector<float> w_;
+  FloatVector w_;
 };
 
 TEST_F(GBDTAlgoTest, TestBuildForest) {

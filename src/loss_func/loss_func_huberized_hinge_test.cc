@@ -37,18 +37,16 @@ class HuberizedHingeTest : public ::testing::Test {
 
     hinge_.reset(new HuberizedHinge(config));
     num_rows_ = data_store_.num_rows();
-    sample_weights_ = {1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
   }
 
   MemDataStore data_store_;
   unique_ptr<HuberizedHinge> hinge_;
-  vector<float> sample_weights_;
+  FloatVector w_ = [](int i) { return i < 4 ? 1.0 : 2.0; };
   uint num_rows_;
 };
 
 TEST_F(HuberizedHingeTest, Hinge) {
-  CHECK(hinge_->Init(&data_store_, sample_weights_)) << "Failed to init loss func.";
-  auto weights = sample_weights_;
+  CHECK(hinge_->Init(&data_store_, w_)) << "Failed to init loss func.";
   vector<double> f = { 0, 0, 0, 0, 0, 0, 0, 0 };
   vector<GradientData> gradient_data_vec;
   double c;

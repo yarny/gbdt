@@ -52,7 +52,7 @@ class TreeConfig;
 Status TrainGBDT(DataStore* data_store,
                  const unordered_set<string>& feature_names,
                  LossFunc* loss_func,
-                 const vector<float>& w,
+                 FloatVector w,
                  const Config& config,
                  const Forest* base_forest,
                  unique_ptr<Forest>* forest);

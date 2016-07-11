@@ -129,9 +129,6 @@ void Train() {
     *base_forest = LoadForestOrDie(FLAGS_base_model_file);
   }
 
-  // Load Sampling weights.
-  const vector<float> w = GetSampleWeightsOrDie(config.data_config(), data_store.get());
-
   // Initialize Loss Function.
   unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config.loss_func_config());
   CHECK(loss_func) << "Failed to initialize loss func from config "
@@ -143,7 +140,7 @@ void Train() {
   status = TrainGBDT(data_store.get(),
                      GetFeaturesSetFromConfig(config.data_config()),
                      loss_func.get(),
-                     w,
+                     GetSampleWeightsOrDie(config.data_config(), data_store.get()),
                      config,
                      base_forest.get(),
                      &forest);

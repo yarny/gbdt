@@ -43,7 +43,7 @@ class Pairwise : public LossFunc {
   typedef std::function<LossFuncData(double delta_target, double delta_func)> PairwiseLossFunc;
   Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
 
-  virtual bool Init(DataStore* data_store, const vector<float>& w) override;
+  virtual bool Init(DataStore* data_store, FloatVector w) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
                                                      vector<GradientData>* gradient_data_vec,
@@ -64,7 +64,7 @@ class Pairwise : public LossFunc {
   vector<pair<uint, uint>> slices_;
   double initial_loss_ = -1;
   LossFuncConfig config_;
-  const vector<float>* w_;
+  FloatVector w_;
 
   PairwiseLossFunc loss_func_;
 };

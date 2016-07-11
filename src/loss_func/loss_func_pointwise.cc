@@ -22,6 +22,7 @@
 #include "external/cppformat/format.h"
 
 #include "src/base/base.h"
+#include "src/data_store/data_store.h"
 #include "src/utils/subsampling.h"
 #include "src/utils/threadpool.h"
 
@@ -36,10 +37,14 @@ const int kMaxIterations = 10;
 Pointwise::Pointwise(PointwiseLossFunc loss_func) : loss_func_(loss_func) {
 }
 
-bool Pointwise::Init(DataStore* data_store, const vector<float>& w) {
-  w_ = &w;
-  weight_sum_ = accumulate(w_->begin(), w_->end(), 0.0);
-  slices_ = Subsampling::DivideSamples(w.size(), FLAGS_num_threads * 5);
+bool Pointwise::Init(DataStore* data_store, FloatVector w) {
+  w_ = w;
+  uint num_rows = data_store->num_rows();
+  weight_sum_ = 0;
+  for (int i = 0; i < num_rows; ++i) {
+    weight_sum_ += w(i);
+  }
+  slices_ = Subsampling::DivideSamples(num_rows, FLAGS_num_threads * 5);
   return ProvideY(data_store, &y_);
 }
 
@@ -65,7 +70,7 @@ void Pointwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
             for (int i = slice.first; i < slice.second; ++i) {
               double f_current = f[i] + *c;
               LossFuncData loss = loss_func_(y_[i], f_current);
-              double w = (*w_)[i];
+              auto w = w_(i);
               auto& gradient_data = (*gradient_data_vec)[i];
               gradient_data = loss.gradient_data;
               total.loss += w * loss.loss;

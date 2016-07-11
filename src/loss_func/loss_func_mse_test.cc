@@ -36,12 +36,11 @@ class LossFuncMSETest : public ::testing::Test {
     config.set_target_column("target");
     mse_.reset(new MSE(config));
     num_rows_ = data_store_.num_rows();
-    w_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   }
 
   MemDataStore data_store_;
   unique_ptr<MSE> mse_;
-  vector<float> w_;
+  FloatVector w_ = [](int) {return 1.0;};
   uint num_rows_;
 };
 

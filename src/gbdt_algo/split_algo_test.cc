@@ -21,13 +21,15 @@ class FindSplitPointTest : public ::testing::Test {
   void SetUp() {
     for (uint i = 0; i < samples_.size(); ++i) {
       uint index = samples_[i];
-      total_ += w_[index] * gradient_data_vec_[index];
+      total_ += w_(index) * gradient_data_vec_[index];
     }
   }
 
   vector<GradientData> gradient_data_vec_ = {
     {-1, 1}, {-2, 1}, {2, 1}, {-1, 1}, {-2, 1}, {3, 1}, {2, 1}, {3, 1}, {0, 1}, {-2, 1}};
-  vector<float> w_ = {0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.2, 0.1, 0.1};
+  vector<float> weights_ = {0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.2, 0.1, 0.1};
+  FloatVector w_ = [this](int i) { return weights_[i]; };
+  FloatVector constant_weight_ = [](int i) { return 1.0; };
   vector<uint> samples_ = {0, 2, 3, 4, 1, 5, 7, 6};
   GradientData total_;
 };
@@ -38,7 +40,7 @@ TEST_F(FindSplitPointTest, FindFloatSplitPoint) {
 
   Split split;
 
-  CHECK(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
+  CHECK(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
   EXPECT_FLOAT_EQ(4.0, split.float_split().threshold());
   EXPECT_FLOAT_EQ(4.0, split.gain());
 }
@@ -48,7 +50,7 @@ TEST_F(FindSplitPointTest, FindFloatSplitPointWithMissingValues) {
       "foo", vector<float>({1, 3, 5, 3, 1, NAN, 5, NAN, 3, 5}));
 
   Split split;
-  CHECK(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
+  CHECK(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
   EXPECT_FLOAT_EQ(4.0, split.float_split().threshold());
   EXPECT_TRUE(split.float_split().missing_to_right_child());
   EXPECT_FLOAT_EQ(4.0, split.gain());
@@ -58,7 +60,7 @@ TEST_F(FindSplitPointTest, FindStringSplit) {
   auto feature = Column::CreateStringColumn(
       "foo", {"1", "3", "5", "3", "1", "7", "5", "7", "3", "5"});
   Split split;
-  CHECK(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
+  CHECK(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
   EXPECT_EQ(2, split.cat_split().internal_categorical_index_size());
   set<uint> value_set(split.cat_split().internal_categorical_index().begin(),
                       split.cat_split().internal_categorical_index().end());
@@ -75,7 +77,7 @@ TEST_F(FindSplitPointTest, FindStringSplitOutOfOrder) {
     gradient_data_vec_[i].g = g[i];
   }
   Split split;
-  CHECK(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
+  CHECK(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
   EXPECT_EQ(2, split.cat_split().internal_categorical_index_size());
   set<uint> value_set(split.cat_split().internal_categorical_index().begin(),
                       split.cat_split().internal_categorical_index().end());
@@ -89,7 +91,7 @@ TEST_F(FindSplitPointTest, NotEnoughSamplesFloat) {
 
   Split split;
   vector<uint> samples = {0};
-  EXPECT_FALSE(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples, SplitConfig(), total_, &split));
+  EXPECT_FALSE(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples, SplitConfig(), total_, &split));
   EXPECT_FLOAT_EQ(0.0, split.gain());
   EXPECT_FALSE(split.has_float_split());
 }
@@ -100,7 +102,7 @@ TEST_F(FindSplitPointTest, NotEnoughSamplesString) {
 
   Split split;
   vector<uint> samples = {0};
-  EXPECT_FALSE(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples, SplitConfig(), total_, &split));
+  EXPECT_FALSE(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples, SplitConfig(), total_, &split));
   EXPECT_FLOAT_EQ(0.0, split.gain());
   EXPECT_FALSE(split.has_cat_split());
 }
@@ -110,7 +112,7 @@ TEST_F(FindSplitPointTest, ConstFloatFeature) {
       "foo", vector<float>({1, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
 
   Split split;
-  EXPECT_FALSE(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
+  EXPECT_FALSE(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
 
   EXPECT_FLOAT_EQ(0.0, split.gain());
   EXPECT_FALSE(split.has_float_split());
@@ -121,7 +123,7 @@ TEST_F(FindSplitPointTest, ConstStringFeature) {
       "foo", vector<string>({"a", "a", "a", "a", "a", "a", "a", "a", "a", "a"}));
 
   Split split;
-  EXPECT_FALSE(FindBestSplit(feature.get(), &w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
+  EXPECT_FALSE(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, SplitConfig(), total_, &split));
 
   EXPECT_FLOAT_EQ(0.0, split.gain());
   EXPECT_FALSE(split.has_cat_split());
@@ -130,7 +132,6 @@ TEST_F(FindSplitPointTest, ConstStringFeature) {
 TEST_F(FindSplitPointTest, IrrelevantFeature) {
   auto feature = Column::CreateBinnedFloatColumn(
       "foo", vector<float>({1, 3, 1, 3, 1, 3, 1, 3, 1, 3}));
-  vector<float> w = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
   vector<double> g = {1, 1, -1, -1, 1, 1, -1, -1, 1, 1};
   vector<uint> samples = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   vector<double> h = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -139,7 +140,8 @@ TEST_F(FindSplitPointTest, IrrelevantFeature) {
   total.g = 2.0;
   total.h = 10.0;
   Split split;
-  EXPECT_FALSE(FindBestSplit(feature.get(), &w, &gradient_data_vec_, samples, SplitConfig(), total, &split));
+  EXPECT_FALSE(FindBestSplit(feature.get(), constant_weight_, &gradient_data_vec_, samples,
+                             SplitConfig(), total, &split));
 
   EXPECT_FLOAT_EQ(0.0, split.gain());
   EXPECT_FALSE(split.has_float_split());

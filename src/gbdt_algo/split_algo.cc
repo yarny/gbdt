@@ -90,7 +90,7 @@ Partition(const Column* feature, const Split& split, VectorSlice<uint> samples) 
 }
 
 Histogram::Histogram(const IntegerizedColumn& feature,
-                     const vector<float>& w,
+                     FloatVector w,
                      const vector<GradientData>& gradient_data_vec,
                      const VectorSlice<uint>& samples) {
   ComputeHistograms(feature, w, gradient_data_vec, samples);
@@ -99,7 +99,7 @@ Histogram::Histogram(const IntegerizedColumn& feature,
 // This is the main work horse of the whole algorithm. Please make sure
 // it is written in an efficient way.
 void Histogram::ComputeHistograms(const IntegerizedColumn& feature,
-                                  const vector<float>& w,
+                                  FloatVector w,
                                   const vector<GradientData>& gradient_data_vec,
                                   const VectorSlice<uint>& samples) {
   uint max_int = feature.max_int();
@@ -109,7 +109,7 @@ void Histogram::ComputeHistograms(const IntegerizedColumn& feature,
   // Compute histograms.
   for(auto index : samples) {
     auto& histogram = histograms_[col[index]];
-    const auto& weight = w[index];
+    const auto& weight = w(index);
     const auto& gradient_data = gradient_data_vec[index];
     histogram.g += weight * gradient_data.g;
     histogram.h += weight * gradient_data.h;
@@ -200,13 +200,13 @@ bool FindBestSplitPoint(const IntegerizedColumn& feature,
 // then we iterate over [0, num_unique_values) to find the best split
 // point. The time complexity is O(n+num_unique_values).
 bool FindBestFloatSplit(const BinnedFloatColumn& feature,
-                        const vector<float>* w,
+                        FloatVector w,
                         const vector<GradientData>* gradient_data_vec,
                         const VectorSlice<uint>& samples,
                         const SplitConfig& config,
                         const GradientData& total,
                         Split* split) {
-  Histogram histogram(feature, *w, *gradient_data_vec, samples);
+  Histogram histogram(feature, w, *gradient_data_vec, samples);
 
   SplitPoint split_point;
   if (!FindBestSplitPoint(feature, config, histogram, total, true, &split_point)) {
@@ -223,13 +223,13 @@ bool FindBestFloatSplit(const BinnedFloatColumn& feature,
 }
 
 bool FindBestStringSplit(const StringColumn& feature,
-                         const vector<float>* w,
+                         FloatVector w,
                          const vector<GradientData>* gradient_data_vec,
                          const VectorSlice<uint>& samples,
                          const SplitConfig& config,
                          const GradientData& total,
                          Split* split) {
-  Histogram histogram(feature, *w, *gradient_data_vec, samples);
+  Histogram histogram(feature, w, *gradient_data_vec, samples);
   // For categorical features, since there is no preset order, we can
   // sort them based on their node scores and find the optimal subset.
   histogram.SortOnNodeScore(config.l2_lambda());
@@ -256,7 +256,7 @@ bool FindBestStringSplit(const StringColumn& feature,
 }
 
 bool FindBestSplit(const Column* feature,
-                   const vector<float>* w,
+                   FloatVector w,
                    const vector<GradientData>* gradient_data_vec,
                    const VectorSlice<uint>& samples,
                    const SplitConfig& config,

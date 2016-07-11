@@ -30,7 +30,7 @@ class Pointwise : public LossFunc {
 public:
   typedef std::function<LossFuncData(double, double)> PointwiseLossFunc;
   Pointwise(PointwiseLossFunc loss_func);
-  virtual bool Init(DataStore* data_store, const vector<float>& w) override;
+  virtual bool Init(DataStore* data_store, FloatVector w) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
                                                      vector<GradientData>* gradient_data_vec,
@@ -45,7 +45,7 @@ private:
 
   PointwiseLossFunc loss_func_;
   vector<float> y_;
-  const vector<float>* w_;
+  FloatVector w_;
   double initial_loss_ = -1;
   double weight_sum_ = 0;
   // Division of [1, sample_size] into slices to help multithreading.

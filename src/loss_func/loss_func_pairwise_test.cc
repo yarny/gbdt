@@ -57,12 +57,12 @@ class PairwiseTest : public ::testing::Test {
 
   unique_ptr<Pairwise> CreateAndInitPairwiseLoss() {
     unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config_));
-    pairwise->Init(&data_store_, sample_weights_);
+    pairwise->Init(&data_store_, w_);
     return std::move(pairwise);
   }
 
   MemDataStore data_store_;
-  vector<float> sample_weights_ = {1.0, 1.0, 1.0, 1.0};
+  FloatVector w_ = [](int) { return 1.0; };
   vector<double> f_ = { 0, 0, 0, 0};
   // Set sampleing_rate to 10000 so that g and h are more stable.
   const int kSamplingRate_ = 10000;
