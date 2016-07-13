@@ -20,8 +20,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/data_store/column.h"
-#include "src/data_store/mem_data_store.h"
 #include "src/proto/config.pb.h"
 
 namespace gbdt {
@@ -29,26 +27,20 @@ namespace gbdt {
 class HuberizedHingeTest : public ::testing::Test {
  protected:
   void SetUp() {
-    auto target = Column::CreateRawFloatColumn("target", vector<float>({0, 0, 0, 0, 1, 1, 1, 1}));
-    data_store_.AddColumn(target->name(), std::move(target));
     LossFuncConfig config;
     config.set_loss_func("huberized_hinge");
-    config.set_target_column("target");
 
     hinge_.reset(new HuberizedHinge(config));
-    num_rows_ = data_store_.num_rows();
-    sample_weights_ = {1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
+    CHECK(hinge_->Init(num_rows_, w_, y_, nullptr).ok());
   }
 
-  MemDataStore data_store_;
   unique_ptr<HuberizedHinge> hinge_;
-  vector<float> sample_weights_;
-  uint num_rows_;
+  FloatVector w_ = [](int i) { return i < 4 ? 1.0 : 2.0; };
+  FloatVector y_ = [](int i) { return i < 4 ? -1 : 1.0; };
+  int num_rows_ = 8;
 };
 
 TEST_F(HuberizedHingeTest, Hinge) {
-  CHECK(hinge_->Init(&data_store_, sample_weights_)) << "Failed to init loss func.";
-  auto weights = sample_weights_;
   vector<double> f = { 0, 0, 0, 0, 0, 0, 0, 0 };
   vector<GradientData> gradient_data_vec;
   double c;

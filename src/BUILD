@@ -23,6 +23,8 @@ cc_binary(
       "//src/data_store:tsv_data_store",
       "//src/gbdt_algo:evaluation",
       "//src/gbdt_algo:gbdt_algo",
+      "//src/loss_func:loss_func",
+      "//src/loss_func:loss_func_factory",
       "//src/proto:config_proto_cc",
       "//src/proto:tree_proto_cc",
       "//src/utils:stopwatch",

@@ -17,6 +17,7 @@
 #define BASE_H_
 
 #include <cmath>
+#include <functional>
 #include <stdint.h>
 #include <glog/logging.h>
 #include <google/protobuf/stubs/status.h>
@@ -24,6 +25,8 @@
 using namespace std;
 using google::protobuf::util::Status;
 using namespace google::protobuf::util;
+
+typedef function<float(int)> FloatVector;
 
 // Integer types
 typedef int8_t int8;

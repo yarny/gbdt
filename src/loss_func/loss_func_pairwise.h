@@ -32,9 +32,6 @@
 
 namespace gbdt {
 
-class RawFloatColumn;
-class DataStore;
-
 // Base class for pairwise loss funcs.
 class Pairwise : public LossFunc {
  public:
@@ -43,7 +40,7 @@ class Pairwise : public LossFunc {
   typedef std::function<LossFuncData(double delta_target, double delta_func)> PairwiseLossFunc;
   Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
 
-  virtual bool Init(DataStore* data_store, const vector<float>& w) override;
+  virtual Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
                                                      vector<GradientData>* gradient_data_vec,
@@ -54,17 +51,17 @@ class Pairwise : public LossFunc {
   // This weights can be used to implement listwise loss functions like LambdaMart.
   virtual function<double(const pair<uint, uint>&)> GeneratePairWeightingFunc(
       const vector<uint>& group, const vector<double>& f);
-  const RawFloatColumn* target_column_ = nullptr;
 
   string PrepareProgressMessage(double loss);
+  LossFuncConfig config_;
+  FloatVector w_;
+  FloatVector y_;
 
  private:
   vector<Group> groups_;
   // Division of [1, group_size] into slices to help multithreading.
   vector<pair<uint, uint>> slices_;
   double initial_loss_ = -1;
-  LossFuncConfig config_;
-  const vector<float>* w_;
 
   PairwiseLossFunc loss_func_;
 };

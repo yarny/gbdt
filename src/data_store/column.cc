@@ -348,4 +348,8 @@ void RawFloatColumn::Finalize() {
   raw_floats_.shrink_to_fit();
 }
 
+const vector<float>& RawFloatColumn::raw_floats() const {
+  return raw_floats_;
+}
+
 }  // namespace gbdt

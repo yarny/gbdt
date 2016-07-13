@@ -55,33 +55,6 @@ void ApplyShrinkage(TreeNode* tree, float shrinkage) {
   }
 }
 
-vector<float> GetSampleWeightsOrDie(const Config& config, DataStore* data_store) {
-  vector<float> weights(data_store->num_rows(), 1.0);
-  const string& weight_column_name = config.data_config().sample_weight_column();
-  if (!weight_column_name.empty()) {
-    const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
-    CHECK(sample_weights) << "Failed to load sample weights";
-
-    for (uint i = 0; i < sample_weights->size(); ++i) {
-      weights[i] = (*sample_weights)[i];
-    }
-  }
-
-  return weights;
-}
-
-vector<const Column*> LoadFeaturesOrDie(const DataConfig& config, DataStore* data_store) {
-  unordered_set<string> feature_names(config.float_feature().begin(), config.float_feature().end());
-  feature_names.insert(config.categorical_feature().begin(), config.categorical_feature().end());
-  CHECK_GT(feature_names.size(), 0) << "Feature set should not be empty.";
-  CHECK_EQ(config.float_feature_size() + config.categorical_feature().size(),
-           feature_names.size()) << "Duplicate feature names.";
-  vector<const Column*> features;
-  auto status = LoadFeatures(feature_names, data_store, &features);
-  CHECK(status.ok()) << status.ToString();
-  return features;
-}
-
 void ClearInternalFields(TreeNode* tree) {
   if (!tree->has_left_child()) {
     tree->clear_split();
@@ -125,38 +98,42 @@ void InitializeWithBaseForest(const Forest* base_forest,
   LOG(INFO) << "Finished initializing forest with " << base_forest->tree_size() << " trees.";
 }
 
-unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const Forest* base_forest) {
+Status TrainGBDT(DataStore* data_store,
+                 const unordered_set<string>& feature_names,
+                 FloatVector w,
+                 FloatVector y,
+                 LossFunc* loss_func,
+                 const Config& config,
+                 const Forest* base_forest,
+                 unique_ptr<Forest>* output_forest) {
   const auto& tree_config = config.tree_config();
   const auto& sampling_config = config.sampling_config();
-
   LOG(INFO) << "TreeConfig:\n" << tree_config.DebugString();
   LOG(INFO) << "SamplingConfig:\n" << sampling_config.DebugString();
 
-  unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config.loss_func_config());
-  if (!loss_func) {
-    LOG(ERROR) << "Failed to initialize loss func from config "
-               << config.loss_func_config().DebugString();
-    return nullptr;
-  }
-  LOG(INFO) << "LossFuncConfig:\n" << config.loss_func_config().DebugString();
+  // Find features from data_store.
+  vector<const Column*> features;
+  auto status = LoadFeatures(feature_names, data_store, &features);
+  if (!status.ok()) return status;
 
-  auto features = LoadFeaturesOrDie(config.data_config(), data_store);
+  const StringColumn* group_column = nullptr;
+  if (!config.data_config().group_column().empty()) {
+    group_column = data_store->GetStringColumn(config.data_config().group_column());
+    if (!group_column) {
+      return Status(error::NOT_FOUND, fmt::format("Failed to find {0} in data_store.",
+                                                  config.data_config().group_column()));
+    }
+  }
+
+  status = loss_func->Init(data_store->num_rows(), w, y, group_column);
+  if (!status.ok()) return status;
+
   uint num_rows = data_store->num_rows();
-
-  // Get sample weights.
-  const vector<float> w = GetSampleWeightsOrDie(config, data_store);
-  if (!loss_func->Init(data_store, w)) {
-    LOG(ERROR) <<  "Data is not compatible with the loss function.";
-    return nullptr;
-  }
-
-  unique_ptr<Forest> forest(new Forest);
-
   vector<double> f(num_rows, 0);  // current function values
   vector<GradientData> gradient_data(num_rows);
   ComputeTreeScores compute_tree_scores(data_store);
 
-  StopWatch stopwatch;
+  unique_ptr<Forest> forest(new Forest);
   // The first tree is constant tree. Throughout the learning process, we will keep
   // updating the constant. The main reason for doing that is to exclude constant
   // from being scaled down by shrinkage.
@@ -165,6 +142,7 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const 
     InitializeWithBaseForest(base_forest, compute_tree_scores, forest.get(), &f);
   }
 
+  StopWatch stopwatch;
   for (int i = 0; i < tree_config.num_iterations(); ++i) {
     string time_progress;
     if (i > 0) {
@@ -183,9 +161,9 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const 
 
     // When constant is NaN of Inf, the learning diverges and should be stopped.
     if (std::isnan(constant) || std::isinf(constant)) {
-      LOG(INFO) << "Stopped learning early because it diverges. "
-          "Please try adding regularization to the config.";
-      break;
+      return Status(error::INTERNAL,
+                    "Stopped learning early because it diverges. "
+                    "Please try adding regularization to the config.");
     }
 
     // Log progress
@@ -205,7 +183,9 @@ unique_ptr<Forest> TrainGBDT(const Config& config, DataStore* data_store, const 
   }
 
   ClearInternalFields(forest.get());
-  return std::move(forest);
+  *output_forest = std::move(forest);
+
+  return Status::OK;
 }
 
 }  // namespace gbdt

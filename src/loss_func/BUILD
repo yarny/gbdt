@@ -18,10 +18,8 @@ cc_library(
         "//external:cppformat-lib",
 	"//src/utils:utils",
         "//src/base:base",
-	"//src/data_store:data_store",
 	":loss_func_math",
-	":loss_func_pointwise",
-	":target",
+        ":loss_func_pointwise",
     ],
 )
 
@@ -32,8 +30,6 @@ cc_test(
         "//external:gtest_main",
         "//src/proto:config_proto_cc",
         "//src/base:base",
-	"//src/data_store:column",
-	"//src/data_store:mem_data_store",
 	":loss_func_logloss",
     ],
     copts = C_TEST_OPTS,
@@ -48,10 +44,8 @@ cc_library(
         "//external:cppformat-lib",
 	"//src/utils:utils",
         "//src/base:base",
-	"//src/data_store:data_store",
 	":loss_func_math",
-	":loss_func_pointwise",
-	":target",
+        ":loss_func_pointwise",
     ],
 )
 
@@ -62,8 +56,6 @@ cc_test(
         "//external:gtest_main",
         "//src/proto:config_proto_cc",
         "//src/base:base",
-	"//src/data_store:column",
-	"//src/data_store:mem_data_store",
 	":loss_func_huberized_hinge",
     ],
     copts = C_TEST_OPTS,
@@ -78,7 +70,6 @@ cc_library(
         "//external:cppformat-lib",
 	"//src/utils:utils",
         "//src/base:base",
-	"//src/data_store:data_store",
 	":loss_func_math",
 	":loss_func_pointwise",
     ],
@@ -91,8 +82,6 @@ cc_test(
         "//external:gtest_main",
         "//src/proto:config_proto_cc",
         "//src/base:base",
-	"//src/data_store:column",
-	"//src/data_store:mem_data_store",
 	":loss_func_mse",
     ],
     copts = C_TEST_OPTS,
@@ -105,7 +94,6 @@ cc_library(
     deps = [
         "//src/base:base",
         "//src/proto:config_proto_cc",
-        "//src/data_store:data_store",
         ":gradient_data"
     ],
 )
@@ -141,31 +129,6 @@ cc_test(
 )
 
 cc_library(
-    name = "target",
-    srcs = [ "target.cc" ],
-    hdrs = [ "target.h" ],
-    deps = [
-        "//src/proto:config_proto_cc",
-        "//src/base:base",
-	"//src/data_store:column",
-	"//src/data_store:data_store",
-    ],
-)
-
-cc_test(
-   name = "target_test",
-   srcs = [ "target_test.cc" ],
-   deps = [
-   	"//external:gtest_main",
-	"//src/proto:config_proto_cc",
-        "//src/data_store:mem_data_store",
-	":target",
-   ],
-   copts = C_TEST_OPTS,
-   linkopts = LINK_OPTS,
-)
-
-cc_library(
     name = "loss_func_pointwise",
     srcs = [ "loss_func_pointwise.cc" ],
     hdrs = [ "loss_func_pointwise.h" ],
@@ -177,19 +140,6 @@ cc_library(
         "//src:flags",
 	":loss_func",
     ],
-)
-
-cc_test(
-    name = "loss_func_pointwise_test",
-    srcs = [ "loss_func_pointwise_test.cc" ],
-    deps = [
-        "//external:gtest_main",
-        "//src/base:base",
-        ":loss_func_math",
-	":loss_func_pointwise",
-    ],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
 )
 
 cc_library(
@@ -221,7 +171,7 @@ cc_library(
     deps = [
         "//external:cppformat-lib",
         "//src/base:base",
-        "//src/data_store:data_store",
+        "//src/data_store:column",
         "//src:flags",
         "//src/utils:subsampling",
         "//src/utils:threadpool",

@@ -37,7 +37,7 @@ class SplitConfig;
 class Histogram {
  public:
   Histogram(const IntegerizedColumn& feature,
-            const vector<float>& w,
+            FloatVector w,
             const vector<GradientData>& gradient_data_vec,
             const VectorSlice<uint>& samples);
   inline int size() const {
@@ -56,7 +56,7 @@ class Histogram {
 
  private:
   void ComputeHistograms(const IntegerizedColumn& feature,
-                         const vector<float>& w,
+                         FloatVector w,
                          const vector<GradientData>& gradient_data,
                          const VectorSlice<uint>& samples);
   vector<GradientData> histograms_;
@@ -74,7 +74,7 @@ Partition(const Column* feature, const Split& split, VectorSlice<uint> samples);
 //
 // 2. total is inputs to the algorithm to save one pass over the data.
 bool FindBestSplit(const Column* feature,
-                   const vector<float>* w,
+                   FloatVector w,
                    const vector<GradientData>* gradient_data_vec,
                    const VectorSlice<uint>& samples,
                    const SplitConfig& config,

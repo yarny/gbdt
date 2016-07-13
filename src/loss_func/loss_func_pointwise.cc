@@ -36,11 +36,15 @@ const int kMaxIterations = 10;
 Pointwise::Pointwise(PointwiseLossFunc loss_func) : loss_func_(loss_func) {
 }
 
-bool Pointwise::Init(DataStore* data_store, const vector<float>& w) {
-  w_ = &w;
-  weight_sum_ = accumulate(w_->begin(), w_->end(), 0.0);
-  slices_ = Subsampling::DivideSamples(w.size(), FLAGS_num_threads * 5);
-  return ProvideY(data_store, &y_);
+Status Pointwise::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) {
+  w_ = w;
+  y_ = y;
+  weight_sum_ = 0;
+  for (int i = 0; i < num_rows; ++i) {
+    weight_sum_ += w(i);
+  }
+  slices_ = Subsampling::DivideSamples(num_rows, FLAGS_num_threads * 5);
+  return Status::OK;
 }
 
 void Pointwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
@@ -64,8 +68,8 @@ void Pointwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
           pool.Enqueue([&, this, &slice=slices_[j], &total=totals[j]](){
             for (int i = slice.first; i < slice.second; ++i) {
               double f_current = f[i] + *c;
-              LossFuncData loss = loss_func_(y_[i], f_current);
-              double w = (*w_)[i];
+              LossFuncData loss = loss_func_(y_(i), f_current);
+              auto w = w_(i);
               auto& gradient_data = (*gradient_data_vec)[i];
               gradient_data = loss.gradient_data;
               total.loss += w * loss.loss;

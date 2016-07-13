@@ -27,14 +27,16 @@
 #include "src/data_store/data_store.h"
 #include "src/proto/config.pb.h"
 #include "src/proto/tree.pb.h"
+#include "src/utils/json_utils.h"
 #include "src/utils/stopwatch.h"
 #include "src/utils/threadpool.h"
+#include "src/utils/utils.h"
 
 DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-Status LoadFeatures(unordered_set<string>& feature_names,
+Status LoadFeatures(const unordered_set<string>& feature_names,
                     DataStore* data_store,
                     vector<const Column*>* columns) {
   vector<const Column*> features;
@@ -143,6 +145,49 @@ list<int> GetTestPoints(const EvalConfig& config, int forest_size) {
     test_points.push_back(forest_size);
   }
   return test_points;
+}
+
+unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config) {
+  unordered_set<string> feature_names(config.float_feature().begin(), config.float_feature().end());
+  feature_names.insert(config.categorical_feature().begin(), config.categorical_feature().end());
+  return feature_names;
+}
+
+FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store) {
+  const string& weight_column_name = config.weight_column();
+  if (!weight_column_name.empty()) {
+    const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
+    CHECK(sample_weights) << "Failed to load sample weights";
+    return [&](int i) {
+      return (*sample_weights)[i];
+    };
+  }
+
+  return [](int) { return 1.0; };
+}
+
+FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store) {
+  const string& target_column_name = config.target_column();
+  CHECK(!target_column_name.empty()) << "Please specify target_column.";
+
+  auto targets = data_store->GetRawFloatColumn(target_column_name);
+  CHECK(targets) << "Failed to get target column " << target_column_name;
+  const auto& raw_floats = targets->raw_floats();
+
+  if (config.binarize_target()) {
+    return [&raw_floats=raw_floats](int i) { return raw_floats[i] > 0 ? 1 : -1; };
+  } else {
+    return [&raw_floats=raw_floats](int i) { return raw_floats[i]; };
+  }
+}
+
+Forest LoadForestOrDie(const string& forest_file) {
+  Forest forest;
+  string forest_text = ReadFileToStringOrDie(forest_file);
+  auto status = JsonUtils::FromJson(forest_text, &forest);
+  CHECK(status.ok()) << "Failed to parse json " << forest_text;
+  LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
+  return forest;
 }
 
 }  // namespace gbdt

@@ -22,15 +22,15 @@
 
 namespace gbdt {
 
-Group::Group(vector<uint>&& group, const RawFloatColumn* target_column) : group_(group) {
-  // Sort groups on the descending order of targets.
+Group::Group(vector<uint>&& group, FloatVector y) : group_(group) {
+  // Sort groups on the descending order of y.
   sort(group_.begin(), group_.end(),
-       [&] (uint i, uint j) { return (*target_column)[i] > (*target_column)[j]; });
+       [&] (uint i, uint j) { return y(i) > y(j); });
 
   // Find change boundaries of targets.
   int last_boundary = 0;
   for (int i = 1; i < group_.size(); ++i) {
-    if ((*target_column)[group_[i - 1]] != (*target_column)[group_[i]]) {
+    if (y(group_[i - 1]) != y(group_[i])) {
       // The pairs consists of this target group and all items following it.
       uint block_size = (i - last_boundary);
       num_pairs_ += block_size * (group_.size() - i);

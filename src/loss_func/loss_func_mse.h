@@ -31,7 +31,6 @@ class MSE : public Pointwise {
   MSE(const LossFuncConfig& config);
 
  private:
-  bool ProvideY(DataStore* data, vector<float>* y) override;
   LossFuncConfig config_;
 };
 

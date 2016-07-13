@@ -40,7 +40,7 @@ using namespace std::placeholders;
 
 namespace gbdt {
 
-GradientData ComputeWeightedSum(const vector<float>& w,
+GradientData ComputeWeightedSum(FloatVector w,
                                 const vector<GradientData>& gradient_data_vec,
                                 const VectorSlice<uint>& samples) {
   // Divide samples into slices to parallelize the computation.
@@ -52,7 +52,7 @@ GradientData ComputeWeightedSum(const vector<float>& w,
     for (int i = 0; i < slices.size(); ++i) {
       pool.Enqueue([&, &slice=slices[i], &total=totals[i]]() {
           for (auto index : slice) {
-            total += w[index] * gradient_data_vec[index];
+            total += w(index) * gradient_data_vec[index];
           }
         });
     }
@@ -73,7 +73,7 @@ struct NodeData {
 
 // Finds the best split for the samples.
 pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& features,
-                                                   const vector<float>& w,
+                                                   FloatVector w,
                                                    const vector<GradientData>& gradient_data_vec,
                                                    const VectorSlice<uint>& samples,
                                                    const GradientData& total,
@@ -83,27 +83,14 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
       features.size(), sampling_config.feature_sampling_rate());
   vector<Split> splits(sample_features.size());
   {
-    auto task = [] (const Column* feature,
-                    const vector<float>* w,
-                    const vector<GradientData>* gradient_data_vec,
-                    const VectorSlice<uint>& samples,
-                    const SplitConfig& config,
-                    const GradientData* total,
-                    Split* split) {
-      FindBestSplit(feature, w, gradient_data_vec, samples, config, *total, split);
-    };
+
     ThreadPool pool(FLAGS_num_threads);
 
     for (uint i = 0; i < sample_features.size(); ++i) {
-      pool.Enqueue(std::bind(
-          task,
-          features[sample_features[i]],
-          &w,
-          &gradient_data_vec,
-          samples,
-          config.split_config(),
-          &total,
-          &splits[i]));
+      pool.Enqueue([&,i] () {
+          FindBestSplit(features[sample_features[i]], w, &gradient_data_vec, samples,
+                        config.split_config(), total, &splits[i]);
+        });
     }
   }
 
@@ -128,7 +115,7 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
   return make_pair(Split(), nullptr);
 }
 
-TreeNode FitTreeToGradients(const vector<float>& w,
+TreeNode FitTreeToGradients(FloatVector w,
                             const vector<GradientData>& gradient_data_vec,
                             const vector<const Column*>& features,
                             const TreeConfig& tree_config,
