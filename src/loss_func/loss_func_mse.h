@@ -16,22 +16,17 @@
 #ifndef LOSS_FUNC_MSE_H_
 #define LOSS_FUNC_MSE_H_
 
+#include "loss_func_math.h"
 #include "loss_func_pointwise.h"
 #include "src/proto/config.pb.h"
 
 namespace gbdt {
 
-class DataStore;
-class RawFloatColumn;
-
 // RMSE loss = sqrt(sum_i(w[i] * (x[i] - f[i])^2) / sum_i(w[i]))
 // https://en.wikipedia.org/wiki/Root-mean-square_deviation
 class MSE : public Pointwise {
  public:
-  MSE(const LossFuncConfig& config);
-
- private:
-  LossFuncConfig config_;
+  MSE(const Config& unused_config) : Pointwise(ComputeMSE) {}
 };
 
 }  // namespace gbdt

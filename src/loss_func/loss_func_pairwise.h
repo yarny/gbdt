@@ -38,7 +38,7 @@ class Pairwise : public LossFunc {
   // delta_target is always positive since we only generates pairs where the first has larger target
   // value.
   typedef std::function<LossFuncData(double delta_target, double delta_func)> PairwiseLossFunc;
-  Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
+  Pairwise(const Config& config, PairwiseLossFunc loss_func);
 
   virtual Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
@@ -53,9 +53,10 @@ class Pairwise : public LossFunc {
       const vector<uint>& group, const vector<double>& f);
 
   string PrepareProgressMessage(double loss);
-  LossFuncConfig config_;
   FloatVector w_;
   FloatVector y_;
+  float pair_sampling_rate_;
+  bool pair_weight_by_delta_target_;
 
  private:
   vector<Group> groups_;

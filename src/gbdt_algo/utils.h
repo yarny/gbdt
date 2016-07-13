@@ -28,9 +28,9 @@ namespace gbdt {
 
 class Column;
 class DataStore;
-class DataConfig;
-class EvalConfig;
+class Config;
 class Forest;
+class StringColumn;
 class TreeNode;
 
 Status LoadFeatures(const unordered_set<string>& feature_names,
@@ -42,12 +42,13 @@ unordered_set<string> CollectAllFeatures(const Forest& forest);
 
 bool IsSingleNodeTree(const TreeNode& tree);
 
-list<int> GetTestPoints(const EvalConfig& config, int forest_size);
+list<int> GetTestPoints(const Config& config, int forest_size);
 
-unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config);
+unordered_set<string> GetFeaturesSetFromConfig(const Config& config);
 
-FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store);
-FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store);
+FloatVector GetSampleWeightsOrDie(const Config& config, DataStore* data_store);
+FloatVector GetTargetsOrDie(const Config& config, DataStore* data_store);
+const StringColumn* GetGroupOrDie(const Config& config, DataStore* data_store);
 
 Forest LoadForestOrDie(const string& forest_file);
 

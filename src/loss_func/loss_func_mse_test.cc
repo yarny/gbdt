@@ -27,7 +27,7 @@ namespace gbdt {
 class LossFuncMSETest : public ::testing::Test {
  protected:
   void SetUp() {
-    LossFuncConfig config;
+    Config config;
     config.set_loss_func("mse");
     mse_.reset(new MSE(config));
     CHECK(mse_->Init(num_rows_, w_, y_, nullptr).ok());

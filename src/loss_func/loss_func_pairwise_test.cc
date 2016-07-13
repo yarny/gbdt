@@ -35,8 +35,7 @@ class PairwiseTest : public ::testing::Test {
     data_store_.AddColumn(group0->name(), std::move(group0));
     data_store_.AddColumn(group1->name(), std::move(group1));
 
-    auto* pairwise_config = config_.mutable_pairwise_config();
-    pairwise_config->set_pair_sampling_rate(kSamplingRate_);
+    config_.set_pair_sampling_rate(kSamplingRate_);
   }
 
   void ExpectGradientEqual(const vector<GradientData>& expected,
@@ -64,7 +63,7 @@ class PairwiseTest : public ::testing::Test {
   vector<double> f_ = { 0, 0, 0, 0};
   // Set sampleing_rate to 10000 so that g and h are more stable.
   const int kSamplingRate_ = 10000;
-  LossFuncConfig config_;
+  Config config_;
 };
 
 // All instances are in one group.
@@ -116,7 +115,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansTwoGroups) {
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansWeightByDeltaTarget) {
   vector<GradientData> gradient_data_vec;
 
-  config_.mutable_pairwise_config()->set_weight_by_delta_target(true);
+  config_.set_pair_weight_by_delta_target(true);
   unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss("group0");
   double c;
   pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);

@@ -17,10 +17,12 @@
 #include "datastore_py.h"
 #include "forest_py.h"
 #include "gbdt_py_base.h"
+#include "train_gbdt_py.h"
 
 PYBIND11_PLUGIN(gbdt) {
     py::module m("gbdt", "gbdt py library");
     InitDataStorePy(m);
     InitForestPy(m);
+    InitTrainGBDTPy(m);
     return m.ptr();
 }

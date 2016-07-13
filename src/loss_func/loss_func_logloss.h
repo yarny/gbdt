@@ -21,19 +21,13 @@
 
 namespace gbdt {
 
-class DataStore;
-
 // LogLoss = sum_i (w[i] * log(1+ exp(-y[i] * f[i]))) / sum_i(w[i])
 // y is {-1, 1} valued.
 class LogLoss : public Pointwise {
  public:
-  LogLoss(const LossFuncConfig& config);
+  LogLoss(const Config& unused_config);
 
   Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) override;
- private:
-
-
-  LossFuncConfig config_;
 };
 
 }  // namespace gbdt

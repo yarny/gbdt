@@ -27,10 +27,10 @@ cc_library(
        ":datastore_py",
        ":forest_py",
        ":gbdt_py_base",
+       ":train_gbdt_py",
    ],
    copts = [ "-I/usr/include/python2.7" ],
 )
-
 
 cc_library(
    name = "datastore_py",
@@ -61,11 +61,27 @@ cc_library(
    copts = [ "-I/usr/include/python2.7",  ],
 )
 
-
 cc_binary(
-   name = "gbdt.so",
+   name = "libgbdt.so",
    linkstatic = 1,
    linkshared = 1,
    deps = [ ":gbdt_py" ],
    linkopts = LINK_OPTS,
+)
+
+cc_library(
+   name = "train_gbdt_py",
+   srcs = [ "train_gbdt_py.cc" ],
+   hdrs = [ "train_gbdt_py.h" ],
+   deps = [
+       "//external:pybind11-lib",
+       ":datastore_py",
+       ":forest_py",
+       ":gbdt_py_base",
+       "//src/gbdt_algo:gbdt_algo",
+       "//src/proto:config_proto_cc",
+       "//src/utils:json_utils",
+       "//src/utils:utils",
+   ],
+   copts = [ "-I/usr/include/python2.7" ],
 )

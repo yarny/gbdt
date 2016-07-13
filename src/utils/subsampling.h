@@ -27,9 +27,6 @@
 
 namespace gbdt {
 
-class SamplingConfig;
-class UniformSamplingConfig;
-
 class Subsampling {
 public:
   static void Reseed(int seed);

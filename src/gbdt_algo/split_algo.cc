@@ -152,7 +152,7 @@ struct SplitPoint {
 // Finds the left and right points for the split.
 // place_missing tells the algorithm to try placing missing on the left or right.
 bool FindBestSplitPoint(const IntegerizedColumn& feature,
-                        const SplitConfig& config,
+                        const Config& config,
                         const Histogram histogram,
                         const GradientData& total,
                         bool place_missing,
@@ -203,7 +203,7 @@ bool FindBestFloatSplit(const BinnedFloatColumn& feature,
                         FloatVector w,
                         const vector<GradientData>* gradient_data_vec,
                         const VectorSlice<uint>& samples,
-                        const SplitConfig& config,
+                        const Config& config,
                         const GradientData& total,
                         Split* split) {
   Histogram histogram(feature, w, *gradient_data_vec, samples);
@@ -226,7 +226,7 @@ bool FindBestStringSplit(const StringColumn& feature,
                          FloatVector w,
                          const vector<GradientData>* gradient_data_vec,
                          const VectorSlice<uint>& samples,
-                         const SplitConfig& config,
+                         const Config& config,
                          const GradientData& total,
                          Split* split) {
   Histogram histogram(feature, w, *gradient_data_vec, samples);
@@ -259,7 +259,7 @@ bool FindBestSplit(const Column* feature,
                    FloatVector w,
                    const vector<GradientData>* gradient_data_vec,
                    const VectorSlice<uint>& samples,
-                   const SplitConfig& config,
+                   const Config& config,
                    const GradientData& total,
                    Split* split) {
   switch (feature->type()) {

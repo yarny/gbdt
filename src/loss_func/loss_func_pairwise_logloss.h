@@ -28,7 +28,7 @@ class LossFuncConfig;
 // PairwiseLogloss: \sum_(\forall pairs) log(1+exp(fn - fp)).
 class PairwiseLogLoss : public Pairwise {
  public:
-  PairwiseLogLoss(const LossFuncConfig& config)
+  PairwiseLogLoss(const Config& config)
       : Pairwise(config,
                  [](double delta_target,
                     double delta_func) {

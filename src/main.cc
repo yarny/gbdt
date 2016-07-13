@@ -48,7 +48,6 @@ DECLARE_string(output_model_name);
 DECLARE_int32(seed);
 
 using gbdt::Config;
-using gbdt::DataConfig;
 using gbdt::DataStore;
 using gbdt::FlatfilesDataStore;
 using gbdt::LoadForestOrDie;
@@ -84,7 +83,7 @@ string FeatureImportanceFormatted(const vector<pair<string, double>>& feature_im
   return strings::JoinStrings(feature_importance_strs, "\n");
 }
 
-unique_ptr<DataStore> LoadDataStoreOrDie(const DataConfig& config) {
+unique_ptr<DataStore> LoadDataStoreOrDie(const Config& config) {
   unique_ptr<DataStore> data_store;
   if (!FLAGS_flatfiles_dirs.empty()) {
     data_store.reset(
@@ -120,7 +119,7 @@ void Train() {
   CHECK(status.ok()) << "Failed to parse json to proto: " << config_text;
 
   // Load DataStore.
-  auto data_store = LoadDataStoreOrDie(config.data_config());
+  auto data_store = LoadDataStoreOrDie(config);
 
   // Load Base Forest if provided.
   unique_ptr<Forest> base_forest;
@@ -130,17 +129,15 @@ void Train() {
   }
 
   // Initialize Loss Function.
-  unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config.loss_func_config());
-  CHECK(loss_func) << "Failed to initialize loss func from config "
-                   << config.loss_func_config().DebugString();
-  LOG(INFO) << "LossFuncConfig:\n" << config.loss_func_config().DebugString();
+  unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config);
+  CHECK(loss_func) << "Failed to initialize loss func " << config.loss_func();
 
   // Start learning.
-  unique_ptr<Forest> forest;
+  Forest forest;
   status = TrainGBDT(data_store.get(),
-                     GetFeaturesSetFromConfig(config.data_config()),
-                     GetSampleWeightsOrDie(config.data_config(), data_store.get()),
-                     GetTargetsOrDie(config.data_config(), data_store.get()),
+                     GetFeaturesSetFromConfig(config),
+                     GetSampleWeightsOrDie(config, data_store.get()),
+                     GetTargetsOrDie(config, data_store.get()),
                      loss_func.get(),
                      config,
                      base_forest.get(),
@@ -151,13 +148,13 @@ void Train() {
   mkdir(FLAGS_output_dir.c_str(), 0744);
   string output_model_file = FLAGS_output_dir + "/" + FLAGS_output_model_name + ".json";
   string forest_text;
-  status = JsonUtils::ToJson(*forest, &forest_text);
+  status = JsonUtils::ToJson(forest, &forest_text);
   CHECK(status.ok()) << "Failed to output model to json.";
   WriteStringToFile(forest_text, output_model_file);
   LOG(INFO) << "Wrote the model to " << output_model_file;
 
   // Write the feature importance into a file.
-  WriteStringToFile(FeatureImportanceFormatted(ComputeFeatureImportance(*forest)),
+  WriteStringToFile(FeatureImportanceFormatted(ComputeFeatureImportance(forest)),
                     FLAGS_output_dir + "/" + FLAGS_output_model_name + ".fimps");
   stopwatch.End();
   LOG(INFO) << "Finished training in "
@@ -183,13 +180,13 @@ void Test() {
   Forest forest = LoadForestOrDie(FLAGS_testing_model_file);
 
   // Load DataStore.
-  auto data_store = LoadDataStoreOrDie(config.data_config());
+  auto data_store = LoadDataStoreOrDie(config);
 
   // Evaluate forest and write score out.
   mkdir(FLAGS_output_dir.c_str(), 0744);
   status = EvaluateForest(data_store.get(),
                           forest,
-                          GetTestPoints(config.eval_config(), forest.tree_size()),
+                          GetTestPoints(config, forest.tree_size()),
                           FLAGS_output_dir);
   CHECK(status.ok()) << "Failed to evaluate the forest: " << status.ToString();
 

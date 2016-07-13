@@ -105,27 +105,16 @@ Status TrainGBDT(DataStore* data_store,
                  LossFunc* loss_func,
                  const Config& config,
                  const Forest* base_forest,
-                 unique_ptr<Forest>* output_forest) {
-  const auto& tree_config = config.tree_config();
-  const auto& sampling_config = config.sampling_config();
-  LOG(INFO) << "TreeConfig:\n" << tree_config.DebugString();
-  LOG(INFO) << "SamplingConfig:\n" << sampling_config.DebugString();
+                 Forest* forest) {
+  LOG(INFO) << "Config:\n" << config.DebugString();
 
   // Find features from data_store.
   vector<const Column*> features;
   auto status = LoadFeatures(feature_names, data_store, &features);
   if (!status.ok()) return status;
 
-  const StringColumn* group_column = nullptr;
-  if (!config.data_config().group_column().empty()) {
-    group_column = data_store->GetStringColumn(config.data_config().group_column());
-    if (!group_column) {
-      return Status(error::NOT_FOUND, fmt::format("Failed to find {0} in data_store.",
-                                                  config.data_config().group_column()));
-    }
-  }
 
-  status = loss_func->Init(data_store->num_rows(), w, y, group_column);
+  status = loss_func->Init(data_store->num_rows(), w, y, GetGroupOrDie(config, data_store));
   if (!status.ok()) return status;
 
   uint num_rows = data_store->num_rows();
@@ -133,17 +122,16 @@ Status TrainGBDT(DataStore* data_store,
   vector<GradientData> gradient_data(num_rows);
   ComputeTreeScores compute_tree_scores(data_store);
 
-  unique_ptr<Forest> forest(new Forest);
   // The first tree is constant tree. Throughout the learning process, we will keep
   // updating the constant. The main reason for doing that is to exclude constant
   // from being scaled down by shrinkage.
   auto* constant_tree = forest->add_tree();
   if (base_forest) {
-    InitializeWithBaseForest(base_forest, compute_tree_scores, forest.get(), &f);
+    InitializeWithBaseForest(base_forest, compute_tree_scores, forest, &f);
   }
 
   StopWatch stopwatch;
-  for (int i = 0; i < tree_config.num_iterations(); ++i) {
+  for (int i = 0; i < config.num_iterations(); ++i) {
     string time_progress;
     if (i > 0) {
       stopwatch.End();
@@ -151,7 +139,7 @@ Status TrainGBDT(DataStore* data_store,
           "iter={0},etf={1},",
           StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()),
           StopWatch::MSecsToFormattedString(
-              stopwatch.ElapsedTimeInMSecs() * (tree_config.num_iterations() - i)));
+              stopwatch.ElapsedTimeInMSecs() * (config.num_iterations() - i)));
     }
     stopwatch.Start();
     // Compute gradients and constant
@@ -172,18 +160,17 @@ Status TrainGBDT(DataStore* data_store,
     // Add a tree to forest
     auto* tree = forest->add_tree();
     // Fit a tree to gradients and apply the shrinkage
-    *tree = FitTreeToGradients(w, gradient_data, features, tree_config, sampling_config);
+    *tree = FitTreeToGradients(w, gradient_data, features, config);
 
     // Apply Shrinkage to the tree
-    ApplyShrinkage(tree, tree_config.shrinkage());
+    ApplyShrinkage(tree, config.shrinkage());
     // Update the constant
     constant_tree->set_score(constant_tree->score() + constant);
     // Update function score.
     compute_tree_scores.AddTreeScores(*tree, constant, &f);
   }
 
-  ClearInternalFields(forest.get());
-  *output_forest = std::move(forest);
+  ClearInternalFields(forest);
 
   return Status::OK;
 }

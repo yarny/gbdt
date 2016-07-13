@@ -22,7 +22,7 @@
 #include "gbdt_py_base.h"
 #include "src/proto/tree.pb.h"
 
-using gbdt::Forest;
+namespace gbdt {
 
 class DataStorePy;
 
@@ -36,10 +36,13 @@ class ForestPy {
   void PredictAndOutput(DataStorePy* data_store_py,
                         const list<int>& test_points,
                         const string& output_dir) const;
+  const Forest& forest() const { return forest_; }
 
  private:
   Forest forest_;
 };
+
+}  // namespace gbdt
 
 void InitForestPy(py::module &m);
 

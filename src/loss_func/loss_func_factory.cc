@@ -30,23 +30,31 @@
 namespace gbdt {
 
 unordered_map<string, LossFuncFactory::Creator> LossFuncFactory::loss_func_creator_map_ = {
-  {"mse", [](const LossFuncConfig& config) { return new MSE(config);}},
-  {"logloss", [](const LossFuncConfig& config) { return new LogLoss(config);}},
-  {"huberized_hinge", [](const LossFuncConfig& config) { return new HuberizedHinge(config);}},
-  {"auc", [](const LossFuncConfig& config) { return new AUC(config);}},
-  {"pairwise_logloss", [](const LossFuncConfig& config) { return new PairwiseLogLoss(config);}},
-  {"gbrank", [](const LossFuncConfig& config) { return new GBRank(config);}},
-  {"lambdamart", [](const LossFuncConfig& config) { return new LambdaMART(config);}}
+  {"mse", [](const Config& config) { return new MSE(config);}},
+  {"logloss", [](const Config& config) { return new LogLoss(config);}},
+  {"huberized_hinge", [](const Config& config) { return new HuberizedHinge(config);}},
+  {"auc", [](const Config& config) { return new AUC(config);}},
+  {"pairwise_logloss", [](const Config& config) { return new PairwiseLogLoss(config);}},
+  {"gbrank", [](const Config& config) { return new GBRank(config);}},
+  {"lambdamart", [](const Config& config) { return new LambdaMART(config);}}
 };
 
 // TODO(criver): find better registration mechanism implementation.
-unique_ptr<LossFunc> LossFuncFactory::CreateLossFunc(const LossFuncConfig& config) {
+unique_ptr<LossFunc> LossFuncFactory::CreateLossFunc(const Config& config) {
   auto it = loss_func_creator_map_.find(config.loss_func());
   if (it != loss_func_creator_map_.end()) {
     return unique_ptr<LossFunc>(it->second(config));
   }
 
   return nullptr;
+}
+
+vector<string> LossFuncFactory::LossFuncs(){
+  vector<string> loss_funcs;
+  for (const auto& p : loss_func_creator_map_) {
+    loss_funcs.push_back(p.first);
+  }
+  return loss_funcs;
 }
 
 }  // namespace gbdt

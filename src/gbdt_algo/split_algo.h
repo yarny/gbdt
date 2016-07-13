@@ -30,7 +30,7 @@ namespace gbdt {
 class Column;
 class IntegerizedColumn;
 class Split;
-class SplitConfig;
+class Config;
 
 // Histogram contains weighted sums of gradients and hessians
 // for each bucktized feature values.
@@ -77,7 +77,7 @@ bool FindBestSplit(const Column* feature,
                    FloatVector w,
                    const vector<GradientData>* gradient_data_vec,
                    const VectorSlice<uint>& samples,
-                   const SplitConfig& config,
+                   const Config& config,
                    const GradientData& total,
                    Split* split);
 

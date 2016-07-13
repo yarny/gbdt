@@ -28,8 +28,7 @@
 
 namespace gbdt {
 
-LogLoss::LogLoss(const LossFuncConfig& config)
-    : Pointwise(ComputeLogLoss), config_(config) {
+LogLoss::LogLoss(const Config& unused_config) : Pointwise(ComputeLogLoss) {
 }
 
 Status LogLoss::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) {

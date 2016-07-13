@@ -1,4 +1,5 @@
-/* Copyright 2016 Jiang Chen <criver@gmail.com>
+/*
+ * Copyright 2016 Jiang Chen <criver@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +14,11 @@
  * limitations under the License.
  */
 
-#include "loss_func_mse.h"
+#ifndef TRAIN_GBDT_PY_H_
+#define TRAIN_GBDT_PY_H_
 
-#include <cmath>
-#include <glog/logging.h>
-#include <numeric>
-#include <string>
-#include <vector>
+#include "gbdt_py_base.h"
 
-#include "loss_func_math.h"
-#include "src/base/base.h"
-#include "src/utils/utils.h"
+void InitTrainGBDTPy(py::module &m);
 
-namespace gbdt {
-
-MSE::MSE(const LossFuncConfig& config) : Pointwise(ComputeMSE), config_(config) {
-}
-
-
-}  // namespace gbdt
+#endif // TRAIN_GBDT_PY_H_

@@ -17,62 +17,40 @@ syntax = 'proto3';
 
 package gbdt;
 
-message DataConfig {
-  repeated string float_feature = 1;
-  repeated string categorical_feature = 2;
-  string weight_column = 3;
-  string target_column = 4;
-  // Whether the binarize targets into {-1, +1}.
-  bool binarize_target = 5;
-  string group_column = 6;
-  // Columns to be loaded in additional to features.
-  // These are usually columns needed for loss function computation.
-  repeated string additional_float_column = 7;
-  repeated string additional_string_column = 8;
-}
-
-message SplitConfig {
-  // The minimum gain to consider split a leaf.
-  double min_gain = 1;
-  // L2 regularization hyperparameter lambda.
-  double l2_lambda = 2;
-}
-
-message TreeConfig {
+message Config {
+  // Tree building config.
   int32 num_iterations = 1;
   int32 num_leaves = 2;
   float shrinkage = 3;
-  SplitConfig split_config = 4;
-}
+  // The minimum gain to consider split a leaf.
+  double min_gain = 4;
+  // L2 regularization hyperparameter lambda.
+  double l2_lambda = 5;
 
-message SamplingConfig {
-  float example_sampling_rate = 1;
-  float feature_sampling_rate = 2;
-}
+  // Sampling config.
+  float example_sampling_rate = 6;
+  float feature_sampling_rate = 7;
 
-message PairwiseConfig {
-  float pair_sampling_rate = 2;
-  bool weight_by_delta_target = 3;
-}
+  // Eval config.
+  int32 eval_interval = 8;
 
-message LambdaMartConfig {
-  float dcg_base = 1;
-}
+  // Data config.
+  repeated string float_feature = 9;
+  repeated string categorical_feature = 10;
+  string weight_column = 11;
+  string target_column = 12;
+  // Whether the binarize targets into {-1, +1}.
+  bool binarize_target = 13;
+  string group_column = 14;
+  // Columns to be loaded in additional to features.
+  // These are usually columns needed for loss function computation.
+  repeated string additional_float_column = 15;
+  repeated string additional_string_column = 16;
 
-message LossFuncConfig {
-  string loss_func = 1;
-  PairwiseConfig pairwise_config = 2;
-  LambdaMartConfig lambdamart_config = 3;
-}
-
-message EvalConfig {
-  int32 eval_interval = 1;
-}
-
-message Config {
-  TreeConfig tree_config = 1;
-  SamplingConfig sampling_config = 2;
-  LossFuncConfig loss_func_config = 3;
-  DataConfig data_config = 4;
-  EvalConfig eval_config = 5;
+  // Loss Func config.
+  string loss_func = 17;
+  // Pairwise loss func.
+  float pair_sampling_rate = 18;
+  bool pair_weight_by_delta_target = 19;
+  float lambdamart_dcg_base = 20;
 }

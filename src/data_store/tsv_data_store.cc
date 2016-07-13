@@ -51,11 +51,11 @@ Status MaybeFindFirstNotOK(const unordered_map<string, unique_ptr<Column>>& colu
 
 }  // namespace
 
-TSVDataStore::TSVDataStore(const vector<string>& tsvs, const DataConfig& config) {
+TSVDataStore::TSVDataStore(const vector<string>& tsvs, const Config& config) {
   status_ = LoadTSVs(tsvs, config);
 }
 
-Status TSVDataStore::LoadTSVs(const vector<string>& tsvs, const DataConfig& config) {
+Status TSVDataStore::LoadTSVs(const vector<string>& tsvs, const Config& config) {
   Status status;
   if (tsvs.size() <= 0) {
     return Status(error::INVALID_ARGUMENT, "There should be at least 1 tsvs.");
@@ -129,7 +129,7 @@ Status TSVDataStore::Finalize() {
   return MaybeFindFirstNotOK(column_map_);
 }
 
-Status TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& config) {
+Status TSVDataStore::SetupColumns(const string& first_tsv, const Config& config) {
   // Read header from first tsv.
   if (!FileExists(first_tsv)) {
     return Status(error::NOT_FOUND, fmt::format("TSV {0} does not exit.", first_tsv));

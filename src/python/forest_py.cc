@@ -6,6 +6,10 @@
 #include "src/proto/tree.pb.h"
 #include "src/utils/json_utils.h"
 
+using gbdt::ForestPy;
+
+namespace gbdt {
+
 ForestPy::ForestPy(const string& str) {
   Forest forest;
   auto status = JsonUtils::FromJson(str, &forest);
@@ -40,6 +44,8 @@ void ForestPy::PredictAndOutput(DataStorePy* data_store_py,
                                output_dir);
   if (!status.ok()) ThrowException(status);
 }
+
+}  // namespace gbdt
 
 void InitForestPy(py::module &m) {
   py::class_<ForestPy>(m, "Forest")

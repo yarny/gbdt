@@ -16,10 +16,8 @@
 #include "loss_func_huberized_hinge.h"
 
 #include <cmath>
-#include <glog/logging.h>
 #include <numeric>
 #include <string>
-#include <vector>
 
 #include "loss_func_math.h"
 #include "src/base/base.h"
@@ -28,8 +26,7 @@
 
 namespace gbdt {
 
-HuberizedHinge::HuberizedHinge(const LossFuncConfig& config)
-    : Pointwise(ComputeHuberizedHinge), config_(config) {
+HuberizedHinge::HuberizedHinge(const Config& unused_config) : Pointwise(ComputeHuberizedHinge) {
 }
 
 Status HuberizedHinge::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) {

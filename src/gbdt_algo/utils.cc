@@ -130,7 +130,7 @@ bool IsSingleNodeTree(const TreeNode& tree) {
   return !tree.has_left_child();
 }
 
-list<int> GetTestPoints(const EvalConfig& config, int forest_size) {
+list<int> GetTestPoints(const Config& config, int forest_size) {
   // Load test points
   // By default, we output the test scores of the final forest,
   // but if eval_interval is specified, we will test the forest at the intervals.
@@ -147,13 +147,13 @@ list<int> GetTestPoints(const EvalConfig& config, int forest_size) {
   return test_points;
 }
 
-unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config) {
+unordered_set<string> GetFeaturesSetFromConfig(const Config& config) {
   unordered_set<string> feature_names(config.float_feature().begin(), config.float_feature().end());
   feature_names.insert(config.categorical_feature().begin(), config.categorical_feature().end());
   return feature_names;
 }
 
-FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store) {
+FloatVector GetSampleWeightsOrDie(const Config& config, DataStore* data_store) {
   const string& weight_column_name = config.weight_column();
   if (!weight_column_name.empty()) {
     const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
@@ -166,7 +166,7 @@ FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_stor
   return [](int) { return 1.0; };
 }
 
-FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store) {
+FloatVector GetTargetsOrDie(const Config& config, DataStore* data_store) {
   const string& target_column_name = config.target_column();
   CHECK(!target_column_name.empty()) << "Please specify target_column.";
 
@@ -179,6 +179,16 @@ FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store) {
   } else {
     return [&raw_floats=raw_floats](int i) { return raw_floats[i]; };
   }
+}
+
+const StringColumn* GetGroupOrDie(const Config& config, DataStore* data_store) {
+  const StringColumn* group_column = nullptr;
+  if (!config.group_column().empty()) {
+    group_column = data_store->GetStringColumn(config.group_column());
+    CHECK(group_column) << fmt::format("Failed to find {0} in data_store.",
+                                       config.group_column());
+  }
+  return group_column;
 }
 
 Forest LoadForestOrDie(const string& forest_file) {
