@@ -27,7 +27,7 @@ namespace gbdt {
 class HuberizedHingeTest : public ::testing::Test {
  protected:
   void SetUp() {
-    LossFuncConfig config;
+    Config config;
     config.set_loss_func("huberized_hinge");
 
     hinge_.reset(new HuberizedHinge(config));

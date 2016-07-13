@@ -29,7 +29,6 @@ class Config;
 class DataStore;
 class Forest;
 class LossFunc;
-class TreeConfig;
 
 // GBDT algorithnm
 // Gradient Boosting Decision Tree (GBDT) Algorithm.

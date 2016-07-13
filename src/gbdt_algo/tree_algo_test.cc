@@ -34,9 +34,9 @@ class TreeBuildingTest : public testing::Test {
   void SetUp() {
     allsamples_ = Subsampling::CreateAllSamples(gradient_data_vec_.size());
 
-    tree_config_.set_num_leaves(10);
-    sampling_config_.set_example_sampling_rate(1.0);
-    sampling_config_.set_feature_sampling_rate(1.0);
+    config_.set_num_leaves(10);
+    config_.set_example_sampling_rate(1.0);
+    config_.set_feature_sampling_rate(1.0);
     const_float_feature_ = Column::CreateBinnedFloatColumn("feature0", vector<float>(16, 1.3));
     const_string_feature_ = Column::CreateStringColumn("feature1", vector<string>(16, "1.3"));
     vector<float> irrelevant_feature = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
@@ -77,8 +77,7 @@ class TreeBuildingTest : public testing::Test {
   // Feature that indicates threes.
   unique_ptr<Column> three_feature0_;
   unique_ptr<Column> three_feature1_;
-  TreeConfig tree_config_;
-  SamplingConfig sampling_config_;
+  Config config_;
   vector<GradientData> gradient_data_vec_ =
   {
     {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},
@@ -100,7 +99,7 @@ TEST_F(TreeBuildingTest, BuildTree) {
                                      zero_feature_.get(),
                                      three_feature0_.get(),
                                      three_feature1_.get() };
-  TreeNode t = FitTreeToGradients(w_, gradient_data_vec_, features, tree_config_, sampling_config_);
+  TreeNode t = FitTreeToGradients(w_, gradient_data_vec_, features, config_);
   RemoveGains(&t);
   string expected_tree =
       "score: 2.5\n"
@@ -162,7 +161,7 @@ TEST_F(TreeBuildingTest, BuildTreeWithIrrlevantFeatures) {
                                      const_string_feature_.get(),
                                      irrelevant_feature_.get() };
 
-  TreeNode t = FitTreeToGradients(w_, gradient_data_vec_, features, tree_config_, sampling_config_);
+  TreeNode t = FitTreeToGradients(w_, gradient_data_vec_, features, config_);
   EXPECT_FALSE(t.has_left_child());
   EXPECT_FALSE(t.has_right_child());
   EXPECT_FALSE(t.has_split());

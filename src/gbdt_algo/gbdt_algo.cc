@@ -106,10 +106,7 @@ Status TrainGBDT(DataStore* data_store,
                  const Config& config,
                  const Forest* base_forest,
                  Forest* forest) {
-  const auto& tree_config = config.tree_config();
-  const auto& sampling_config = config.sampling_config();
-  LOG(INFO) << "TreeConfig:\n" << tree_config.DebugString();
-  LOG(INFO) << "SamplingConfig:\n" << sampling_config.DebugString();
+  LOG(INFO) << "Config:\n" << config.DebugString();
 
   // Find features from data_store.
   vector<const Column*> features;
@@ -117,7 +114,7 @@ Status TrainGBDT(DataStore* data_store,
   if (!status.ok()) return status;
 
 
-  status = loss_func->Init(data_store->num_rows(), w, y, GetGroupOrDie(config.data_config(), data_store));
+  status = loss_func->Init(data_store->num_rows(), w, y, GetGroupOrDie(config, data_store));
   if (!status.ok()) return status;
 
   uint num_rows = data_store->num_rows();
@@ -134,7 +131,7 @@ Status TrainGBDT(DataStore* data_store,
   }
 
   StopWatch stopwatch;
-  for (int i = 0; i < tree_config.num_iterations(); ++i) {
+  for (int i = 0; i < config.num_iterations(); ++i) {
     string time_progress;
     if (i > 0) {
       stopwatch.End();
@@ -142,7 +139,7 @@ Status TrainGBDT(DataStore* data_store,
           "iter={0},etf={1},",
           StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()),
           StopWatch::MSecsToFormattedString(
-              stopwatch.ElapsedTimeInMSecs() * (tree_config.num_iterations() - i)));
+              stopwatch.ElapsedTimeInMSecs() * (config.num_iterations() - i)));
     }
     stopwatch.Start();
     // Compute gradients and constant
@@ -163,10 +160,10 @@ Status TrainGBDT(DataStore* data_store,
     // Add a tree to forest
     auto* tree = forest->add_tree();
     // Fit a tree to gradients and apply the shrinkage
-    *tree = FitTreeToGradients(w, gradient_data, features, tree_config, sampling_config);
+    *tree = FitTreeToGradients(w, gradient_data, features, config);
 
     // Apply Shrinkage to the tree
-    ApplyShrinkage(tree, tree_config.shrinkage());
+    ApplyShrinkage(tree, config.shrinkage());
     // Update the constant
     constant_tree->set_score(constant_tree->score() + constant);
     // Update function score.

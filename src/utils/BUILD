@@ -99,7 +99,6 @@ cc_library(
     srcs = [ "subsampling.cc" ],
     hdrs = [ "subsampling.h" ],
     deps = [
-        "//src/proto:config_proto_cc",
         ":utils",
     ],
 )

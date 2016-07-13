@@ -31,7 +31,7 @@ namespace gbdt {
 // http://www.cc.gatech.edu/~zha/papers/fp086-zheng.pdf
 class GBRank : public Pairwise {
  public:
-  GBRank(const LossFuncConfig& config)
+  GBRank(const Config& config)
       : Pairwise(config,
                  [](double delta_target, double delta_func) {
                    return ComputeSquaredHinge(delta_target, delta_func);

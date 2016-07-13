@@ -25,11 +25,11 @@
 
 namespace gbdt {
 
-class LossFuncConfig;
+class Config;
 class LossFuncFactory {
 public:
-  typedef std::function<LossFunc*(const LossFuncConfig&)> Creator;
-  static unique_ptr<LossFunc> CreateLossFunc(const LossFuncConfig& config);
+  typedef std::function<LossFunc*(const Config&)> Creator;
+  static unique_ptr<LossFunc> CreateLossFunc(const Config& config);
   static vector<string> LossFuncs();
 
 private:

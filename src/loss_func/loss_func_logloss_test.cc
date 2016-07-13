@@ -27,7 +27,7 @@ namespace gbdt {
 class LossFuncLogLossTest : public ::testing::Test {
  protected:
   void SetUp() {
-    LossFuncConfig config;
+    Config config;
     config.set_loss_func("logloss");
     logloss_.reset(new LogLoss(config));
     CHECK(logloss_->Init(num_rows_, w_, y_, nullptr).ok());

@@ -34,7 +34,7 @@ class TSVDataStoreTest : public ::testing::Test {
     for (const auto& block : blocks) {
       block_paths.push_back(kTestFileDir + "/" + block);
     }
-    DataConfig config;
+    Config config;
     config.add_float_feature("foo");
     config.add_float_feature("bar");
     config.add_categorical_feature("weather");

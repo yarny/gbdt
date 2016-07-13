@@ -21,7 +21,7 @@
 namespace gbdt {
 
 TEST(LossFuncFactoryTest, TestLossFuncCreation) {
-  LossFuncConfig config;
+  Config config;
 
   EXPECT_EQ(nullptr, LossFuncFactory::CreateLossFunc(config));
 

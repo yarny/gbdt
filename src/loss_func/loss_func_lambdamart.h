@@ -24,7 +24,7 @@ namespace gbdt {
 // is implemented as pairwise logloss with pair weighted by dcg diff.
 class LambdaMART : public Pairwise {
  public:
-  LambdaMART(const LossFuncConfig& config);
+  LambdaMART(const Config& config);
 
  private:
   function<double(const pair<uint, uint>&)> GeneratePairWeightingFunc(

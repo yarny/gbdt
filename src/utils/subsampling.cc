@@ -18,7 +18,6 @@
 
 #include <random>
 
-#include "src/proto/config.pb.h"
 #include "src/utils/utils.h"
 #include "src/utils/vector_slice.h"
 

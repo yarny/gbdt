@@ -30,8 +30,7 @@ class PairwiseTest : public ::testing::Test {
     auto group0 = Column::CreateStringColumn("group0", {"1", "1", "1", "1"});
     data_store_.AddColumn(group0->name(), std::move(group0));
 
-    auto* pairwise_config = config_.mutable_pairwise_config();
-    pairwise_config->set_pair_sampling_rate(kSamplingRate_);
+    config_.set_pair_sampling_rate(kSamplingRate_);
   }
 
   void ExpectGradientEqual(const vector<GradientData>& expected,
@@ -48,7 +47,7 @@ class PairwiseTest : public ::testing::Test {
 
   MemDataStore data_store_;
   const int kSamplingRate_ = 1000;
-  LossFuncConfig config_;
+  Config config_;
   FloatVector w_ = [](int) { return 1.0; };
   FloatVector y_ = [](int i) { return i; };
 };

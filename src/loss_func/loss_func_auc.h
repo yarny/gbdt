@@ -23,13 +23,13 @@
 
 namespace gbdt {
 
-class LossFuncConfig;
+class Config;
 
 // AUC: \sum_(\forall pairs) max(0, f_n + 1.0 - f_p). We huberize the hinge loss so we
 // can get hessian out of it.
 class AUC : public Pairwise {
  public:
-  AUC(const LossFuncConfig& config)
+  AUC(const Config& config)
       : Pairwise(config,
                  [] (double delta_target, double delta_func) {
                    return ComputeHuberizedHinge(1, delta_func); }) {}

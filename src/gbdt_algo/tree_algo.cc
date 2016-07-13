@@ -77,10 +77,9 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
                                                    const vector<GradientData>& gradient_data_vec,
                                                    const VectorSlice<uint>& samples,
                                                    const GradientData& total,
-                                                   const TreeConfig& config,
-                                                   const SamplingConfig& sampling_config) {
+                                                   const Config& config) {
   vector<uint> sample_features = Subsampling::UniformSubsample(
-      features.size(), sampling_config.feature_sampling_rate());
+      features.size(), config.feature_sampling_rate());
   vector<Split> splits(sample_features.size());
   {
 
@@ -89,7 +88,7 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
     for (uint i = 0; i < sample_features.size(); ++i) {
       pool.Enqueue([&,i] () {
           FindBestSplit(features[sample_features[i]], w, &gradient_data_vec, samples,
-                        config.split_config(), total, &splits[i]);
+                        config, total, &splits[i]);
         });
     }
   }
@@ -118,9 +117,8 @@ pair<Split, const Column*> FindBestFeatureAndSplit(const vector<const Column*>& 
 TreeNode FitTreeToGradients(FloatVector w,
                             const vector<GradientData>& gradient_data_vec,
                             const vector<const Column*>& features,
-                            const TreeConfig& tree_config,
-                            const SamplingConfig& sampling_config) {
-  double lambda = tree_config.split_config().l2_lambda();
+                            const Config& config) {
+  double lambda = config.l2_lambda();
   auto cmp = [] (const NodeData& x, const NodeData& y) {
       return x.node->split().gain() < y.node->split().gain();
   };
@@ -129,19 +127,19 @@ TreeNode FitTreeToGradients(FloatVector w,
 
   // Subsampling.
   auto subsamples = Subsampling::UniformSubsample(
-      gradient_data_vec.size(), sampling_config.example_sampling_rate());
+      gradient_data_vec.size(), config.example_sampling_rate());
   GradientData total = ComputeWeightedSum(w, gradient_data_vec, subsamples);
 
   tree.set_score(total.Score(lambda));
   auto root_split = FindBestFeatureAndSplit(
-      features, w, gradient_data_vec, subsamples, total, tree_config, sampling_config);
+      features, w, gradient_data_vec, subsamples, total, config);
   if (root_split.first.gain() > 0) {
     *(tree.mutable_split()) = std::move(root_split.first);
   }
   node_queue.push(NodeData({&tree, root_split.second, VectorSlice<uint>(subsamples)}));
 
   // The size of queue is equal to the number of leaves
-  while (!node_queue.empty() && node_queue.size() < tree_config.num_leaves() &&
+  while (!node_queue.empty() && node_queue.size() < config.num_leaves() &&
          node_queue.top().feature) {
     auto node_data = node_queue.top();
     auto* node = node_data.node;
@@ -158,7 +156,7 @@ TreeNode FitTreeToGradients(FloatVector w,
     auto* left_child = node->mutable_left_child();
     left_child->set_score(left_total.Score(lambda));
     auto left_split = FindBestFeatureAndSplit(
-        features, w, gradient_data_vec, sub_slices.first, left_total, tree_config, sampling_config);
+        features, w, gradient_data_vec, sub_slices.first, left_total, config);
     if (left_split.first.gain() > 0) {
       *left_child->mutable_split() = std::move(left_split.first);
     }
@@ -167,7 +165,7 @@ TreeNode FitTreeToGradients(FloatVector w,
     auto* right_child = node->mutable_right_child();
     right_child->set_score(right_total.Score(lambda));
     auto right_split = FindBestFeatureAndSplit(
-        features, w, gradient_data_vec, sub_slices.second, right_total, tree_config, sampling_config);
+        features, w, gradient_data_vec, sub_slices.second, right_total, config);
     if (right_split.first.gain() > 0) {
       *right_child->mutable_split() = std::move(right_split.first);
     }

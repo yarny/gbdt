@@ -21,8 +21,6 @@
 
 namespace gbdt {
 
-class DataStore;
-
 // Huberized Hinge Loss (https://en.wikipedia.org/wiki/Hinge_loss) is a variation of Hinge loss that
 // are smooth hence easier to optimize.
 // Huberized Hinge = 1/2 - y *f         if yf <= 0
@@ -31,12 +29,9 @@ class DataStore;
 // y is {-1, 1} valued.
 class HuberizedHinge : public Pointwise {
  public:
-  HuberizedHinge(const LossFuncConfig& config);
+  HuberizedHinge(const Config& unused_config);
 
   Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) override;
-
- private:
-  LossFuncConfig config_;
 };
 
 }  // namespace gbdt

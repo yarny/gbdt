@@ -28,7 +28,6 @@ cc_test(
     srcs = [ "loss_func_logloss_test.cc" ],
     deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
         "//src/base:base",
 	":loss_func_logloss",
     ],
@@ -54,7 +53,6 @@ cc_test(
     srcs = [ "loss_func_huberized_hinge_test.cc" ],
     deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
         "//src/base:base",
 	":loss_func_huberized_hinge",
     ],
@@ -64,11 +62,9 @@ cc_test(
 
 cc_library(
     name = "loss_func_mse",
-    srcs = [ "loss_func_mse.cc" ],
     hdrs = [ "loss_func_mse.h" ],
     deps = [
         "//external:cppformat-lib",
-	"//src/utils:utils",
         "//src/base:base",
 	":loss_func_math",
 	":loss_func_pointwise",
@@ -80,7 +76,6 @@ cc_test(
     srcs = [ "loss_func_mse_test.cc" ],
     deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
         "//src/base:base",
 	":loss_func_mse",
     ],
