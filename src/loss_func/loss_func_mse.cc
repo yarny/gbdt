@@ -23,8 +23,6 @@
 
 #include "loss_func_math.h"
 #include "src/base/base.h"
-#include "src/data_store/column.h"
-#include "src/data_store/data_store.h"
 #include "src/utils/utils.h"
 
 namespace gbdt {

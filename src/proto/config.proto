@@ -24,10 +24,11 @@ message DataConfig {
   string target_column = 4;
   // Whether the binarize targets into {-1, +1}.
   bool binarize_target = 5;
+  string group_column = 6;
   // Columns to be loaded in additional to features.
   // These are usually columns needed for loss function computation.
-  repeated string additional_float_column = 6;
-  repeated string additional_string_column = 7;
+  repeated string additional_float_column = 7;
+  repeated string additional_string_column = 8;
 }
 
 message SplitConfig {
@@ -50,7 +51,6 @@ message SamplingConfig {
 }
 
 message PairwiseConfig {
-  string group_column = 1;
   float pair_sampling_rate = 2;
   bool weight_by_delta_target = 3;
 }

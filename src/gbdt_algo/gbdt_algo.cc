@@ -116,7 +116,16 @@ Status TrainGBDT(DataStore* data_store,
   auto status = LoadFeatures(feature_names, data_store, &features);
   if (!status.ok()) return status;
 
-  status = loss_func->Init(data_store->num_rows(), w, y, data_store);
+  const StringColumn* group_column = nullptr;
+  if (!config.data_config().group_column().empty()) {
+    group_column = data_store->GetStringColumn(config.data_config().group_column());
+    if (!group_column) {
+      return Status(error::NOT_FOUND, fmt::format("Failed to find {0} in data_store.",
+                                                  config.data_config().group_column()));
+    }
+  }
+
+  status = loss_func->Init(data_store->num_rows(), w, y, group_column);
   if (!status.ok()) return status;
 
   uint num_rows = data_store->num_rows();

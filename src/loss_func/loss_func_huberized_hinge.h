@@ -33,7 +33,7 @@ class HuberizedHinge : public Pointwise {
  public:
   HuberizedHinge(const LossFuncConfig& config);
 
-  Status Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) override;
+  Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) override;
 
  private:
   LossFuncConfig config_;

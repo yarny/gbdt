@@ -23,8 +23,6 @@
 
 #include "loss_func_math.h"
 #include "src/base/base.h"
-#include "src/data_store/column.h"
-#include "src/data_store/data_store.h"
 #include "src/proto/config.pb.h"
 #include "src/utils/utils.h"
 
@@ -34,13 +32,13 @@ HuberizedHinge::HuberizedHinge(const LossFuncConfig& config)
     : Pointwise(ComputeHuberizedHinge), config_(config) {
 }
 
-Status HuberizedHinge::Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) {
+Status HuberizedHinge::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) {
   for (int i = 0; i < num_rows; ++i) {
     if (y(i) != 1.0 and y(i) != -1.0) {
       return Status(error::INVALID_ARGUMENT, "Binary targets should only take values +1 and -1.");
     }
   }
-  Pointwise::Init(num_rows, w, y, data_store);
+  Pointwise::Init(num_rows, w, y, group_column);
   return Status::OK;
 }
 

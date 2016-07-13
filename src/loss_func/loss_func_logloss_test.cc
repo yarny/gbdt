@@ -20,8 +20,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/data_store/column.h"
-#include "src/data_store/mem_data_store.h"
 #include "src/proto/config.pb.h"
 
 namespace gbdt {

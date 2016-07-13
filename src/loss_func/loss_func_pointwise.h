@@ -30,7 +30,7 @@ class Pointwise : public LossFunc {
 public:
   typedef std::function<LossFuncData(double, double)> PointwiseLossFunc;
   Pointwise(PointwiseLossFunc loss_func);
-  virtual Status Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) override;
+  virtual Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
                                                      vector<GradientData>* gradient_data_vec,

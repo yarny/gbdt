@@ -31,7 +31,6 @@ class PairwiseTest : public ::testing::Test {
     data_store_.AddColumn(group0->name(), std::move(group0));
 
     auto* pairwise_config = config_.mutable_pairwise_config();
-    pairwise_config->set_group_column("group0");
     pairwise_config->set_pair_sampling_rate(kSamplingRate_);
   }
 
@@ -60,7 +59,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
   double c;
 
   unique_ptr<Pairwise> lambdamart(new LambdaMART(config_));
-  lambdamart->Init(data_store_.num_rows(), w_, y_, &data_store_);
+  lambdamart->Init(data_store_.num_rows(), w_, y_, data_store_.GetStringColumn("group0"));
   lambdamart->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);

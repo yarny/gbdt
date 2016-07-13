@@ -165,8 +165,7 @@ Status TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& con
     raw_float_columns.emplace_back(config.weight_column());
   }
 
-  // Add additional float columns as raw float columns.
-  for (const string& header : config.additional_float_column()) {
+  for (const string& header : raw_float_columns) {
     auto it = map_from_header_to_index.find(header);
     if (it == map_from_header_to_index.end()) {
       return Status(error::NOT_FOUND,
@@ -179,8 +178,12 @@ Status TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& con
     float_column_indices_.push_back(it->second);
   }
 
+  vector<string> string_columns(config.categorical_feature().begin(), config.categorical_feature().end());
+  if (!config.group_column().empty()) {
+    string_columns.push_back(config.group_column());
+  }
   // Add categorical features as string columns.
-  for (const string& header : config.categorical_feature()) {
+  for (const string& header : string_columns) {
     auto it = map_from_header_to_index.find(header);
     if (it == map_from_header_to_index.end()) {
       return Status(error::NOT_FOUND, "Failed to find column " + header + " in " + first_tsv);

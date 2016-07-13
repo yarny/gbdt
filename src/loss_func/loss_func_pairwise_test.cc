@@ -36,7 +36,6 @@ class PairwiseTest : public ::testing::Test {
     data_store_.AddColumn(group1->name(), std::move(group1));
 
     auto* pairwise_config = config_.mutable_pairwise_config();
-    pairwise_config->set_group_column("group0");
     pairwise_config->set_pair_sampling_rate(kSamplingRate_);
   }
 
@@ -52,9 +51,10 @@ class PairwiseTest : public ::testing::Test {
     }
   }
 
-  unique_ptr<Pairwise> CreateAndInitPairwiseLoss() {
+  unique_ptr<Pairwise> CreateAndInitPairwiseLoss(const string& group_name) {
     unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config_));
-    pairwise->Init(data_store_.num_rows(), w_, y_, &data_store_);
+
+    pairwise->Init(data_store_.num_rows(), w_, y_, data_store_.GetStringColumn(group_name));
     return std::move(pairwise);
   }
 
@@ -71,7 +71,7 @@ class PairwiseTest : public ::testing::Test {
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansOneGroup) {
   vector<GradientData> gradient_data_vec;
   double c;
-  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss();
+  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss("group0");
   pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
 
   // c is zero for all pairwise losses.
@@ -85,8 +85,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansOneGroup) {
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansNoGroup) {
   // When no group specified, every instance is put in one group.
   vector<GradientData> gradient_data_vec;
-  config_.mutable_pairwise_config()->clear_group_column();
-  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss();
+  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss("");
   double c;
   pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
 
@@ -101,8 +100,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansNoGroup) {
 TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansTwoGroups) {
   vector<GradientData> gradient_data_vec;
 
-  config_.mutable_pairwise_config()->set_group_column("group1");
-  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss();
+  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss("group1");
   double c;
   pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
 
@@ -119,7 +117,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansWeightByDeltaTarge
   vector<GradientData> gradient_data_vec;
 
   config_.mutable_pairwise_config()->set_weight_by_delta_target(true);
-  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss();
+  unique_ptr<Pairwise> pairwise = CreateAndInitPairwiseLoss("group0");
   double c;
   pairwise->ComputeFunctionalGradientsAndHessians(f_, &c, &gradient_data_vec, nullptr);
 

@@ -21,7 +21,7 @@
 
 #include "external/cppformat/format.h"
 
-#include "src/data_store/data_store.h"
+#include "src/data_store/column.h"
 #include "src/utils/subsampling.h"
 #include "src/utils/threadpool.h"
 
@@ -37,23 +37,17 @@ Pairwise::Pairwise(const LossFuncConfig& config, Pairwise::PairwiseLossFunc loss
       << "Please specify a non-zero pair sampling rate.";
 }
 
-Status Pairwise::Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) {
+Status Pairwise::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) {
   w_ = w;
   y_ = y;
 
   // Construct groups.
-  const string& group_column_name = config_.pairwise_config().group_column();
   vector<vector<uint>> groups;
-  if (group_column_name.empty()) {
+  if (!group_column) {
     // When group is not specified, every thing is one group.
     groups.resize(1);
     groups[0] = Subsampling::CreateAllSamples(num_rows);
   } else {
-    auto group_column = data_store->GetStringColumn(group_column_name);
-    if (!group_column) {
-      return Status(error::NOT_FOUND, "Failed to get group column " + group_column_name);
-    }
-
     groups.resize(group_column->max_int() - 1);
     const auto& group_col = group_column->col();
     for (int i = 0; i < group_column->size(); ++i) {

@@ -22,7 +22,6 @@
 #include "external/cppformat/format.h"
 
 #include "src/base/base.h"
-#include "src/data_store/data_store.h"
 #include "src/utils/subsampling.h"
 #include "src/utils/threadpool.h"
 
@@ -37,7 +36,7 @@ const int kMaxIterations = 10;
 Pointwise::Pointwise(PointwiseLossFunc loss_func) : loss_func_(loss_func) {
 }
 
-Status Pointwise::Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) {
+Status Pointwise::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) {
   w_ = w;
   y_ = y;
   weight_sum_ = 0;

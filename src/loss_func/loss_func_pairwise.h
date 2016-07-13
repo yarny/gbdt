@@ -32,9 +32,6 @@
 
 namespace gbdt {
 
-class RawFloatColumn;
-class DataStore;
-
 // Base class for pairwise loss funcs.
 class Pairwise : public LossFunc {
  public:
@@ -43,7 +40,7 @@ class Pairwise : public LossFunc {
   typedef std::function<LossFuncData(double delta_target, double delta_func)> PairwiseLossFunc;
   Pairwise(const LossFuncConfig& config, PairwiseLossFunc loss_func);
 
-  virtual Status Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) override;
+  virtual Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
                                                      double* c,
                                                      vector<GradientData>* gradient_data_vec,
