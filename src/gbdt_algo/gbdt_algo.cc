@@ -100,8 +100,9 @@ void InitializeWithBaseForest(const Forest* base_forest,
 
 Status TrainGBDT(DataStore* data_store,
                  const unordered_set<string>& feature_names,
-                 LossFunc* loss_func,
                  FloatVector w,
+                 FloatVector y,
+                 LossFunc* loss_func,
                  const Config& config,
                  const Forest* base_forest,
                  unique_ptr<Forest>* output_forest) {
@@ -115,9 +116,8 @@ Status TrainGBDT(DataStore* data_store,
   auto status = LoadFeatures(feature_names, data_store, &features);
   if (!status.ok()) return status;
 
-  if (!loss_func->Init(data_store, w)) {
-    return Status(error::INTERNAL, "Failed to initialize loss function with the data_store.");
-  }
+  status = loss_func->Init(data_store->num_rows(), w, y, data_store);
+  if (!status.ok()) return status;
 
   uint num_rows = data_store->num_rows();
   vector<double> f(num_rows, 0);  // current function values

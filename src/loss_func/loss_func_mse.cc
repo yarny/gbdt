@@ -32,26 +32,5 @@ namespace gbdt {
 MSE::MSE(const LossFuncConfig& config) : Pointwise(ComputeMSE), config_(config) {
 }
 
-bool MSE::ProvideY(DataStore* data_store, vector<float>* y) {
-  const string& target_column_name = config_.target_column();
-  if (target_column_name.empty()) {
-    LOG(ERROR) << "Please specify target_column for MSE loss.";
-    return false;
-  }
-
-  auto targets = data_store->GetRawFloatColumn(target_column_name);
-  if (!targets) {
-    LOG(ERROR) << "Failed to get target column " << target_column_name;
-    return false;
-  }
-
-  // Copy targets to y.
-  y->resize(targets->size());
-  for (int i = 0; i < targets->size(); ++i) {
-    (*y)[i] = (*targets)[i];
-  }
-
-  return true;
-}
 
 }  // namespace gbdt

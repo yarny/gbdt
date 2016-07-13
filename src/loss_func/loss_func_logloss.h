@@ -29,8 +29,10 @@ class LogLoss : public Pointwise {
  public:
   LogLoss(const LossFuncConfig& config);
 
+  Status Init(int num_rows, FloatVector w, FloatVector y, DataStore* data_store) override;
  private:
-  bool ProvideY(DataStore* data, vector<float>* y) override;
+
+
   LossFuncConfig config_;
 };
 

@@ -30,14 +30,11 @@ namespace gbdt {
 class PairwiseTest : public ::testing::Test {
  protected:
   void SetUp() {
-    auto target = Column::CreateRawFloatColumn("target", vector<float>({0, 1, 2, 3}));
     auto group0 = Column::CreateStringColumn("group0", {"1", "1", "1", "1"});
     auto group1 = Column::CreateStringColumn("group1", {"0", "0", "1", "1"});
-    data_store_.AddColumn(target->name(), std::move(target));
     data_store_.AddColumn(group0->name(), std::move(group0));
     data_store_.AddColumn(group1->name(), std::move(group1));
 
-    config_.set_target_column("target");
     auto* pairwise_config = config_.mutable_pairwise_config();
     pairwise_config->set_group_column("group0");
     pairwise_config->set_pair_sampling_rate(kSamplingRate_);
@@ -57,12 +54,13 @@ class PairwiseTest : public ::testing::Test {
 
   unique_ptr<Pairwise> CreateAndInitPairwiseLoss() {
     unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config_));
-    pairwise->Init(&data_store_, w_);
+    pairwise->Init(data_store_.num_rows(), w_, y_, &data_store_);
     return std::move(pairwise);
   }
 
   MemDataStore data_store_;
   FloatVector w_ = [](int) { return 1.0; };
+  FloatVector y_ = [](int i) { return i; };
   vector<double> f_ = { 0, 0, 0, 0};
   // Set sampleing_rate to 10000 so that g and h are more stable.
   const int kSamplingRate_ = 10000;

@@ -20,8 +20,7 @@ cc_library(
         "//src/base:base",
 	"//src/data_store:data_store",
 	":loss_func_math",
-	":loss_func_pointwise",
-	":target",
+        ":loss_func_pointwise",
     ],
 )
 
@@ -50,8 +49,7 @@ cc_library(
         "//src/base:base",
 	"//src/data_store:data_store",
 	":loss_func_math",
-	":loss_func_pointwise",
-	":target",
+        ":loss_func_pointwise",
     ],
 )
 
@@ -138,31 +136,6 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
-)
-
-cc_library(
-    name = "target",
-    srcs = [ "target.cc" ],
-    hdrs = [ "target.h" ],
-    deps = [
-        "//src/proto:config_proto_cc",
-        "//src/base:base",
-	"//src/data_store:column",
-	"//src/data_store:data_store",
-    ],
-)
-
-cc_test(
-   name = "target_test",
-   srcs = [ "target_test.cc" ],
-   deps = [
-   	"//external:gtest_main",
-	"//src/proto:config_proto_cc",
-        "//src/data_store:mem_data_store",
-	":target",
-   ],
-   copts = C_TEST_OPTS,
-   linkopts = LINK_OPTS,
 )
 
 cc_library(

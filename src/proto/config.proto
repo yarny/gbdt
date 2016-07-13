@@ -20,11 +20,14 @@ package gbdt;
 message DataConfig {
   repeated string float_feature = 1;
   repeated string categorical_feature = 2;
+  string weight_column = 3;
+  string target_column = 4;
+  // Whether the binarize targets into {-1, +1}.
+  bool binarize_target = 5;
   // Columns to be loaded in additional to features.
   // These are usually columns needed for loss function computation.
-  repeated string additional_float_column = 3;
-  repeated string additional_string_column = 4;
-  string sample_weight_column = 5;
+  repeated string additional_float_column = 6;
+  repeated string additional_string_column = 7;
 }
 
 message SplitConfig {
@@ -58,9 +61,8 @@ message LambdaMartConfig {
 
 message LossFuncConfig {
   string loss_func = 1;
-  string target_column = 2;
-  PairwiseConfig pairwise_config = 3;
-  LambdaMartConfig lambdamart_config = 4;
+  PairwiseConfig pairwise_config = 2;
+  LambdaMartConfig lambdamart_config = 3;
 }
 
 message EvalConfig {

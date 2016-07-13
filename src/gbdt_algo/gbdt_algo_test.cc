@@ -51,10 +51,10 @@ class GBDTAlgoTest : public ::testing::Test {
         " categorical_feature: ["
         "   'color' "
         " ]"
+        "  target_column: 'label'"
         "}"
         "loss_func_config {"
         "  loss_func: 'mse' "
-        "  target_column: 'label'"
         "}";
     CHECK(google::protobuf::TextFormat::ParseFromString(config_text, &config_))
         << "Failed to parse proto " << config_text;
@@ -66,6 +66,7 @@ class GBDTAlgoTest : public ::testing::Test {
     CHECK(loss_func_);
     feature_names_ = GetFeaturesSetFromConfig(config_.data_config());
     w_ = GetSampleWeightsOrDie(config_.data_config(), data_store_.get());
+    y_ = GetTargetsOrDie(config_.data_config(), data_store_.get());
   }
 
   void RemoveGains(TreeNode* t) {
@@ -89,14 +90,16 @@ class GBDTAlgoTest : public ::testing::Test {
   unique_ptr<LossFunc> loss_func_;
   unordered_set<string> feature_names_;
   FloatVector w_;
+  FloatVector y_;
 };
 
 TEST_F(GBDTAlgoTest, TestBuildForest) {
   unique_ptr<Forest> forest;
   auto status = TrainGBDT(data_store_.get(),
                           feature_names_,
-                          loss_func_.get(),
                           w_,
+                          y_,
+                          loss_func_.get(),
                           config_,
                           nullptr,
                           &forest);
@@ -125,8 +128,9 @@ TEST_F(GBDTAlgoTest, TestBuildForestWithBaseForest) {
   unique_ptr<Forest> forest;
   auto status = TrainGBDT(data_store_.get(),
                           feature_names_,
-                          loss_func_.get(),
                           w_,
+                          y_,
+                          loss_func_.get(),
                           config_,
                           &base_forest,
                           &forest);

@@ -26,23 +26,18 @@ namespace gbdt {
 class GroupTest : public ::testing::Test {
  protected:
   void SetUp() {
-    vector<float> raw_floats = {0, 1, 2, 0, 3, 0, 1, 1, 0, 2, 3, 1, 1, 0, 3};
-    target_column_ = Column::CreateRawFloatColumn("foo", std::move(raw_floats));
-    targets_ = static_cast<const RawFloatColumn*>(target_column_.get());
   }
-
-  unique_ptr<Column> target_column_;
-  const RawFloatColumn* targets_;
+  vector<float> targets_ = {0, 1, 2, 0, 3, 0, 1, 1, 0, 2, 3, 1, 1, 0, 3};
   unique_ptr<Group> group_;
   std::mt19937 generator_;
   const int kSampleCount_ = 10000;
 };
 
 TEST_F(GroupTest, TestGroup) {
-  Group group({0, 2, 3, 4, 5, 7, 9, 10}, targets_);
+  Group group({0, 2, 3, 4, 5, 7, 9, 10}, [this](int i) { return targets_[i]; });
   vector<float> targets(group.size());
   for (int i = 0; i < targets.size(); ++i) {
-    targets[i] = (*targets_)[group[i]];
+    targets[i] = targets_[group[i]];
   }
   EXPECT_EQ(8, group.size());
   // The group is sorted by targets.
@@ -55,14 +50,14 @@ TEST_F(GroupTest, TestGroup) {
     ASSERT_GT(group.size(), p.first);
     ASSERT_GT(group.size(), p.second);
     ASSERT_NE(p.first, p.second);
-    ASSERT_GT((*targets_)[group[p.first]], (*targets_)[group[p.second]]);
+    ASSERT_GT(targets_[group[p.first]], targets_[group[p.second]]);
     ++counts[p];
   }
 
   // The probability of sampling each pair is 1/23.
   for (int i = 0; i < group.size(); ++i) {
     for (int j = i + 1; j < group.size(); ++j) {
-      if ((*targets_)[group[i]] != (*targets_)[group[j]]) {
+      if (targets_[group[i]] != targets_[group[j]]) {
         EXPECT_LT(fabs(1.0 / 23 - counts[make_pair(i, j)] / (double) kSampleCount_), 1e-2);
       }
     }

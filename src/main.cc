@@ -139,8 +139,9 @@ void Train() {
   unique_ptr<Forest> forest;
   status = TrainGBDT(data_store.get(),
                      GetFeaturesSetFromConfig(config.data_config()),
-                     loss_func.get(),
                      GetSampleWeightsOrDie(config.data_config(), data_store.get()),
+                     GetTargetsOrDie(config.data_config(), data_store.get()),
+                     loss_func.get(),
                      config,
                      base_forest.get(),
                      &forest);

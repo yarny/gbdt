@@ -154,7 +154,7 @@ unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config) {
 }
 
 FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store) {
-  const string& weight_column_name = config.sample_weight_column();
+  const string& weight_column_name = config.weight_column();
   if (!weight_column_name.empty()) {
     const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
     CHECK(sample_weights) << "Failed to load sample weights";
@@ -164,6 +164,21 @@ FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_stor
   }
 
   return [](int) { return 1.0; };
+}
+
+FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store) {
+  const string& target_column_name = config.target_column();
+  CHECK(!target_column_name.empty()) << "Please specify target_column.";
+
+  auto targets = data_store->GetRawFloatColumn(target_column_name);
+  CHECK(targets) << "Failed to get target column " << target_column_name;
+  const auto& raw_floats = targets->raw_floats();
+
+  if (config.binarize_target()) {
+    return [&raw_floats=raw_floats](int i) { return raw_floats[i] > 0 ? 1 : -1; };
+  } else {
+    return [&raw_floats=raw_floats](int i) { return raw_floats[i]; };
+  }
 }
 
 Forest LoadForestOrDie(const string& forest_file) {

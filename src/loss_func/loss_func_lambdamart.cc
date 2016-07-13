@@ -87,7 +87,7 @@ function<double(const pair<uint, uint>&)> LambdaMART::GeneratePairWeightingFunc(
 
   // The weight is set to the delta_dcg if the pair is inverted.
   return [&, this] (const pair<uint, uint>& p) {
-    double target_diff = (*target_column_)[group[p.first]] - (*target_column_)[group[p.second]];
+    double target_diff = y_(group[p.first]) - y_(group[p.second]);
     double discount_diff = fabs(discount_(ranks_[p.first]) - discount_(ranks_[p.second]));
     return target_diff * discount_diff;
   };

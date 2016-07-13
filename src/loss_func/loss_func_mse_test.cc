@@ -29,23 +29,19 @@ namespace gbdt {
 class LossFuncMSETest : public ::testing::Test {
  protected:
   void SetUp() {
-    auto target = Column::CreateRawFloatColumn("target", vector<float>({0, 0, 0, 0, 1, 1, 1, 1}));
-    data_store_.AddColumn(target->name(), std::move(target));
     LossFuncConfig config;
     config.set_loss_func("mse");
-    config.set_target_column("target");
     mse_.reset(new MSE(config));
-    num_rows_ = data_store_.num_rows();
+    CHECK(mse_->Init(num_rows_, w_, y_, nullptr).ok());
   }
-
-  MemDataStore data_store_;
+  
   unique_ptr<MSE> mse_;
-  FloatVector w_ = [](int) {return 1.0;};
-  uint num_rows_;
+  FloatVector w_ = [](int) { return 1.0; };
+  FloatVector y_ = [](int i) { return i < 4 ? 0 : 1.0; };
+  int num_rows_ = 8;
 };
 
-TEST_F(LossFuncMSETest, TestMSE) {
-  mse_->Init(&data_store_, w_);
+TEST_F(LossFuncMSETest, TestMSE1) {
   vector<double> f = { 2, 2, 2, 2, 2, 2, 2, 2 };
   vector<GradientData> gradient_data_vec;
   double c;
@@ -60,17 +56,21 @@ TEST_F(LossFuncMSETest, TestMSE) {
 
   auto total = accumulate(gradient_data_vec.begin(), gradient_data_vec.end(), GradientData());
   EXPECT_FLOAT_EQ(0, total.g);
+}
 
-  f = { 2, 2, 2, 2, 0, 0, 0, 0 };
+TEST_F(LossFuncMSETest, TestMSE2) {
+  vector<double> f = { 2, 2, 2, 2, 0, 0, 0, 0 };
+  vector<GradientData> gradient_data_vec;
+  double c;
   mse_->ComputeFunctionalGradientsAndHessians(f, &c, &gradient_data_vec, nullptr);
   EXPECT_FLOAT_EQ(-0.5, c);
-  expected_g = { -1.5, -1.5, -1.5, -1.5, 1.5, 1.5, 1.5, 1.5 };
-
+  vector<double> expected_g = { -1.5, -1.5, -1.5, -1.5, 1.5, 1.5, 1.5, 1.5 };
+  vector<double> expected_h = { 1, 1, 1, 1, 1, 1, 1, 1 };
   for (int i = 0; i < gradient_data_vec.size(); ++i) {
     EXPECT_FLOAT_EQ(expected_g[i], gradient_data_vec[i].g);
     EXPECT_FLOAT_EQ(expected_h[i], gradient_data_vec[i].h);
   }
-  total = accumulate(gradient_data_vec.begin(), gradient_data_vec.end(), GradientData());
+  auto total = accumulate(gradient_data_vec.begin(), gradient_data_vec.end(), GradientData());
   EXPECT_FLOAT_EQ(0, total.g);
 }
 

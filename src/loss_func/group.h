@@ -22,8 +22,6 @@
 
 namespace gbdt {
 
-class RawFloatColumn;
-
 // Represents a group of instances in the training data set. In search ranking setting, a group are
 // documents retrieved by the same query.
 // Samples of pairs of instances with difference in targets are drawn from groups. In case when the
@@ -32,7 +30,7 @@ class RawFloatColumn;
 // sampling strategy to support various types of pairwise losses.
 class Group {
  public:
-  Group(vector<uint>&& group, const RawFloatColumn* target_column);
+  Group(vector<uint>&& group, FloatVector y);
 
   // NOTE: Positive and negative are relative in this setting. Each pair has a positive and
   // a negative but each item can be positive in one pair but negative in another.

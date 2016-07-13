@@ -191,6 +191,7 @@ public:
   }
   void Add(const vector<float>* raw_floats);
   void Finalize();
+  const vector<float>& raw_floats() const;
 
 protected:
   vector<float> raw_floats_;

@@ -156,6 +156,15 @@ Status TSVDataStore::SetupColumns(const string& first_tsv, const DataConfig& con
     float_column_indices_.push_back(it->second);
   }
 
+  vector<string> raw_float_columns(config.additional_float_column().begin(),
+                                   config.additional_float_column().end());
+  if (!config.target_column().empty()) {
+    raw_float_columns.emplace_back(config.target_column());
+  }
+  if (!config.weight_column().empty()) {
+    raw_float_columns.emplace_back(config.weight_column());
+  }
+
   // Add additional float columns as raw float columns.
   for (const string& header : config.additional_float_column()) {
     auto it = map_from_header_to_index.find(header);

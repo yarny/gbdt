@@ -47,6 +47,7 @@ list<int> GetTestPoints(const EvalConfig& config, int forest_size);
 unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config);
 
 FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store);
+FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store);
 
 Forest LoadForestOrDie(const string& forest_file);
 
