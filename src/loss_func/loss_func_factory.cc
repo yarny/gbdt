@@ -49,4 +49,12 @@ unique_ptr<LossFunc> LossFuncFactory::CreateLossFunc(const LossFuncConfig& confi
   return nullptr;
 }
 
+vector<string> LossFuncFactory::LossFuncs(){
+  vector<string> loss_funcs;
+  for (const auto& p : loss_func_creator_map_) {
+    loss_funcs.push_back(p.first);
+  }
+  return loss_funcs;
+}
+
 }  // namespace gbdt

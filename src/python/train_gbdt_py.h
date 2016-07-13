@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-#include "datastore_py.h"
-#include "forest_py.h"
-#include "gbdt_py_base.h"
-#include "train_gbdt_py.h"
+#ifndef TRAIN_GBDT_PY_H_
+#define TRAIN_GBDT_PY_H_
 
-PYBIND11_PLUGIN(gbdt) {
-    py::module m("gbdt", "gbdt py library");
-    InitDataStorePy(m);
-    InitForestPy(m);
-    InitTrainGBDTPy(m);
-    return m.ptr();
-}
+#include "gbdt_py_base.h"
+
+void InitTrainGBDTPy(py::module &m);
+
+#endif // TRAIN_GBDT_PY_H_

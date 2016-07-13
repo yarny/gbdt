@@ -20,7 +20,7 @@
 #include "gbdt_py_base.h"
 #include "src/data_store/data_store.h"
 
-using gbdt::DataStore;
+namespace gbdt {
 
 class DataStorePy {
  public:
@@ -58,6 +58,8 @@ class DataStorePy {
  private:
   unique_ptr<DataStore> data_store_;
 };
+
+}  // namespace gbdt
 
 void InitDataStorePy(py::module &m);
 

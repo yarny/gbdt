@@ -136,7 +136,7 @@ void Train() {
   LOG(INFO) << "LossFuncConfig:\n" << config.loss_func_config().DebugString();
 
   // Start learning.
-  unique_ptr<Forest> forest;
+  Forest forest;
   status = TrainGBDT(data_store.get(),
                      GetFeaturesSetFromConfig(config.data_config()),
                      GetSampleWeightsOrDie(config.data_config(), data_store.get()),
@@ -151,13 +151,13 @@ void Train() {
   mkdir(FLAGS_output_dir.c_str(), 0744);
   string output_model_file = FLAGS_output_dir + "/" + FLAGS_output_model_name + ".json";
   string forest_text;
-  status = JsonUtils::ToJson(*forest, &forest_text);
+  status = JsonUtils::ToJson(forest, &forest_text);
   CHECK(status.ok()) << "Failed to output model to json.";
   WriteStringToFile(forest_text, output_model_file);
   LOG(INFO) << "Wrote the model to " << output_model_file;
 
   // Write the feature importance into a file.
-  WriteStringToFile(FeatureImportanceFormatted(ComputeFeatureImportance(*forest)),
+  WriteStringToFile(FeatureImportanceFormatted(ComputeFeatureImportance(forest)),
                     FLAGS_output_dir + "/" + FLAGS_output_model_name + ".fimps");
   stopwatch.End();
   LOG(INFO) << "Finished training in "

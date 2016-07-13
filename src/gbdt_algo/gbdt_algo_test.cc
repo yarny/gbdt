@@ -94,7 +94,7 @@ class GBDTAlgoTest : public ::testing::Test {
 };
 
 TEST_F(GBDTAlgoTest, TestBuildForest) {
-  unique_ptr<Forest> forest;
+  Forest forest;
   auto status = TrainGBDT(data_store_.get(),
                           feature_names_,
                           w_,
@@ -104,14 +104,13 @@ TEST_F(GBDTAlgoTest, TestBuildForest) {
                           nullptr,
                           &forest);
   CHECK(status.ok()) << status.ToString();
-  CHECK(forest) << "Failed to train forest.";
-  for (auto& tree : *forest->mutable_tree()) {
+  for (auto& tree : *forest.mutable_tree()) {
     RemoveGains(&tree);
   }
 
-  EXPECT_EQ(expected_forest_.tree_size(), forest->tree_size());
-  for (int i = 0; i < forest->tree_size(); ++i) {
-    EXPECT_EQ(expected_forest_.tree(i).DebugString(), forest->tree(i).DebugString());
+  EXPECT_EQ(expected_forest_.tree_size(), forest.tree_size());
+  for (int i = 0; i < forest.tree_size(); ++i) {
+    EXPECT_EQ(expected_forest_.tree(i).DebugString(), forest.tree(i).DebugString());
   }
 }
 
@@ -125,7 +124,7 @@ TEST_F(GBDTAlgoTest, TestBuildForestWithBaseForest) {
   // Train with base forest and train for additional 2 iterations.
   config_.mutable_tree_config()->set_num_iterations(2);
 
-  unique_ptr<Forest> forest;
+  Forest forest;
   auto status = TrainGBDT(data_store_.get(),
                           feature_names_,
                           w_,
@@ -135,17 +134,16 @@ TEST_F(GBDTAlgoTest, TestBuildForestWithBaseForest) {
                           &base_forest,
                           &forest);
   CHECK(status.ok()) << status.ToString();
-  CHECK(forest) << "Failed to train forest.";
 
-  for (auto& tree : *forest->mutable_tree()) {
+  for (auto& tree : *forest.mutable_tree()) {
     RemoveGains(&tree);
   }
 
-  EXPECT_EQ(expected_forest_.tree_size(), forest->tree_size());
+  EXPECT_EQ(expected_forest_.tree_size(), forest.tree_size());
   // The first trees are from expected_forest_. They match exactly with those of
   // expected_forest_.
   for (int i = 0; i < expected_forest_.tree_size(); ++i) {
-    EXPECT_EQ(expected_forest_.tree(i).DebugString(), forest->tree(i).DebugString());
+    EXPECT_EQ(expected_forest_.tree(i).DebugString(), forest.tree(i).DebugString());
   }
 }
 

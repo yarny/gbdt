@@ -181,6 +181,16 @@ FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store) {
   }
 }
 
+const StringColumn* GetGroupOrDie(const DataConfig& config, DataStore* data_store) {
+  const StringColumn* group_column = nullptr;
+  if (!config.group_column().empty()) {
+    group_column = data_store->GetStringColumn(config.group_column());
+    CHECK(group_column) << fmt::format("Failed to find {0} in data_store.",
+                                       config.group_column());
+  }
+  return group_column;
+}
+
 Forest LoadForestOrDie(const string& forest_file) {
   Forest forest;
   string forest_text = ReadFileToStringOrDie(forest_file);

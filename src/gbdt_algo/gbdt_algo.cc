@@ -105,7 +105,7 @@ Status TrainGBDT(DataStore* data_store,
                  LossFunc* loss_func,
                  const Config& config,
                  const Forest* base_forest,
-                 unique_ptr<Forest>* output_forest) {
+                 Forest* forest) {
   const auto& tree_config = config.tree_config();
   const auto& sampling_config = config.sampling_config();
   LOG(INFO) << "TreeConfig:\n" << tree_config.DebugString();
@@ -116,16 +116,8 @@ Status TrainGBDT(DataStore* data_store,
   auto status = LoadFeatures(feature_names, data_store, &features);
   if (!status.ok()) return status;
 
-  const StringColumn* group_column = nullptr;
-  if (!config.data_config().group_column().empty()) {
-    group_column = data_store->GetStringColumn(config.data_config().group_column());
-    if (!group_column) {
-      return Status(error::NOT_FOUND, fmt::format("Failed to find {0} in data_store.",
-                                                  config.data_config().group_column()));
-    }
-  }
 
-  status = loss_func->Init(data_store->num_rows(), w, y, group_column);
+  status = loss_func->Init(data_store->num_rows(), w, y, GetGroupOrDie(config.data_config(), data_store));
   if (!status.ok()) return status;
 
   uint num_rows = data_store->num_rows();
@@ -133,13 +125,12 @@ Status TrainGBDT(DataStore* data_store,
   vector<GradientData> gradient_data(num_rows);
   ComputeTreeScores compute_tree_scores(data_store);
 
-  unique_ptr<Forest> forest(new Forest);
   // The first tree is constant tree. Throughout the learning process, we will keep
   // updating the constant. The main reason for doing that is to exclude constant
   // from being scaled down by shrinkage.
   auto* constant_tree = forest->add_tree();
   if (base_forest) {
-    InitializeWithBaseForest(base_forest, compute_tree_scores, forest.get(), &f);
+    InitializeWithBaseForest(base_forest, compute_tree_scores, forest, &f);
   }
 
   StopWatch stopwatch;
@@ -182,8 +173,7 @@ Status TrainGBDT(DataStore* data_store,
     compute_tree_scores.AddTreeScores(*tree, constant, &f);
   }
 
-  ClearInternalFields(forest.get());
-  *output_forest = std::move(forest);
+  ClearInternalFields(forest);
 
   return Status::OK;
 }

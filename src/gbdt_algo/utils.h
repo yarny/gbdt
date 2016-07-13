@@ -31,6 +31,7 @@ class DataStore;
 class DataConfig;
 class EvalConfig;
 class Forest;
+class StringColumn;
 class TreeNode;
 
 Status LoadFeatures(const unordered_set<string>& feature_names,
@@ -48,6 +49,7 @@ unordered_set<string> GetFeaturesSetFromConfig(const DataConfig& config);
 
 FloatVector GetSampleWeightsOrDie(const DataConfig& config, DataStore* data_store);
 FloatVector GetTargetsOrDie(const DataConfig& config, DataStore* data_store);
+const StringColumn* GetGroupOrDie(const DataConfig& config, DataStore* data_store);
 
 Forest LoadForestOrDie(const string& forest_file);
 

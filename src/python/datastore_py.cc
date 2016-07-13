@@ -18,13 +18,16 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gbdt_py_base.h"
 #include "src/data_store/data_store.h"
 #include "src/data_store/tsv_data_store.h"
 #include "src/proto/config.pb.h"
 
-using gbdt::DataStore;
+using gbdt::DataStorePy;
+
+namespace gbdt {
 
 void DataStorePy::LoadTSV(const vector<string>& tsvs,
                           const vector<string>& binned_float_cols,
@@ -51,6 +54,8 @@ void DataStorePy::LoadTSV(const vector<string>& tsvs,
 void DataStorePy::Clear() {
   data_store_.reset(nullptr);
 }
+
+}  // namespace gbdt
 
 void InitDataStorePy(py::module &m) {
   py::class_<DataStorePy>(m, "DataStore")
