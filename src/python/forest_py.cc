@@ -37,6 +37,9 @@ vector<pair<string, double>> ForestPy::FeatureImportance() const {
 
 vector<double> ForestPy::Predict(DataStorePy* data_store_py) const {
   vector<double> scores;
+  if (!data_store_py || !data_store_py->data_store()) {
+    ThrowException(Status(error::NOT_FOUND, "Data store is empty."));
+  }
   auto status = EvaluateForest(data_store_py->data_store(),
                                forest_,
                                &scores);
