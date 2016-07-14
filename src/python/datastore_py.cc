@@ -29,12 +29,7 @@ using gbdt::DataStorePy;
 
 namespace gbdt {
 
-DataStorePy::DataStorePy(const vector<string>& tsvs,
-                         const vector<string>& binned_float_cols,
-                         const vector<string>& raw_float_cols,
-                         const vector<string>& string_cols) {
-  LoadTSV(tsvs, binned_float_cols, raw_float_cols, string_cols);
-}
+DataStorePy::DataStorePy() {}
 
 void DataStorePy::LoadTSV(const vector<string>& tsvs,
                           const vector<string>& binned_float_cols,
@@ -81,8 +76,10 @@ void DataStorePy::Clear() {
 
 void InitDataStorePy(py::module &m) {
   py::class_<DataStorePy>(m, "DataStore")
-      .def(py::init<const vector<string>&, const vector<string>&, const vector<string>&, const vector<string>&>(),
-           py::arg("tsvs")=vector<string>(),
+      .def(py::init<>())
+      .def("load_tsv",
+           &DataStorePy::LoadTSV,
+           py::arg("tsvs"),
            py::arg("binned_float_cols")=vector<string>(),
            py::arg("raw_float_cols")=vector<string>(),
            py::arg("string_cols")=vector<string>())

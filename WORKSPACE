@@ -36,7 +36,7 @@ bind(
 new_git_repository(
     name = "pybind11",
     remote = "https://github.com/pybind/pybind11.git",
-    tag = "v1.8",
+    tag = "v1.8.1",
     build_file = "pybind11.BUILD",
 )
 
