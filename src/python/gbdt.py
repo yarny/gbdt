@@ -20,15 +20,21 @@ def train(data_store,
     """
     train gbdt model.
     Inputs: data_store: The Data Store.
-            float_features: Continuous features
-            cat_features: Categorical features
             y: The target
             config: the config params. See https://github.com/yarny/gbdt/blob/master/src/proto/config.proto for all params.
-            w: the sampling weight
+            float_features: Continuous features.
+            cat_features: Categorical features.
+            w: The sampling weight.
+            base_forest: The base forest based on which the training will continue.
+            num_threads: The number of threads to run training with.
     Outputs: The forest.
     """
     config['float_feature'] = float_features
     config['categorical_feature'] = cat_features
+    if 'example_sampling_rate' not in config:
+        config['example_sampling_rate'] = 1
+    if 'feature_sampling_rate' not in config:
+        config['feature_sampling_rate'] = 1
 
     return __train_internal__(data_store,
                               y=y,
