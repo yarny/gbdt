@@ -3,6 +3,14 @@ TUTORIALS
 
 The data in this directory comes from https://github.com/szilard/benchm-ml/tree/master/z-other-tools.
 
+Python Example
+-------------------
+To run python example, run `python python_example.py logloss`.
+
+C++ Binary Example
+------------------
+Build C++ binary and run the following commands.
+
 * **Run training:**  `../../bazel-bin/src/gbdt --config_file=benchm-ml.logloss.config --tsvs=train-0.1m.tsv --output_dir=model --logtostderr --num_threads=16`
 * **Run testing:**  `../../bazel-bin/src/gbdt --config_file=benchm-ml.logloss.config --tsvs=test.tsv --output_dir=scores --testing_model_file=model/forest.json --logtostderr --num_threads=16`
 
