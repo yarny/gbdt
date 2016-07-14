@@ -29,11 +29,11 @@
 #include "src/loss_func/loss_func_factory.h"
 #include "src/proto/config.pb.h"
 #include "src/utils/json_utils.h"
+#include "src/utils/subsampling.h"
 #include "src/utils/utils.h"
 
 using gbdt::ForestPy;
 
-DECLARE_int32(seed);
 DECLARE_int32(num_threads);
 
 namespace gbdt {
@@ -45,14 +45,22 @@ ForestPy TrainPy(DataStorePy* data_store,
                  ForestPy* base_forest_py,
                  int random_seed,
                  int num_threads) {
-  FLAGS_seed = random_seed;
   FLAGS_num_threads = num_threads;
 
   Config config;
   auto status = JsonUtils::FromJson(json_config, &config);
   if (!status.ok()) ThrowException(status);
-  status = CheckConfig(config);
-  if (!status.ok()) ThrowException(status);
+  if (!data_store) ThrowException(Status(error::NOT_FOUND, "Datastore cannot be empty."));
+  if (data_store->num_rows() != y.size()) {
+    ThrowException(Status(error::INVALID_ARGUMENT,
+                          fmt::format("Num of rows in data store does not match length of y ({0} vs {1})",
+                                      data_store->num_rows(), y.size())));
+  }
+  if (!w.empty() && data_store->num_rows() != w.size()) {
+    ThrowException(Status(error::INVALID_ARGUMENT,
+                          fmt::format("Num of rows in data store does not match length of w ({0} vs {1})",
+                                      data_store->num_rows(), w.size())));
+  }
 
   FloatVector w_hat = [](int){ return 1.0f; };
   if (!w.empty()) {
@@ -72,9 +80,12 @@ ForestPy TrainPy(DataStorePy* data_store,
 
   unordered_set<string> features(config.categorical_feature().begin(),
                                  config.categorical_feature().end());
-  features.insert(config.float_feature().begin(),
-                  config.float_feature().end());
+  features.insert(config.float_feature().begin(), config.float_feature().end());
+  if (features.size() <= 0) {
+    ThrowException(Status(error::INVALID_ARGUMENT, "Feature set should not empty."));
+  }
 
+  Subsampling::Reseed(random_seed);
   Forest forest;
   status = TrainGBDT(data_store->data_store(),
                      features,
@@ -99,6 +110,6 @@ void InitTrainGBDTPy(py::module &m) {
         py::arg("w")=vector<float>(),
         py::arg("config"),
         py::arg("base_forest")=(ForestPy*) nullptr,
-        py::arg("random_seed")=1232212,
+        py::arg("random_seed")=1234567,
         py::arg("num_threads")=16);
 }

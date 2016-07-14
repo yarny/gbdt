@@ -106,13 +106,15 @@ Status TrainGBDT(DataStore* data_store,
                  const Config& config,
                  const Forest* base_forest,
                  Forest* forest) {
+  auto status = CheckConfig(config);
+  if (!status.ok()) return status;
+
   LOG(INFO) << "Config:\n" << config.DebugString();
 
   // Find features from data_store.
   vector<const Column*> features;
-  auto status = LoadFeatures(feature_names, data_store, &features);
+  status = LoadFeatures(feature_names, data_store, &features);
   if (!status.ok()) return status;
-
 
   status = loss_func->Init(data_store->num_rows(), w, y, GetGroupOrDie(config, data_store));
   if (!status.ok()) return status;
@@ -131,7 +133,7 @@ Status TrainGBDT(DataStore* data_store,
   }
 
   StopWatch stopwatch;
-  for (int i = 0; i < config.num_iterations(); ++i) {
+  for (int i = 0; i < config.num_trees(); ++i) {
     string time_progress;
     if (i > 0) {
       stopwatch.End();
@@ -139,7 +141,7 @@ Status TrainGBDT(DataStore* data_store,
           "iter={0},etf={1},",
           StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()),
           StopWatch::MSecsToFormattedString(
-              stopwatch.ElapsedTimeInMSecs() * (config.num_iterations() - i)));
+              stopwatch.ElapsedTimeInMSecs() * (config.num_trees() - i)));
     }
     stopwatch.Start();
     // Compute gradients and constant

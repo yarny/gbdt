@@ -29,6 +29,13 @@ using gbdt::DataStorePy;
 
 namespace gbdt {
 
+DataStorePy::DataStorePy(const vector<string>& tsvs,
+                         const vector<string>& binned_float_cols,
+                         const vector<string>& raw_float_cols,
+                         const vector<string>& string_cols) {
+  LoadTSV(tsvs, binned_float_cols, raw_float_cols, string_cols);
+}
+
 void DataStorePy::LoadTSV(const vector<string>& tsvs,
                           const vector<string>& binned_float_cols,
                           const vector<string>& raw_float_cols,
@@ -51,6 +58,11 @@ void DataStorePy::LoadTSV(const vector<string>& tsvs,
   data_store_ = std::move(data_store);
 }
 
+const vector<float>* DataStorePy::GetRawFloatCol(const string& col) const {
+  const auto* column = data_store_ ? data_store_->GetRawFloatColumn(col) : nullptr;
+  return column ? &column->raw_floats() : nullptr;
+}
+
 void DataStorePy::Clear() {
   data_store_.reset(nullptr);
 }
@@ -59,17 +71,18 @@ void DataStorePy::Clear() {
 
 void InitDataStorePy(py::module &m) {
   py::class_<DataStorePy>(m, "DataStore")
-      .def(py::init<>())
-      .def("load_tsv", &DataStorePy::LoadTSV,
+      .def(py::init<const vector<string>&, const vector<string>&, const vector<string>&, const vector<string>&>(),
            py::arg("tsvs"),
-           py::arg("binned_float_cols") = vector<string>(),
-           py::arg("raw_float_cols") = vector<string>(),
-           py::arg("string_cols") = vector<string>())
+           py::arg("binned_float_cols")=vector<string>(),
+           py::arg("raw_float_cols")=vector<string>(),
+           py::arg("string_cols")=vector<string>())
+      .def("__len__", &DataStorePy::num_rows)
       .def("num_cols", &DataStorePy::num_cols)
       .def("num_rows", &DataStorePy::num_rows)
       .def("num_binned_float_cols", &DataStorePy::num_binned_float_cols)
       .def("num_raw_float_cols", &DataStorePy::num_raw_float_cols)
       .def("num_string_cols", &DataStorePy::num_string_cols)
+      .def("get_raw_float_col", &DataStorePy::GetRawFloatCol, py::return_value_policy::reference)
       .def("clear", &DataStorePy::Clear)
       .def("__str__", &DataStorePy::Description);
 }

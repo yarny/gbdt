@@ -53,6 +53,7 @@ cc_library(
    deps = [
        "//external:pybind11-lib",
        "//src/gbdt_algo:evaluation",
+       "//src/gbdt_algo:utils",
        "//src/proto:tree_proto_cc",
        "//src/utils:json_utils",
        ":datastore_py",
@@ -83,6 +84,7 @@ cc_library(
        "//src/gbdt_algo:utils",
        "//src/proto:config_proto_cc",
        "//src/utils:json_utils",
+       "//src/utils:subsampling",
        "//src/utils:utils",
    ],
    copts = [ "-I/usr/include/python2.7" ],

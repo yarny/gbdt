@@ -36,6 +36,7 @@ class ForestPy {
   void PredictAndOutput(DataStorePy* data_store_py,
                         const list<int>& test_points,
                         const string& output_dir) const;
+  vector<pair<string, double>> FeatureImportance() const;
   const Forest& forest() const { return forest_; }
 
  private:

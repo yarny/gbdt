@@ -47,7 +47,6 @@ DECLARE_string(output_dir);
 DECLARE_string(output_model_name);
 DECLARE_int32(seed);
 
-using gbdt::CheckConfigs;
 using gbdt::Config;
 using gbdt::DataStore;
 using gbdt::FlatfilesDataStore;
@@ -118,7 +117,6 @@ void Train() {
   string config_text = ReadFileToStringOrDie(FLAGS_config_file);
   auto status = JsonUtils::FromJson(config_text, &config);
   CHECK(status.ok()) << "Failed to parse json to proto: " << config_text;
-  status = CheckConfigs(config);
 
   // Load DataStore.
   auto data_store = LoadDataStoreOrDie(config);

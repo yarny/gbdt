@@ -201,10 +201,10 @@ Forest LoadForestOrDie(const string& forest_file) {
 }
 
 Status CheckConfig(Config config) {
-  if (config.num_iterations() <= 0) {
+  if (config.num_trees() <= 0) {
     return Status(error::INVALID_ARGUMENT,
-                  fmt::format("num_iterations should be positive (actual {0})",
-                              config.num_iterations()));
+                  fmt::format("num_trees should be positive (actual {0})",
+                              config.num_trees()));
   }
   if (config.num_leaves() <= 0) {
     return Status(error::INVALID_ARGUMENT,
