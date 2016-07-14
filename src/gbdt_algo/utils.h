@@ -49,8 +49,9 @@ unordered_set<string> GetFeaturesSetFromConfig(const Config& config);
 FloatVector GetSampleWeightsOrDie(const Config& config, DataStore* data_store);
 FloatVector GetTargetsOrDie(const Config& config, DataStore* data_store);
 const StringColumn* GetGroupOrDie(const Config& config, DataStore* data_store);
-
 Forest LoadForestOrDie(const string& forest_file);
+
+Status CheckConfig(Config config);
 
 }  // namespace gbdt
 

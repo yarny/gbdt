@@ -55,7 +55,7 @@ Status LoadFeatures(const unordered_set<string>& feature_names,
   for (const auto& feature_name : feature_names) {
     const auto* feature = data_store->GetColumn(feature_name);
     if (feature == nullptr) {
-      return Status(error::NOT_FOUND, "Failed to load feature " + feature_name);
+      return Status(error::NOT_FOUND, fmt::format("Failed to load feature {0} from data_store.", feature_name));
     }
     if (!feature->status().ok()) {
       return feature->status();
@@ -198,6 +198,32 @@ Forest LoadForestOrDie(const string& forest_file) {
   CHECK(status.ok()) << "Failed to parse json " << forest_text;
   LOG(INFO) << "Loaded a forest with " << forest.tree_size() << " trees.";
   return forest;
+}
+
+Status CheckConfig(Config config) {
+  if (config.num_iterations() <= 0) {
+    return Status(error::INVALID_ARGUMENT,
+                  fmt::format("num_iterations should be positive (actual {0})",
+                              config.num_iterations()));
+  }
+  if (config.num_leaves() <= 0) {
+    return Status(error::INVALID_ARGUMENT,
+                  fmt::format("num_leaves should be positive (actual {0})",
+                              config.num_leaves()));
+  }
+  if (config.example_sampling_rate() <= 0 ||
+      config.example_sampling_rate() > 1) {
+    return Status(error::INVALID_ARGUMENT,
+                  fmt::format("example_sampling_rate should be in [0, 1] (actual {0})",
+                              config.example_sampling_rate()));
+  }
+  if (config.feature_sampling_rate() <= 0 ||
+      config.feature_sampling_rate() > 1) {
+    return Status(error::INVALID_ARGUMENT,
+                  fmt::format("feature_sampling_rate should be in [0, 1] (actual {0})",
+                              config.feature_sampling_rate()));
+  }
+  return Status::OK;
 }
 
 }  // namespace gbdt

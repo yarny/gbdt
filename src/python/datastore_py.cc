@@ -33,7 +33,7 @@ void DataStorePy::LoadTSV(const vector<string>& tsvs,
                           const vector<string>& binned_float_cols,
                           const vector<string>& raw_float_cols,
                           const vector<string>& string_cols) {
-  gbdt::DataConfig config;
+  Config config;
   for (const auto& col : binned_float_cols) {
     config.add_float_feature(col);
   }
