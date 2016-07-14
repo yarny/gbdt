@@ -102,7 +102,7 @@ const Column* DataStore::GetColumn(const string& column_name) {
 
 string DataStore::Description() const {
   return fmt::format("DataStore with {0} binned float, {1} raw float and "
-                     "{2} string columns, each with {3} row.",
+                     "{2} string columns, each with {3} rows.",
                      num_binned_float_cols(),
                      num_raw_float_cols(),
                      num_string_cols(),

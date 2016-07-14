@@ -105,8 +105,6 @@ void Train() {
   CHECK(!FLAGS_config_file.empty()) << "Please specify --config_file.";
   CHECK(!FLAGS_output_dir.empty()) << "Please specify --output_dir.";
 
-  StopWatch stopwatch;
-  stopwatch.Start();
   LOG(INFO) << "Start training.";
 
   // Reseed.
@@ -156,9 +154,6 @@ void Train() {
   // Write the feature importance into a file.
   WriteStringToFile(FeatureImportanceFormatted(ComputeFeatureImportance(forest)),
                     FLAGS_output_dir + "/" + FLAGS_output_model_name + ".fimps");
-  stopwatch.End();
-  LOG(INFO) << "Finished training in "
-            << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()) << ".";
 }
 
 void Test() {

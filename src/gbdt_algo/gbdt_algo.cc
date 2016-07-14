@@ -106,6 +106,8 @@ Status TrainGBDT(DataStore* data_store,
                  const Config& config,
                  const Forest* base_forest,
                  Forest* forest) {
+  StopWatch overall_stopwatch;
+  overall_stopwatch.Start();
   auto status = CheckConfig(config);
   if (!status.ok()) return status;
 
@@ -173,6 +175,10 @@ Status TrainGBDT(DataStore* data_store,
   }
 
   ClearInternalFields(forest);
+
+  overall_stopwatch.End();
+  LOG(INFO) << "Finished training in "
+            << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()) << ".";
 
   return Status::OK;
 }
