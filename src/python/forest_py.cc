@@ -1,8 +1,13 @@
 #include "forest_py.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "datastore_py.h"
 #include "gbdt_py_base.h"
 #include "src/gbdt_algo/evaluation.h"
+#include "src/gbdt_algo/utils.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/json_utils.h"
 
@@ -24,6 +29,10 @@ string ForestPy::ToJson() const {
   if (!status.ok()) ThrowException(status);
 
   return json_str;
+}
+
+vector<pair<string, double>> ForestPy::FeatureImportance() const {
+  return ComputeFeatureImportance(forest_);
 }
 
 vector<double> ForestPy::Predict(DataStorePy* data_store_py) const {
@@ -52,5 +61,6 @@ void InitForestPy(py::module &m) {
       .def(py::init<const string&>())
       .def("as_json", &ForestPy::ToJson)
       .def("predict", &ForestPy::Predict)
-      .def("predict_and_output", &ForestPy::PredictAndOutput);
+      .def("predict_and_output", &ForestPy::PredictAndOutput)
+      .def("feature_importance", &ForestPy::FeatureImportance);
 }

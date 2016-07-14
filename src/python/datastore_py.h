@@ -24,13 +24,10 @@ namespace gbdt {
 
 class DataStorePy {
  public:
-  DataStorePy() {
-  }
-
-  void LoadTSV(const vector<string>& tsvs,
-               const vector<string>& binned_float_cols,
-               const vector<string>& raw_float_cols,
-               const vector<string>& string_cols);
+  DataStorePy(const vector<string>& tsvs,
+              const vector<string>& binned_float_cols,
+              const vector<string>& raw_float_cols,
+              const vector<string>& string_cols);
   string Description() const {
     return (data_store_) ? data_store_->Description() : "Empty data store.";
   }
@@ -50,12 +47,17 @@ class DataStorePy {
   int num_string_cols() const {
     return (data_store_) ? data_store_->num_string_cols() : 0;
   }
+  const vector<float>* GetRawFloatCol(const string& col) const;
 
   DataStore* data_store() {
     return data_store_.get();
   }
 
  private:
+  void LoadTSV(const vector<string>& tsvs,
+               const vector<string>& binned_float_cols,
+               const vector<string>& raw_float_cols,
+               const vector<string>& string_cols);
   unique_ptr<DataStore> data_store_;
 };
 

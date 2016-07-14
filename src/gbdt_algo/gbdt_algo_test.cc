@@ -32,7 +32,7 @@ class GBDTAlgoTest : public ::testing::Test {
     // The ground truth function is color='red' and width >=10 and height >= 5.
     data_store_.reset(new FlatfilesDataStore("src/gbdt_algo/testdata/gbdt_algo_test/flatfiles"));
     string config_text =
-        "  num_iterations: 4 "
+        "  num_trees: 4 "
         "  num_leaves: 3 "
         "  shrinkage: 0.1"
         "  example_sampling_rate: 1.0"
@@ -113,7 +113,7 @@ TEST_F(GBDTAlgoTest, TestBuildForestWithBaseForest) {
   }
 
   // Train with base forest and train for additional 2 iterations.
-  config_.set_num_iterations(2);
+  config_.set_num_trees(2);
 
   Forest forest;
   auto status = TrainGBDT(data_store_.get(),

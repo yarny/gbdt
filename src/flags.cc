@@ -26,4 +26,4 @@ DEFINE_string(base_model_file, "", "The base model file.");
 DEFINE_string(config_file, "", "The config file.");
 DEFINE_int32(num_threads, 16, "The number of threads.");
 DEFINE_string(mode, "train", "The running mode.");
-DEFINE_int32(seed, 123467, "The random seed.");
+DEFINE_int32(seed, 1234567, "The random seed.");

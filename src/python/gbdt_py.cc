@@ -19,8 +19,8 @@
 #include "gbdt_py_base.h"
 #include "train_gbdt_py.h"
 
-PYBIND11_PLUGIN(gbdt) {
-    py::module m("gbdt", "gbdt py library");
+PYBIND11_PLUGIN(libgbdt) {
+    py::module m("libgbdt", "GBDT python library");
     InitDataStorePy(m);
     InitForestPy(m);
     InitTrainGBDTPy(m);

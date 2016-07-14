@@ -19,7 +19,7 @@ package gbdt;
 
 message Config {
   // Tree building config.
-  int32 num_iterations = 1;
+  int32 num_trees = 1;
   int32 num_leaves = 2;
   float shrinkage = 3;
   // The minimum gain to consider split a leaf.
