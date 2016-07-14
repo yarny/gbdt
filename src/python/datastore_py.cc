@@ -82,7 +82,7 @@ void DataStorePy::Clear() {
 void InitDataStorePy(py::module &m) {
   py::class_<DataStorePy>(m, "DataStore")
       .def(py::init<const vector<string>&, const vector<string>&, const vector<string>&, const vector<string>&>(),
-           py::arg("tsvs"),
+           py::arg("tsvs")=vector<string>(),
            py::arg("binned_float_cols")=vector<string>(),
            py::arg("raw_float_cols")=vector<string>(),
            py::arg("string_cols")=vector<string>())
