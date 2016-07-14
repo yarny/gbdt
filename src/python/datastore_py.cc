@@ -63,6 +63,16 @@ const vector<float>* DataStorePy::GetRawFloatCol(const string& col) const {
   return column ? &column->raw_floats() : nullptr;
 }
 
+vector<string> DataStorePy::GetStringCol(const string& col) const {
+  const auto* column = data_store_ ? data_store_->GetStringColumn(col) : nullptr;
+  if (!column) return vector<string>();
+  vector<string> raw_strings(data_store_->num_rows());
+  for (int i = 0; i < column->size(); ++i) {
+    raw_strings[i] = column->get_row_string(i);
+  }
+  return raw_strings;
+}
+
 void DataStorePy::Clear() {
   data_store_.reset(nullptr);
 }
@@ -83,6 +93,7 @@ void InitDataStorePy(py::module &m) {
       .def("num_raw_float_cols", &DataStorePy::num_raw_float_cols)
       .def("num_string_cols", &DataStorePy::num_string_cols)
       .def("get_raw_float_col", &DataStorePy::GetRawFloatCol, py::return_value_policy::reference)
+      .def("get_string_col", &DataStorePy::GetStringCol)
       .def("clear", &DataStorePy::Clear)
       .def("__str__", &DataStorePy::Description);
 }

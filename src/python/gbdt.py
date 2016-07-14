@@ -8,7 +8,9 @@ from libgbdt import Forest
 from libgbdt import train as __train_internal__
 import json
 
-def train(data_store, y, config,
+def train(data_store,
+          config,
+          y=[],
           float_features=[],
           cat_features=[],
           w=[],
@@ -29,7 +31,7 @@ def train(data_store, y, config,
     config['categorical_feature'] = cat_features
 
     return __train_internal__(data_store,
-                              y,
+                              y=y,
                               w=w,
                               config=json.dumps(config),
                               base_forest=base_forest,

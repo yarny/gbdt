@@ -48,6 +48,7 @@ class DataStorePy {
     return (data_store_) ? data_store_->num_string_cols() : 0;
   }
   const vector<float>* GetRawFloatCol(const string& col) const;
+  vector<string> GetStringCol(const string& col) const;
 
   DataStore* data_store() {
     return data_store_.get();

@@ -51,7 +51,8 @@ ForestPy TrainPy(DataStorePy* data_store,
   auto status = JsonUtils::FromJson(json_config, &config);
   if (!status.ok()) ThrowException(status);
   if (!data_store) ThrowException(Status(error::NOT_FOUND, "Datastore cannot be empty."));
-  if (data_store->num_rows() != y.size()) {
+
+  if (!y.empty() && data_store->num_rows() != y.size()) {
     ThrowException(Status(error::INVALID_ARGUMENT,
                           fmt::format("Num of rows in data store does not match length of y ({0} vs {1})",
                                       data_store->num_rows(), y.size())));
@@ -66,7 +67,21 @@ ForestPy TrainPy(DataStorePy* data_store,
   if (!w.empty()) {
     w_hat = ([&w=w](int i) { return w[i]; });
   }
-  auto y_hat = [&y=y](int i) { return y[i]; };
+
+  FloatVector y_hat = [&y=y](int i) { return y[i]; };
+  if (y.empty()) {
+    if (config.target_column().empty()) {
+      ThrowException(Status(error::INVALID_ARGUMENT,
+                            fmt::format("Please either specify target_column through config or input it directly.")));
+    }
+    const auto* targets = data_store->data_store()->GetRawFloatColumn(config.target_column());
+    if (!targets) {
+      ThrowException(Status(error::INVALID_ARGUMENT,
+                            fmt::format("Failed to load target column {0}", config.target_column())));
+    }
+    y_hat = [&y=targets->raw_floats()](int i) { return y[i]; };
+  }
+
 
   // Initialize Loss Function.
   unique_ptr<LossFunc> loss_func = LossFuncFactory::CreateLossFunc(config);

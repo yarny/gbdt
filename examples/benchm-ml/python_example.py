@@ -28,20 +28,23 @@ def main():
               'pair_sampling_rate': 0.00001,
               'shrinkage' : 0.1}
 
+    target_column = 'dep_delayed_15min'
+
     training_data = gbdt.DataStore(tsvs=["train-0.1m.tsv"],
                                    binned_float_cols=float_features,
-                                   string_cols=cat_features)
-    training_targets = GetTargets('train-0.1m.tsv')
+                                   string_cols=cat_features + [target_column])
+    training_targets = [1 if l == 'Y' else -1 for l in training_data.get_string_col(target_column)]
     forest = gbdt.train(training_data,
-                   training_targets,
-                   float_features=float_features,
-                   cat_features=cat_features,
-                   config=config)
+                        y=training_targets,
+                        float_features=float_features,
+                        cat_features=cat_features,
+                        config=config)
 
     testing_data = gbdt.DataStore(tsvs=["test.tsv"],
                                   binned_float_cols=float_features,
-                                  string_cols=cat_features)
-    testing_targets = GetTargets('test.tsv')
+                                  string_cols=cat_features + [target_column])
+    testing_targets = [1 if l == 'Y' else -1 for l in testing_data.get_string_col(target_column)]
+
     print "\nFeature Importance:"
     print '\n'.join(['{0}\t{1}'.format(feature, imp) for feature,imp in forest.feature_importance()])
     print
