@@ -20,10 +20,10 @@
 namespace gbdt {
 
 TEST(StopWatchTest, StopWatchTest) {
-  std::string str = StopWatch::MSecsToFormattedString(1203121.0);
-  EXPECT_EQ(str, "20m3s121ms");
-  str = StopWatch::MSecsToFormattedString(604800021.0);
-  EXPECT_EQ(str, "1w21ms");
+  EXPECT_EQ("123ms", StopWatch::MSecsToFormattedString(123));
+  EXPECT_EQ("20m3.1s", StopWatch::MSecsToFormattedString(1203121.0));
+  EXPECT_EQ("1h40m3.4s", StopWatch::MSecsToFormattedString(6003432.0));
+  EXPECT_EQ("7d", StopWatch::MSecsToFormattedString(604800021.0));
 }
 
 }  // namespace gbdt
