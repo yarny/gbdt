@@ -33,31 +33,20 @@ double StopWatch::ElapsedTimeInMSecs() const {
 }
 
 string StopWatch::MSecsToFormattedString(double ms) {
-  const uint num_levels = 6;
-  const uint time_level[] = {1000, 60, 60, 24, 7};
-  const string time_unit_names[] = {"ms", "s", "m", "h", "d", "w"};
-  vector<uint> time(num_levels, 0);
-  
-  uint total_units = (uint) ms;
-    
-  for (uint i = 0; i < num_levels-1 && total_units > 0; ++i) {
-    time[i] = total_units % time_level[i];
-    total_units = total_units / time_level[i];
-  }
-  time[num_levels-1] = total_units;
-  
-  vector<string> formatted_str;
-  for(uint i = 0; i < num_levels; ++i) {
-    if (time[i] > 0) {
-      formatted_str.insert(formatted_str.begin(),
-			   fmt::format("{0}{1}",
-				       time[i],
-				       time_unit_names[i]));
-    }
+  if (ms < 1000) {
+    return fmt::format("{0}ms", int(ms));
   }
 
-  if (formatted_str.size() == 0)
-    return "0ms";
-  
-  return strings::JoinStrings(formatted_str, "");
+  double seconds = ms / 1000.0;
+  int mins = int(seconds / 60);
+  seconds -= 60 * mins;
+  int hrs = mins / 60;
+  mins -= hrs * 60;
+  int days = hrs / 24;
+  hrs -= 24 * days;
+
+  return ((days == 0 ? "" : fmt::format("{0}d", days)) +
+          (hrs == 0 ? "" : fmt::format("{0}h", hrs)) +
+          (mins == 0 ? "" : fmt::format("{0}m", mins)) +
+          (seconds < 0.05 ? "" : fmt::format("{0:.1f}s",seconds)));
 }
