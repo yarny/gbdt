@@ -83,16 +83,37 @@ uint CountColumn(const unordered_map<string, unique_ptr<Column>>& column_map,
 
   return count;
 }
-uint DataStore::num_binned_float_cols() const {
-  return CountColumn(column_map_, Column::kBinnedFloatColumn);
+vector<const BinnedFloatColumn*> DataStore::GetBinnedFloatColumns() const {
+  vector<const BinnedFloatColumn*> columns;
+  auto type = Column::kBinnedFloatColumn;
+  for (const auto& p : column_map_) {
+      if (p.second->type() == type) {
+        columns.emplace_back(static_cast<const BinnedFloatColumn*>(p.second.get()));
+    }
+  }
+  return columns;
 }
 
-uint DataStore::num_raw_float_cols() const {
-  return CountColumn(column_map_, Column::kRawFloatColumn);
+vector<const RawFloatColumn*> DataStore::GetRawFloatColumns() const {
+  vector<const RawFloatColumn*> columns;
+  auto type = Column::kRawFloatColumn;
+  for (const auto& p : column_map_) {
+      if (p.second->type() == type) {
+        columns.emplace_back(static_cast<const RawFloatColumn*>(p.second.get()));
+    }
+  }
+  return columns;
 }
 
-uint DataStore::num_string_cols() const {
-  return CountColumn(column_map_, Column::kStringColumn);
+vector<const StringColumn*> DataStore::GetStringColumns() const {
+  vector<const StringColumn*> columns;
+  auto type = Column::kStringColumn;
+  for (const auto& p : column_map_) {
+      if (p.second->type() == type) {
+        columns.emplace_back(static_cast<const StringColumn*>(p.second.get()));
+    }
+  }
+  return columns;
 }
 
 const Column* DataStore::GetColumn(const string& column_name) {
@@ -103,9 +124,9 @@ const Column* DataStore::GetColumn(const string& column_name) {
 string DataStore::Description() const {
   return fmt::format("DataStore with {0} binned float, {1} raw float and "
                      "{2} string columns, each with {3} rows.",
-                     num_binned_float_cols(),
-                     num_raw_float_cols(),
-                     num_string_cols(),
+                     GetBinnedFloatColumns().size(),
+                     GetRawFloatColumns().size(),
+                     GetStringColumns().size(),
                      num_rows());
 }
 

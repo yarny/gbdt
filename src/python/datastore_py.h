@@ -17,6 +17,10 @@
 #ifndef DATASTORE_PY_H_
 #define DATASTORE_PY_H_
 
+#include <string>
+#include <vector>
+
+#include "column_py.h"
 #include "gbdt_py_base.h"
 #include "src/data_store/data_store.h"
 
@@ -36,17 +40,13 @@ class DataStorePy {
   int num_cols() {
     return (data_store_) ? data_store_->num_cols() : 0;
   }
-  int num_binned_float_cols() const {
-    return (data_store_) ? data_store_->num_binned_float_cols() : 0;
-  }
-  int num_raw_float_cols() const {
-    return (data_store_) ? data_store_->num_raw_float_cols() : 0;
-  }
-  int num_string_cols() const {
-    return (data_store_) ? data_store_->num_string_cols() : 0;
-  }
-  const vector<float>* GetRawFloatCol(const string& col) const;
-  vector<string> GetStringCol(const string& col) const;
+
+  BinnedFloatColumnPy GetBinnedFloatColumn(const string& col) const;
+  RawFloatColumnPy GetRawFloatColumn(const string& col) const;
+  StringColumnPy GetStringColumn(const string& col) const;
+  vector<BinnedFloatColumnPy> GetBinnedFloatColumns() const;
+  vector<RawFloatColumnPy> GetRawFloatColumns() const;
+  vector<StringColumnPy> GetStringColumns() const;
 
   DataStore* data_store() {
     return data_store_.get();
@@ -58,7 +58,6 @@ class DataStorePy {
                const vector<string>& string_cols);
 
  private:
-
   unique_ptr<DataStore> data_store_;
 };
 
