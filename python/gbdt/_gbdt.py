@@ -1,7 +1,7 @@
 import sys
 import os
 abspath = os.path.dirname(os.path.abspath(__file__))
-sys.path.append('{0}/../../bazel-bin/src/python'.format(abspath))
+sys.path.append('{0}/lib'.format(abspath))
 
 from libgbdt import DataStore
 from libgbdt import Forest
