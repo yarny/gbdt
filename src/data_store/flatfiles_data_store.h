@@ -40,7 +40,7 @@ public:
 private:
   bool LoadColumn(const string& column_name);
   unique_ptr<Column> LoadStringColumn(ifstream& in, const string& column_name);
-  unique_ptr<Column> LoadFloatColumn(ifstream& in, const string& column_name, bool binned);
+  unique_ptr<Column> LoadFloatColumn(ifstream& in, const string& column_name, bool bucketized);
   string FindFlatfile(const string& column_name) const;
 
   vector<string> flatfiles_dirs_;

@@ -35,11 +35,11 @@ DataStorePy::DataStorePy() {}
 
 
 void DataStorePy::LoadTSV(const vector<string>& tsvs,
-                          const vector<string>& binned_float_cols,
+                          const vector<string>& bucketized_float_cols,
                           const vector<string>& raw_float_cols,
                           const vector<string>& string_cols) {
   Config config;
-  for (const auto& col : binned_float_cols) {
+  for (const auto& col : bucketized_float_cols) {
     config.add_float_feature(col);
   }
   for (const auto& col : raw_float_cols) {
@@ -70,18 +70,18 @@ RawFloatColumnPy DataStorePy::GetRawFloatColumn(const string& col) const {
   return RawFloatColumnPy(column);
 }
 
-BinnedFloatColumnPy DataStorePy::GetBinnedFloatColumn(const string& col) const {
-  const auto* column = data_store_ ? data_store_->GetBinnedFloatColumn(col) : nullptr;
+BucketizedFloatColumnPy DataStorePy::GetBucketizedFloatColumn(const string& col) const {
+  const auto* column = data_store_ ? data_store_->GetBucketizedFloatColumn(col) : nullptr;
   if (!column) ThrowException(Status(error::NOT_FOUND,
                                       fmt::format("Failed to find {0} from data store", col)));
-  return BinnedFloatColumnPy(column);
+  return BucketizedFloatColumnPy(column);
 }
 
-vector<BinnedFloatColumnPy> DataStorePy::GetBinnedFloatColumns() const {
-  auto columns = data_store_ ? data_store_->GetBinnedFloatColumns() : vector<const BinnedFloatColumn*> ();
-  vector<BinnedFloatColumnPy> column_pys;
+vector<BucketizedFloatColumnPy> DataStorePy::GetBucketizedFloatColumns() const {
+  auto columns = data_store_ ? data_store_->GetBucketizedFloatColumns() : vector<const BucketizedFloatColumn*> ();
+  vector<BucketizedFloatColumnPy> column_pys;
   for (const auto* column : columns) {
-    column_pys.emplace_back(BinnedFloatColumnPy(column));
+    column_pys.emplace_back(BucketizedFloatColumnPy(column));
   }
   return column_pys;
 }
@@ -115,18 +115,23 @@ void InitDataStorePy(py::module &m) {
       .def(py::init<>())
       .def("load_tsv",
            &DataStorePy::LoadTSV,
+           "Loads tsv into data_store. \nThe data store accepts both float and string columns."
+           "The gbdt package bucketizes float features to reduce time complexity and memory footprint."
+           "Please load all float features as bucketized_float_cols and other float cols like target "
+           "or weights as raw_float_cols.",
            py::arg("tsvs"),
-           py::arg("binned_float_cols")=vector<string>(),
+           py::arg("bucketized_float_cols")=vector<string>(),
            py::arg("raw_float_cols")=vector<string>(),
            py::arg("string_cols")=vector<string>())
       .def("__len__", &DataStorePy::num_rows)
       .def("num_cols", &DataStorePy::num_cols)
-      .def("get_binned_float_col", &DataStorePy::GetBinnedFloatColumn)
+      .def("get_bucketized_float_col", &DataStorePy::GetBucketizedFloatColumn)
       .def("get_raw_float_col", &DataStorePy::GetRawFloatColumn)
       .def("get_string_col", &DataStorePy::GetStringColumn)
-      .def("get_binned_float_cols", &DataStorePy::GetBinnedFloatColumns)
+      .def("get_bucketized_float_cols", &DataStorePy::GetBucketizedFloatColumns)
       .def("get_raw_float_cols", &DataStorePy::GetRawFloatColumns)
       .def("get_string_cols", &DataStorePy::GetStringColumns)
       .def("clear", &DataStorePy::Clear)
+      .def("__repl__", &DataStorePy::Description)
       .def("__str__", &DataStorePy::Description);
 }

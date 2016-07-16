@@ -99,7 +99,7 @@ Status TSVDataStore::LoadTSVs(const vector<string>& tsvs, const Config& config) 
 Status TSVDataStore::ProcessBlock(const TSVBlock* block) {
   {
     ThreadPool pool(FLAGS_num_threads);
-    for (auto& p : binned_float_columns_) {
+    for (auto& p : bucketized_float_columns_) {
       pool.Enqueue([&] { p.first->Add(&block->float_columns()[p.second]); });
     }
     for (auto& p : raw_float_columns_) {
@@ -116,7 +116,7 @@ Status TSVDataStore::ProcessBlock(const TSVBlock* block) {
 Status TSVDataStore::Finalize() {
   {
     ThreadPool pool(FLAGS_num_threads);
-    for (auto& p : binned_float_columns_) {
+    for (auto& p : bucketized_float_columns_) {
       pool.Enqueue([&] { p.first->Finalize(); });
     }
     for (auto& p : string_columns_) {
@@ -142,16 +142,16 @@ Status TSVDataStore::SetupColumns(const string& first_tsv, const Config& config)
     map_from_header_to_index[headers[i]] = i;
   }
 
-  // Add float features as binned float columns.
+  // Add float features as bucketized float columns.
   for (const string& header : config.float_feature()) {
     auto it = map_from_header_to_index.find(header);
     if (it == map_from_header_to_index.end()) {
       return Status(error::NOT_FOUND,
                     fmt::format("Failed to find column {0} in {1}.", header, first_tsv));
     }
-    column_map_[header].reset(new BinnedFloatColumn(header));
-    binned_float_columns_.push_back(
-        make_pair(static_cast<BinnedFloatColumn*>(column_map_[header].get()),
+    column_map_[header].reset(new BucketizedFloatColumn(header));
+    bucketized_float_columns_.push_back(
+        make_pair(static_cast<BucketizedFloatColumn*>(column_map_[header].get()),
                   float_column_indices_.size()));
     float_column_indices_.push_back(it->second);
   }

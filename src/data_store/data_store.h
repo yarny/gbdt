@@ -30,13 +30,13 @@ class DataStore {
 public:
   virtual ~DataStore();
 
-  const BinnedFloatColumn* GetBinnedFloatColumn(const string& column_name);
+  const BucketizedFloatColumn* GetBucketizedFloatColumn(const string& column_name);
   const RawFloatColumn* GetRawFloatColumn(const string& column_name);
   const StringColumn* GetStringColumn(const string& column_name);
   uint num_rows() const;
   uint num_cols() const;
 
-  vector<const BinnedFloatColumn*> GetBinnedFloatColumns() const;
+  vector<const BucketizedFloatColumn*> GetBucketizedFloatColumns() const;
   vector<const RawFloatColumn*> GetRawFloatColumns() const;
   vector<const StringColumn*> GetStringColumns() const;
 

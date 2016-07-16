@@ -33,7 +33,7 @@ class Column {
  public:
   enum ColumnType {
     kStringColumn = 0,
-    kBinnedFloatColumn = 1,
+    kBucketizedFloatColumn = 1,
     kRawFloatColumn = 2,
   };
 
@@ -42,8 +42,8 @@ class Column {
   static unique_ptr<Column>
       CreateStringColumn(const string& name, const vector<string>& raw_strings);
   static unique_ptr<Column>
-      CreateBinnedFloatColumn(const string& name, const vector<float>& raw_floats,
-                              uint num_bins=30000);
+      CreateBucketizedFloatColumn(const string& name, const vector<float>& raw_floats,
+                                  uint num_buckets=30000);
   static unique_ptr<Column>
       CreateRawFloatColumn(const string& name, vector<float>&& raw_floats);
 
@@ -64,7 +64,7 @@ private:
 };
 
 // Integerized Column is a column where the values are represented by integers.
-// They can be either StringColumn or BinnedFloatColumn.
+// They can be either StringColumn or BucketizedFloatColumn.
 class IntegerizedColumn : public Column {
  public:
   // An interface to access integer vector of different bits.
@@ -134,49 +134,49 @@ protected:
   unordered_map<string, uint> map_to_indices_ = { {"__missing__", 0} };
 };
 
-// BinnedFloatColumn.
+// BucketizedFloatColumn.
 // Float NAN is use to represent missing.
-class BinnedFloatColumn : public IntegerizedColumn {
+class BucketizedFloatColumn : public IntegerizedColumn {
  public:
-  BinnedFloatColumn(const string& name, int num_bins=30000);
-  virtual ~BinnedFloatColumn();
+  BucketizedFloatColumn(const string& name, int num_buckets=30000);
+  virtual ~BucketizedFloatColumn();
 
   inline float get_row_max(uint i) const {
-    return get_bin_max((*col_)[i]);
+    return get_bucket_max((*col_)[i]);
   }
   inline float get_row_min(uint i) const {
-    return get_bin_min((*col_)[i]);
+    return get_bucket_min((*col_)[i]);
   }
-  inline float get_bin_max(uint bin_index) const {
-    return bin_maxs_[bin_index];
+  inline float get_bucket_max(uint bucket_index) const {
+    return bucket_maxs_[bucket_index];
   }
-  inline float get_bin_min(uint bin_index) const {
-    return bin_mins_[bin_index];
+  inline float get_bucket_min(uint bucket_index) const {
+    return bucket_mins_[bucket_index];
   }
 
-  // max_int is num_bins + 1. All values exceeding the max upper bound are
+  // max_int is num_buckets + 1. All values exceeding the max upper bound are
   // put in the bin #bins_.size().
   inline uint max_int() const override {
-    return bin_maxs_.size();
+    return bucket_maxs_.size();
   }
 
-  void BuildBins();
+  void BuildBuckets();
   void Add(const vector<float>* raw_floats);
   void Finalize() override;
 
  private:
-  Status AddBinnedVec(const vector<float>& raw_floats);
+  Status AddBucketizedVec(const vector<float>& raw_floats);
 
-  int num_bins_ = 30000;
+  int num_buckets_ = 30000;
   // Hold the raw floats before bins is built.
   vector<float> buffer_;
 
-  // bin_max to bin index map.
-  map<float, uint> bin_map_;
+  // bucket_max to bucket index map.
+  map<float, uint> bucket_map_;
   // The first bin is NaN representing missing the last bin is always
-  // numeric_limits<float>::max(). The bins are represented as [bin_min, bin_max].
-  vector<float> bin_maxs_;
-  vector<float> bin_mins_;
+  // numeric_limits<float>::max(). The bins are represented as [bucket_min, bucket_max].
+  vector<float> bucket_maxs_;
+  vector<float> bucket_mins_;
 };
 
 // Simply holds a vector of floats.
