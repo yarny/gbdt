@@ -41,10 +41,10 @@ class DataStorePy {
     return (data_store_) ? data_store_->num_cols() : 0;
   }
 
-  BinnedFloatColumnPy GetBinnedFloatColumn(const string& col) const;
+  BucketizedFloatColumnPy GetBucketizedFloatColumn(const string& col) const;
   RawFloatColumnPy GetRawFloatColumn(const string& col) const;
   StringColumnPy GetStringColumn(const string& col) const;
-  vector<BinnedFloatColumnPy> GetBinnedFloatColumns() const;
+  vector<BucketizedFloatColumnPy> GetBucketizedFloatColumns() const;
   vector<RawFloatColumnPy> GetRawFloatColumns() const;
   vector<StringColumnPy> GetStringColumns() const;
 
@@ -53,7 +53,7 @@ class DataStorePy {
   }
 
   void LoadTSV(const vector<string>& tsvs,
-               const vector<string>& binned_float_cols,
+               const vector<string>& bucketized_float_cols,
                const vector<string>& raw_float_cols,
                const vector<string>& string_cols);
 

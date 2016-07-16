@@ -33,7 +33,7 @@ class TSVDataStore : public DataStore {
  public:
   // TSVs can be divided into blocks. The first tsv contains the header file.
   // data_config contains information on how to load the columns. The column
-  // can be loaded as binned_floats, raw_float, or strings.
+  // can be loaded as bucketized_floats, raw_float, or strings.
   TSVDataStore(const vector<string>& tsvs, const Config& config);
   virtual ~TSVDataStore() {}
 
@@ -43,7 +43,7 @@ class TSVDataStore : public DataStore {
   Status SetupColumns(const string& first_tsv, const Config& config);
   Status LoadTSVs(const vector<string>& tsvs, const Config& config);
 
-  vector<pair<BinnedFloatColumn*, int>> binned_float_columns_;
+  vector<pair<BucketizedFloatColumn*, int>> bucketized_float_columns_;
   vector<pair<RawFloatColumn*, int>> raw_float_columns_;
   vector<pair<StringColumn*, int>> string_columns_;
   vector<int> float_column_indices_;

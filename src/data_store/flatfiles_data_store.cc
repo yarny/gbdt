@@ -61,7 +61,7 @@ bool FlatfilesDataStore::LoadColumn(const string& column_name) {
   } else if (column_type == "# dtype=raw_floats") {
     // Read as raw floats.
     column = LoadFloatColumn(in, column_name, false);
-  } else if (column_type == "# dtype=binned_floats") {
+  } else if (column_type == "# dtype=bucketized_floats") {
     column = LoadFloatColumn(in, column_name, true);
   } else {
     LOG(ERROR) << "Unknown flatfile type: " << column_type ;
@@ -99,7 +99,7 @@ unique_ptr<Column> FlatfilesDataStore::LoadStringColumn(ifstream& in, const stri
 
 unique_ptr<Column> FlatfilesDataStore::LoadFloatColumn(ifstream& in,
                                                        const string& column_name,
-                                                       bool binned) {
+                                                       bool bucketized) {
   vector<float> raw_floats;
   while (!in.eof()) {
     string line = ReadLine(in);
@@ -114,7 +114,7 @@ unique_ptr<Column> FlatfilesDataStore::LoadFloatColumn(ifstream& in,
     }
   }
 
-  return binned ? Column::CreateBinnedFloatColumn(column_name, raw_floats) :
+  return bucketized ? Column::CreateBucketizedFloatColumn(column_name, raw_floats) :
       Column::CreateRawFloatColumn(column_name, std::move(raw_floats));
 }
 

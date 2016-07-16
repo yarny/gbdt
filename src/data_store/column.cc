@@ -32,21 +32,21 @@ namespace {
 const long kMaxUInt8 = 256;
 const long kMaxUInt16 = 65536;
 
-void UniformBinning(const map<float, uint>& histograms, uint bin_capacity, vector<float>* bins) {
+void UniformBinning(const map<float, uint>& histograms, uint bucket_capacity, vector<float>* buckets) {
   uint running_sum = 0;
   float upper_limit = NAN;
   for (auto p : histograms) {
     running_sum += p.second;
     upper_limit = p.first;
 
-    if (running_sum >= bin_capacity) {
-      bins->push_back(upper_limit);
+    if (running_sum >= bucket_capacity) {
+      buckets->push_back(upper_limit);
       running_sum = 0;
     }
   }
 
   if (running_sum > 0) {
-    bins->push_back(upper_limit);
+    buckets->push_back(upper_limit);
   }
 }
 
@@ -181,88 +181,88 @@ void StringColumn::Finalize() {
   IntegerizedColumn::Finalize();
 }
 
-BinnedFloatColumn::BinnedFloatColumn(const string& name, int num_bins)
-    : IntegerizedColumn(name, Column::kBinnedFloatColumn), num_bins_(num_bins) {
+BucketizedFloatColumn::BucketizedFloatColumn(const string& name, int num_buckets)
+    : IntegerizedColumn(name, Column::kBucketizedFloatColumn), num_buckets_(num_buckets) {
 }
 
-BinnedFloatColumn::~BinnedFloatColumn() {
+BucketizedFloatColumn::~BucketizedFloatColumn() {
 }
 
-template <typename INT> Status AddBinnedVecHelper(const vector<float>& raw_floats,
-                                                const map<float, uint>& bin_map,
-                                                vector<INT>* col,
-                                                vector<float>* bin_mins) {
+template <typename INT> Status AddBucketizedVecHelper(const vector<float>& raw_floats,
+                                                      const map<float, uint>& bucket_map,
+                                                      vector<INT>* col,
+                                                      vector<float>* bucket_mins) {
   col->reserve(col->size() + raw_floats.size());
   for (auto v : raw_floats) {
     // NAN represents missing and has index 0.
     if (isnan(v)) {
       col->push_back(0);
     } else {
-      auto it = bin_map.lower_bound(v);
-      if (it == bin_map.end()) {
+      auto it = bucket_map.lower_bound(v);
+      if (it == bucket_map.end()) {
         return Status(error::OUT_OF_RANGE,
                       fmt::format(
-                          "This should not happen because the last bin is the max float value. "
+                          "This should not happen because the last bucket is the max float value. "
                           "Value ({0})", v));
       }
-      int bin_id = it->second;
-      col->push_back(bin_id);
-      (*bin_mins)[bin_id] = min((*bin_mins)[bin_id], v);
+      int bucket_id = it->second;
+      col->push_back(bucket_id);
+      (*bucket_mins)[bucket_id] = min((*bucket_mins)[bucket_id], v);
     }
   }
   return Status::OK;
 }
 
-Status BinnedFloatColumn::AddBinnedVec(const vector<float>& raw_floats) {
+Status BucketizedFloatColumn::AddBucketizedVec(const vector<float>& raw_floats) {
   Status status;
   if (max_int() <= kMaxUInt8) {
-    return AddBinnedVecHelper<uint8>(raw_floats, bin_map_, &col_8_, &bin_mins_);
+    return AddBucketizedVecHelper<uint8>(raw_floats, bucket_map_, &col_8_, &bucket_mins_);
   } else if (max_int() <= kMaxUInt16) {
-    return AddBinnedVecHelper<uint16>(raw_floats, bin_map_, &col_16_, &bin_mins_);
+    return AddBucketizedVecHelper<uint16>(raw_floats, bucket_map_, &col_16_, &bucket_mins_);
   } else {
-    return AddBinnedVecHelper<uint32>(raw_floats, bin_map_, &col_32_, &bin_mins_);
+    return AddBucketizedVecHelper<uint32>(raw_floats, bucket_map_, &col_32_, &bucket_mins_);
   }
   return Status::OK;
 }
 
-void BinnedFloatColumn::Add(const vector<float>* raw_floats) {
+void BucketizedFloatColumn::Add(const vector<float>* raw_floats) {
   if (!status_.ok()) return;
   if (finalized_) {
     status_ = Status(error::FAILED_PRECONDITION, "Cannot run Add after finalized.");
     return;
   }
-  if (bin_maxs_.size() == 0) {
-    // Stage 0: build binning.
+  if (bucket_maxs_.size() == 0) {
+    // Stage 0: build buckets.
     buffer_.reserve(buffer_.size() + raw_floats->size());
     for (const float v : *raw_floats) {
       buffer_.push_back(v);
     }
-    if (buffer_.size() > 100 * num_bins_) {
-      BuildBins();
+    if (buffer_.size() > 100 * num_buckets_) {
+      BuildBuckets();
     }
   } else {
-    status_ = AddBinnedVec(*raw_floats);
+    status_ = AddBucketizedVec(*raw_floats);
   }
 }
 
-void BinnedFloatColumn::Finalize() {
+void BucketizedFloatColumn::Finalize() {
   if (!status_.ok()) return;
   if (finalized_) {
     status_ = Status(error::FAILED_PRECONDITION, "Cannot run Add after finalized.");
     return;
   }
-  if (bin_maxs_.size() == 0) {
-    BuildBins();
+  if (bucket_maxs_.size() == 0) {
+    BuildBuckets();
     if (!status_.ok()) return;
   }
-  bin_map_.clear();
+  bucket_map_.clear();
   IntegerizedColumn::Finalize();
 }
 
-void BinnedFloatColumn::BuildBins() {
+void BucketizedFloatColumn::BuildBuckets() {
   if (!status_.ok()) return;
   if (finalized_) {
-    status_ = Status(error::FAILED_PRECONDITION, "Cannot run BuildBins after it is finalized");
+    status_ = Status(error::FAILED_PRECONDITION, "Cannot run BuildBuckets after it is finalized");
     return;
   }
   const auto& raw_floats = buffer_;
@@ -274,16 +274,16 @@ void BinnedFloatColumn::BuildBins() {
       ++histograms[v];
     }
   }
-  uint bin_capacity = max(static_cast<unsigned long>(1), raw_floats.size() / num_bins_);
+  uint bucket_capacity = max(static_cast<unsigned long>(1), raw_floats.size() / num_buckets_);
 
-  // Put NaN at the beginning of the bins.
-  bin_maxs_.push_back(NAN);
+  // Put NaN at the beginning of the buckets.
+  bucket_maxs_.push_back(NAN);
   int left_over = raw_floats.size();
-  // First, any single value with counts > average bin capacity is put in their own bins.
+  // First, any single value with counts > average bucket capacity is put in their own buckets.
   auto it = histograms.begin();
   while (it != histograms.end()) {
-    if (it->second >= bin_capacity) {
-      bin_maxs_.push_back(it->first);
+    if (it->second >= bucket_capacity) {
+      bucket_maxs_.push_back(it->first);
       left_over -= it->second;
       it = histograms.erase(it);
     } else {
@@ -292,19 +292,19 @@ void BinnedFloatColumn::BuildBins() {
   }
   // Use uniform binning for the rest.
   uint left_over_capacity =
-      max(static_cast<unsigned long>(1), left_over / (num_bins_ - bin_maxs_.size()));
-  UniformBinning(histograms, left_over_capacity, &bin_maxs_);
-  sort(bin_maxs_.begin() + 1, bin_maxs_.end());
-  bin_maxs_.push_back(numeric_limits<float>::max());
+      max(static_cast<unsigned long>(1), left_over / (num_buckets_ - bucket_maxs_.size()));
+  UniformBinning(histograms, left_over_capacity, &bucket_maxs_);
+  sort(bucket_maxs_.begin() + 1, bucket_maxs_.end());
+  bucket_maxs_.push_back(numeric_limits<float>::max());
 
-  for (int i = 1; i < bin_maxs_.size(); ++i) {
-    bin_map_[bin_maxs_[i]] = i;
+  for (int i = 1; i < bucket_maxs_.size(); ++i) {
+    bucket_map_[bucket_maxs_[i]] = i;
   }
 
-  bin_maxs_.shrink_to_fit();
-  // Initialize bin_mins_ to be bins_maxs_.
-  bin_mins_ = bin_maxs_;
-  status_ = AddBinnedVec(buffer_);
+  bucket_maxs_.shrink_to_fit();
+  // Initialize bucket_mins_ to be buckets_maxs_.
+  bucket_mins_ = bucket_maxs_;
+  status_ = AddBucketizedVec(buffer_);
   buffer_.clear();
   buffer_.shrink_to_fit();
 }
@@ -317,9 +317,9 @@ unique_ptr<Column> Column::CreateStringColumn(
   return unique_ptr<Column>(column);
 }
 
-unique_ptr<Column> Column::CreateBinnedFloatColumn(
-    const string& name, const vector<float>& raw_floats, uint num_bins) {
-  auto* column = new BinnedFloatColumn(name, num_bins);
+unique_ptr<Column> Column::CreateBucketizedFloatColumn(
+    const string& name, const vector<float>& raw_floats, uint num_buckets) {
+  auto* column = new BucketizedFloatColumn(name, num_buckets);
   column->Add(&raw_floats);
   column->Finalize();
   return unique_ptr<Column>(column);

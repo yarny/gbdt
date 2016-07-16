@@ -38,17 +38,17 @@ const RawFloatColumn* DataStore::GetRawFloatColumn(const string& column_name) {
   return static_cast<const RawFloatColumn*>(column);
 }
 
-const BinnedFloatColumn* DataStore::GetBinnedFloatColumn(const string& column_name) {
+const BucketizedFloatColumn* DataStore::GetBucketizedFloatColumn(const string& column_name) {
   const auto* column = GetColumn(column_name);
   if (!column) {
     LOG(ERROR) << "Failed to load column " << column_name << " from data store.";
     return nullptr;
   }
-  if (column->type() != Column::kBinnedFloatColumn) {
-    LOG(ERROR) << column_name << " is NOT a BinnedFloatColumn.";
+  if (column->type() != Column::kBucketizedFloatColumn) {
+    LOG(ERROR) << column_name << " is NOT a BucketizedFloatColumn.";
     return nullptr;
   }
-  return static_cast<const BinnedFloatColumn*>(column);
+  return static_cast<const BucketizedFloatColumn*>(column);
 }
 
 const StringColumn* DataStore::GetStringColumn(const string& column_name) {
@@ -83,12 +83,12 @@ uint CountColumn(const unordered_map<string, unique_ptr<Column>>& column_map,
 
   return count;
 }
-vector<const BinnedFloatColumn*> DataStore::GetBinnedFloatColumns() const {
-  vector<const BinnedFloatColumn*> columns;
-  auto type = Column::kBinnedFloatColumn;
+vector<const BucketizedFloatColumn*> DataStore::GetBucketizedFloatColumns() const {
+  vector<const BucketizedFloatColumn*> columns;
+  auto type = Column::kBucketizedFloatColumn;
   for (const auto& p : column_map_) {
       if (p.second->type() == type) {
-        columns.emplace_back(static_cast<const BinnedFloatColumn*>(p.second.get()));
+        columns.emplace_back(static_cast<const BucketizedFloatColumn*>(p.second.get()));
     }
   }
   return columns;
@@ -122,9 +122,9 @@ const Column* DataStore::GetColumn(const string& column_name) {
 }
 
 string DataStore::Description() const {
-  return fmt::format("DataStore with {0} binned float, {1} raw float and "
+  return fmt::format("DataStore with {0} bucketized float, {1} raw float and "
                      "{2} string columns, each with {3} rows.",
-                     GetBinnedFloatColumns().size(),
+                     GetBucketizedFloatColumns().size(),
                      GetRawFloatColumns().size(),
                      GetStringColumns().size(),
                      num_rows());

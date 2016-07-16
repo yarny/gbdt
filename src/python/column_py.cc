@@ -20,7 +20,7 @@
 
 #include "external/cppformat/format.h"
 
-using gbdt::BinnedFloatColumnPy;
+using gbdt::BucketizedFloatColumnPy;
 using gbdt::RawFloatColumnPy;
 using gbdt::StringColumnPy;
 
@@ -56,28 +56,28 @@ float RawFloatColumnPy::get(int i) const {
   return (*column_)[i];
 }
 
-int BinnedFloatColumnPy::size() const {
+int BucketizedFloatColumnPy::size() const {
   return column_ ? column_->size() : 0;
 }
 
-const string BinnedFloatColumnPy::name() const {
+const string BucketizedFloatColumnPy::name() const {
   return column_ ? column_->name() : "empty column.";
 }
 
-pair<float, float> BinnedFloatColumnPy::get(int i) const {
+pair<float, float> BucketizedFloatColumnPy::get(int i) const {
   if (!column_) ThrowException(Status(error::NOT_FOUND, "The column is null."));
   if (i >= column_->size()) ThrowException(Status(error::OUT_OF_RANGE, "Index out of range."));
 
   return make_pair(column_->get_row_min(i), column_->get_row_max(i));
 }
 
-vector<pair<float, float>> BinnedFloatColumnPy::GetBins() const {
+vector<pair<float, float>> BucketizedFloatColumnPy::GetBuckets() const {
   if (!column_) ThrowException(Status(error::NOT_FOUND, "The column is null."));
-  vector<pair<float, float>> bins;
+  vector<pair<float, float>> buckets;
   for (int i = 0; i < column_->max_int(); ++i) {
-    bins.emplace_back(column_->get_bin_min(i), column_->get_bin_max(i));
+    buckets.emplace_back(column_->get_bucket_min(i), column_->get_bucket_max(i));
   }
-  return bins;
+  return buckets;
 }
 
 }  // namespace gbdt
@@ -96,10 +96,10 @@ void InitRawFloatColumnPy(py::module &m) {
       .def("__str__", &RawFloatColumnPy::name);
 }
 
-void InitBinnedFloatColumnPy(py::module &m) {
-  py::class_<BinnedFloatColumnPy>(m, "BinnedFloatColumn")
-      .def("__len__", &BinnedFloatColumnPy::size)
-      .def("__getitem__", &BinnedFloatColumnPy::get)
-      .def("__str__", &BinnedFloatColumnPy::name)
-      .def("bins", &BinnedFloatColumnPy::GetBins);
+void InitBucketizedFloatColumnPy(py::module &m) {
+  py::class_<BucketizedFloatColumnPy>(m, "BucketizedFloatColumn")
+      .def("__len__", &BucketizedFloatColumnPy::size)
+      .def("__getitem__", &BucketizedFloatColumnPy::get)
+      .def("__str__", &BucketizedFloatColumnPy::name)
+      .def("buckets", &BucketizedFloatColumnPy::GetBuckets);
 }

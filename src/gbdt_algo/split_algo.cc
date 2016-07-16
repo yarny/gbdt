@@ -33,7 +33,7 @@ namespace gbdt {
 const double kFloatTolerance = 1e-6;
 
 pair<VectorSlice<uint>, VectorSlice<uint>>
-Partition(const BinnedFloatColumn* feature, const Split& split, VectorSlice<uint> samples) {
+Partition(const BucketizedFloatColumn* feature, const Split& split, VectorSlice<uint> samples) {
   CHECK(split.has_float_split()) << "Split and feature type mismatch for " << feature->name();
   uint left_size = 0;
   bool missing_to_right = split.float_split().missing_to_right_child();
@@ -82,8 +82,8 @@ pair<VectorSlice<uint>, VectorSlice<uint>>
 Partition(const Column* feature, const Split& split, VectorSlice<uint> samples) {
   if (feature->type() == Column::kStringColumn) {
     return Partition(static_cast<const StringColumn*>(feature), split, samples);
-  } else if (feature->type() == Column::kBinnedFloatColumn) {
-    return Partition(static_cast<const BinnedFloatColumn*>(feature), split, samples);
+  } else if (feature->type() == Column::kBucketizedFloatColumn) {
+    return Partition(static_cast<const BucketizedFloatColumn*>(feature), split, samples);
   } else {
     return make_pair(VectorSlice<uint>(samples, 0, 0), VectorSlice<uint>(samples));
   }
@@ -199,7 +199,7 @@ bool FindBestSplitPoint(const IntegerizedColumn& feature,
 // weights into each unique value represented by an integer,
 // then we iterate over [0, num_unique_values) to find the best split
 // point. The time complexity is O(n+num_unique_values).
-bool FindBestFloatSplit(const BinnedFloatColumn& feature,
+bool FindBestFloatSplit(const BucketizedFloatColumn& feature,
                         FloatVector w,
                         const vector<GradientData>* gradient_data_vec,
                         const VectorSlice<uint>& samples,
@@ -217,8 +217,8 @@ bool FindBestFloatSplit(const BinnedFloatColumn& feature,
   split->mutable_float_split()->set_missing_to_right_child(split_point.missing_on_right);
   
   split->mutable_float_split()->set_threshold(
-      (feature.get_bin_max(histogram.value(split_point.left_point)) +
-       feature.get_bin_min(histogram.value(split_point.left_point + 1))) / 2.0);
+      (feature.get_bucket_max(histogram.value(split_point.left_point)) +
+       feature.get_bucket_min(histogram.value(split_point.left_point + 1))) / 2.0);
   return true;
 }
 
@@ -266,8 +266,8 @@ bool FindBestSplit(const Column* feature,
     case Column::kStringColumn:
       return FindBestStringSplit(static_cast<const StringColumn&>(*feature),
                                  w, gradient_data_vec, samples, config, total, split);
-    case Column::kBinnedFloatColumn:
-      return FindBestFloatSplit(static_cast<const BinnedFloatColumn&>(*feature),
+    case Column::kBucketizedFloatColumn:
+      return FindBestFloatSplit(static_cast<const BucketizedFloatColumn&>(*feature),
                                 w, gradient_data_vec, samples, config, total, split);
     default:
       return false;

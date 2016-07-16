@@ -21,7 +21,7 @@
 
 PYBIND11_PLUGIN(libgbdt) {
     py::module m("libgbdt", "GBDT python library");
-    InitBinnedFloatColumnPy(m);
+    InitBucketizedFloatColumnPy(m);
     InitRawFloatColumnPy(m);
     InitStringColumnPy(m);
     InitDataStorePy(m);

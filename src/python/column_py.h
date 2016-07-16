@@ -44,22 +44,22 @@ class RawFloatColumnPy {
   const RawFloatColumn* column_ = nullptr;
 };
 
-class BinnedFloatColumnPy {
+class BucketizedFloatColumnPy {
  public:
-  BinnedFloatColumnPy(const BinnedFloatColumn* column) : column_(column) {}
+  BucketizedFloatColumnPy(const BucketizedFloatColumn* column) : column_(column) {}
   int size() const;
   const string name() const;
   pair<float, float> get(int i) const;
 
-  vector<pair<float, float> > GetBins() const;
+  vector<pair<float, float> > GetBuckets() const;
  private:
-  const BinnedFloatColumn* column_ = nullptr;
+  const BucketizedFloatColumn* column_ = nullptr;
 };
 
 }  // namespace gbdt
 
 void InitStringColumnPy(py::module &m);
 void InitRawFloatColumnPy(py::module &m);
-void InitBinnedFloatColumnPy(py::module &m);
+void InitBucketizedFloatColumnPy(py::module &m);
 
 #endif // COLUMN_PY_H_
