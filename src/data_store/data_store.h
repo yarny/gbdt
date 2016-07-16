@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include "column.h"
 #include "src/base/base.h"
@@ -29,15 +30,17 @@ class DataStore {
 public:
   virtual ~DataStore();
 
-  const RawFloatColumn* GetRawFloatColumn(const string& column_name);
   const BinnedFloatColumn* GetBinnedFloatColumn(const string& column_name);
+  const RawFloatColumn* GetRawFloatColumn(const string& column_name);
   const StringColumn* GetStringColumn(const string& column_name);
-  virtual const Column* GetColumn(const string& column_name);
   uint num_rows() const;
   uint num_cols() const;
-  uint num_binned_float_cols() const;
-  uint num_raw_float_cols() const;
-  uint num_string_cols() const;
+
+  vector<const BinnedFloatColumn*> GetBinnedFloatColumns() const;
+  vector<const RawFloatColumn*> GetRawFloatColumns() const;
+  vector<const StringColumn*> GetStringColumns() const;
+
+  virtual const Column* GetColumn(const string& column_name);
   string Description() const;
   const Status& status() const {
     return status_;

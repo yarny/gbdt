@@ -20,7 +20,9 @@
 #include <string>
 #include <vector>
 
+#include "external/cppformat/format.h"
 #include "gbdt_py_base.h"
+#include "src/data_store/column.h"
 #include "src/data_store/data_store.h"
 #include "src/data_store/tsv_data_store.h"
 #include "src/proto/config.pb.h"
@@ -30,6 +32,7 @@ using gbdt::DataStorePy;
 namespace gbdt {
 
 DataStorePy::DataStorePy() {}
+
 
 void DataStorePy::LoadTSV(const vector<string>& tsvs,
                           const vector<string>& binned_float_cols,
@@ -53,19 +56,52 @@ void DataStorePy::LoadTSV(const vector<string>& tsvs,
   data_store_ = std::move(data_store);
 }
 
-const vector<float>* DataStorePy::GetRawFloatCol(const string& col) const {
-  const auto* column = data_store_ ? data_store_->GetRawFloatColumn(col) : nullptr;
-  return column ? &column->raw_floats() : nullptr;
+StringColumnPy DataStorePy::GetStringColumn(const string& col) const {
+  const auto* column = data_store_ ? data_store_->GetStringColumn(col) : nullptr;
+  if (!column) ThrowException(Status(error::NOT_FOUND,
+                                      fmt::format("Failed to find {0} from data store", col)));
+  return StringColumnPy(column);
 }
 
-vector<string> DataStorePy::GetStringCol(const string& col) const {
-  const auto* column = data_store_ ? data_store_->GetStringColumn(col) : nullptr;
-  if (!column) return vector<string>();
-  vector<string> raw_strings(data_store_->num_rows());
-  for (int i = 0; i < column->size(); ++i) {
-    raw_strings[i] = column->get_row_string(i);
+RawFloatColumnPy DataStorePy::GetRawFloatColumn(const string& col) const {
+  const auto* column = data_store_ ? data_store_->GetRawFloatColumn(col) : nullptr;
+  if (!column) ThrowException(Status(error::NOT_FOUND,
+                                      fmt::format("Failed to find {0} from data store", col)));
+  return RawFloatColumnPy(column);
+}
+
+BinnedFloatColumnPy DataStorePy::GetBinnedFloatColumn(const string& col) const {
+  const auto* column = data_store_ ? data_store_->GetBinnedFloatColumn(col) : nullptr;
+  if (!column) ThrowException(Status(error::NOT_FOUND,
+                                      fmt::format("Failed to find {0} from data store", col)));
+  return BinnedFloatColumnPy(column);
+}
+
+vector<BinnedFloatColumnPy> DataStorePy::GetBinnedFloatColumns() const {
+  auto columns = data_store_ ? data_store_->GetBinnedFloatColumns() : vector<const BinnedFloatColumn*> ();
+  vector<BinnedFloatColumnPy> column_pys;
+  for (const auto* column : columns) {
+    column_pys.emplace_back(BinnedFloatColumnPy(column));
   }
-  return raw_strings;
+  return column_pys;
+}
+
+vector<RawFloatColumnPy> DataStorePy::GetRawFloatColumns() const {
+  auto columns = data_store_ ? data_store_->GetRawFloatColumns() : vector<const RawFloatColumn*>();
+  vector<RawFloatColumnPy> column_pys;
+  for (const auto* column : columns) {
+    column_pys.emplace_back(RawFloatColumnPy(column));
+  }
+  return column_pys;
+}
+
+vector<StringColumnPy> DataStorePy::GetStringColumns() const {
+  auto columns = data_store_ ? data_store_->GetStringColumns() : vector<const StringColumn*>();
+  vector<StringColumnPy> column_pys;
+  for (const auto* column : columns) {
+    column_pys.emplace_back(StringColumnPy(column));
+  }
+  return column_pys;
 }
 
 void DataStorePy::Clear() {
@@ -85,12 +121,12 @@ void InitDataStorePy(py::module &m) {
            py::arg("string_cols")=vector<string>())
       .def("__len__", &DataStorePy::num_rows)
       .def("num_cols", &DataStorePy::num_cols)
-      .def("num_rows", &DataStorePy::num_rows)
-      .def("num_binned_float_cols", &DataStorePy::num_binned_float_cols)
-      .def("num_raw_float_cols", &DataStorePy::num_raw_float_cols)
-      .def("num_string_cols", &DataStorePy::num_string_cols)
-      .def("get_raw_float_col", &DataStorePy::GetRawFloatCol, py::return_value_policy::reference)
-      .def("get_string_col", &DataStorePy::GetStringCol)
+      .def("get_binned_float_col", &DataStorePy::GetBinnedFloatColumn)
+      .def("get_raw_float_col", &DataStorePy::GetRawFloatColumn)
+      .def("get_string_col", &DataStorePy::GetStringColumn)
+      .def("get_binned_float_cols", &DataStorePy::GetBinnedFloatColumns)
+      .def("get_raw_float_cols", &DataStorePy::GetRawFloatColumns)
+      .def("get_string_cols", &DataStorePy::GetStringColumns)
       .def("clear", &DataStorePy::Clear)
       .def("__str__", &DataStorePy::Description);
 }

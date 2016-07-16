@@ -37,14 +37,30 @@ cc_library(
    srcs = [ "datastore_py.cc" ],
    hdrs = [ "datastore_py.h" ],
    deps = [
+       "//external:cppformat-lib",
        "//external:pybind11-lib",
        "//src/data_store:data_store",
        "//src/data_store:tsv_data_store",
        "//src/proto:config_proto_cc",
+       ":column_py",
        ":gbdt_py_base",
    ],
    copts = [ "-I/usr/include/python2.7",  ],
 )
+
+cc_library(
+   name = "column_py",
+   srcs = [ "column_py.cc" ],
+   hdrs = [ "column_py.h" ],
+   deps = [
+       "//external:cppformat-lib",
+       "//external:pybind11-lib",
+       "//src/data_store:column",
+       ":gbdt_py_base",
+   ],
+   copts = [ "-I/usr/include/python2.7",  ],
+)
+
 
 cc_library(
    name = "forest_py",
