@@ -4,7 +4,7 @@ The package can be installed as a python package or compiled as C++ biinary.
 
 Python Installation Instructions
 ------------------------
-Precompiled packages are available for linux x86_64 platform. To install, just run
+Precompiled packages are available for linux x86_64 platform and python 2. To install, just run
 `pip install git+https://github.com/yarny/gbdt.git`
 
 

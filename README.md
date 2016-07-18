@@ -17,6 +17,10 @@ When is GBDT good for you?
   * GBDT implements various pointwise, pairwise, listingwis loss functions including mse, logloss, huberized hinge loss, pairwise logloss,
 [GBRank](http://www.cc.gatech.edu/~zha/papers/fp086-zheng.pdf) and [LambdaMart](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/MSR-TR-2010-82.pdf). It supports easily addition of your own custom loss functions.
 
+Installation (python2.7 + linux x86_64):
+---------
+`pip install git+https://github.com/yarny/gbdt.git`
+
 Documentations
 ---------
 * Installation instructions can be found at [docs/INSTALL.md](https://github.com/yarny/gbdt/blob/master/docs/INSTALL.md).
