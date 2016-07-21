@@ -35,7 +35,7 @@ class FindSplitPointTest : public ::testing::Test {
 };
 
 TEST_F(FindSplitPointTest, FindFloatSplitPoint) {
-  auto feature = Column::CreateBinnedFloatColumn(
+  auto feature = Column::CreateBucketizedFloatColumn(
       "foo", vector<float>({1, 3, 5, 3, 1, 7, 5, 7, 3, 5}));
 
   Split split;
@@ -46,7 +46,7 @@ TEST_F(FindSplitPointTest, FindFloatSplitPoint) {
 }
 
 TEST_F(FindSplitPointTest, FindFloatSplitPointWithMissingValues) {
-  auto feature = Column::CreateBinnedFloatColumn(
+  auto feature = Column::CreateBucketizedFloatColumn(
       "foo", vector<float>({1, 3, 5, 3, 1, NAN, 5, NAN, 3, 5}));
 
   Split split;
@@ -86,7 +86,7 @@ TEST_F(FindSplitPointTest, FindStringSplitOutOfOrder) {
 }
 
 TEST_F(FindSplitPointTest, NotEnoughSamplesFloat) {
-  auto feature = Column::CreateBinnedFloatColumn(
+  auto feature = Column::CreateBucketizedFloatColumn(
       "foo", vector<float>({1, 3, 5, 3, 1, 7, 5, 7, 3, 5}));
 
   Split split;
@@ -108,7 +108,7 @@ TEST_F(FindSplitPointTest, NotEnoughSamplesString) {
 }
 
 TEST_F(FindSplitPointTest, ConstFloatFeature) {
-  auto feature = Column::CreateBinnedFloatColumn(
+  auto feature = Column::CreateBucketizedFloatColumn(
       "foo", vector<float>({1, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
 
   Split split;
@@ -130,7 +130,7 @@ TEST_F(FindSplitPointTest, ConstStringFeature) {
 }
 
 TEST_F(FindSplitPointTest, IrrelevantFeature) {
-  auto feature = Column::CreateBinnedFloatColumn(
+  auto feature = Column::CreateBucketizedFloatColumn(
       "foo", vector<float>({1, 3, 1, 3, 1, 3, 1, 3, 1, 3}));
   vector<double> g = {1, 1, -1, -1, 1, 1, -1, -1, 1, 1};
   vector<uint> samples = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -152,7 +152,7 @@ class PartitionTest : public ::testing::Test {
   void SetUp() {
     feature0_ = Column::CreateStringColumn(
         "foo", { "red", "red", "blue", "green", "red", "green", "yellow", "green" });
-    feature1_ = Column::CreateBinnedFloatColumn(
+    feature1_ = Column::CreateBucketizedFloatColumn(
         "bar", {5, 3, 7, 1, 2, 0, 6, 4});
     samples_.resize(feature0_->size());
     for (uint i = 0; i < samples_.size(); ++i) {
@@ -218,7 +218,7 @@ TEST_F(PartitionTest, PartitionFloatColumnPartial) {
 }
 
 TEST_F(PartitionTest, PartitionFloatColumnWithMissing) {
-  auto feature = Column::CreateBinnedFloatColumn(
+  auto feature = Column::CreateBucketizedFloatColumn(
       "hello", {4, 5, NAN, 3, NAN, NAN, 2, 1});
   Split split;
   split.mutable_float_split()->set_threshold(2.5);

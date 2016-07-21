@@ -32,19 +32,19 @@ class DataStoreTest : public ::testing::Test {
 };
 
 TEST_F(DataStoreTest, TestGetColumn) {
-  EXPECT_NE(nullptr, data_store_->GetBinnedFloatColumn("foo"));
+  EXPECT_NE(nullptr, data_store_->GetBucketizedFloatColumn("foo"));
   EXPECT_NE(nullptr, data_store_->GetRawFloatColumn("foo2"));
   EXPECT_NE(nullptr, data_store_->GetStringColumn("bar"));
 
   EXPECT_EQ(nullptr, data_store_->GetRawFloatColumn("foo"));
   EXPECT_EQ(nullptr, data_store_->GetStringColumn("foo"));
-  EXPECT_EQ(nullptr, data_store_->GetBinnedFloatColumn("foo2"));
+  EXPECT_EQ(nullptr, data_store_->GetBucketizedFloatColumn("foo2"));
   EXPECT_EQ(nullptr, data_store_->GetStringColumn("foo2"));
-  EXPECT_EQ(nullptr, data_store_->GetBinnedFloatColumn("bar"));
+  EXPECT_EQ(nullptr, data_store_->GetBucketizedFloatColumn("bar"));
   EXPECT_EQ(nullptr, data_store_->GetRawFloatColumn("bar"));
 
   EXPECT_EQ(nullptr, data_store_->GetRawFloatColumn("bar2"));
-  EXPECT_EQ(nullptr, data_store_->GetBinnedFloatColumn("bar2"));
+  EXPECT_EQ(nullptr, data_store_->GetBucketizedFloatColumn("bar2"));
   EXPECT_EQ(nullptr, data_store_->GetStringColumn("bar2"));
 }
 

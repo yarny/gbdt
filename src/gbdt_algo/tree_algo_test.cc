@@ -37,13 +37,13 @@ class TreeBuildingTest : public testing::Test {
     config_.set_num_leaves(10);
     config_.set_example_sampling_rate(1.0);
     config_.set_feature_sampling_rate(1.0);
-    const_float_feature_ = Column::CreateBinnedFloatColumn("feature0", vector<float>(16, 1.3));
+    const_float_feature_ = Column::CreateBucketizedFloatColumn("feature0", vector<float>(16, 1.3));
     const_string_feature_ = Column::CreateStringColumn("feature1", vector<string>(16, "1.3"));
     vector<float> irrelevant_feature = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
-    irrelevant_feature_ = Column::CreateBinnedFloatColumn("feature2", irrelevant_feature);
+    irrelevant_feature_ = Column::CreateBucketizedFloatColumn("feature2", irrelevant_feature);
 
     vector<float> parity_feature = {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
-    parity_feature_ = Column::CreateBinnedFloatColumn("feature3", parity_feature);
+    parity_feature_ = Column::CreateBucketizedFloatColumn("feature3", parity_feature);
     vector<string> zero_feature = { "zero", "zero", "zero", "zero",
                                     "nonzero", "nonzero", "nonzero", "nonzero",
                                     "nonzero", "nonzero", "nonzero", "nonzero",
@@ -51,8 +51,8 @@ class TreeBuildingTest : public testing::Test {
     zero_feature_ = Column::CreateStringColumn("feature4", zero_feature);
     vector<float> three_feature0 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0};
     vector<float> three_feature1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, NAN};
-    three_feature0_ = Column::CreateBinnedFloatColumn("feature5", three_feature0);
-    three_feature1_ = Column::CreateBinnedFloatColumn("feature6", three_feature1);
+    three_feature0_ = Column::CreateBucketizedFloatColumn("feature5", three_feature0);
+    three_feature1_ = Column::CreateBucketizedFloatColumn("feature6", three_feature1);
   }
 
   void RemoveGains(TreeNode* t) {

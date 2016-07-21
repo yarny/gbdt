@@ -51,7 +51,7 @@ class TSVDataStoreTest : public ::testing::Test {
     return col_strings;
   }
 
-  static vector<float> GetBinMax(const BinnedFloatColumn& column) {
+  static vector<float> GetBinMax(const BucketizedFloatColumn& column) {
     vector<float> array(column.size());
     for (int i = 0; i < column.size(); ++i) {
       array[i] = column.get_row_max(i);
@@ -73,8 +73,8 @@ class TSVDataStoreTest : public ::testing::Test {
 TEST_F(TSVDataStoreTest, Test) {
   ASSERT_NE(data_store_->GetRawFloatColumn("target"), nullptr);
   ASSERT_NE(data_store_->GetStringColumn("weather"), nullptr);
-  ASSERT_NE(data_store_->GetBinnedFloatColumn("foo"), nullptr);
-  ASSERT_NE(data_store_->GetBinnedFloatColumn("bar"), nullptr);
+  ASSERT_NE(data_store_->GetBucketizedFloatColumn("foo"), nullptr);
+  ASSERT_NE(data_store_->GetBucketizedFloatColumn("bar"), nullptr);
   // "color" is in the tsv but not loaded by our config.
   EXPECT_EQ(data_store_->GetStringColumn("color"), nullptr);
 
@@ -82,9 +82,9 @@ TEST_F(TSVDataStoreTest, Test) {
   EXPECT_EQ(vector<string>({ "rainy", "clear", "cloudy", "clear", "snowy", "rainy", "cloudy", "shower", "rainy" }),
             GetColStrings(*data_store_->GetStringColumn("weather")));
   EXPECT_EQ(vector<float>({ 213, 312, 395, 45, 672, 123, 56, 79, 321 }),
-            GetBinMax(*data_store_->GetBinnedFloatColumn("foo")));
+            GetBinMax(*data_store_->GetBucketizedFloatColumn("foo")));
   EXPECT_EQ(vector<float>({ 5.4, 4.3, 3.2, 2.3, 4.5, 6.5, 6.5, 7.8, 9.9 }),
-            GetBinMax(*data_store_->GetBinnedFloatColumn("bar")));
+            GetBinMax(*data_store_->GetBucketizedFloatColumn("bar")));
   EXPECT_EQ(vector<float>({ 0, 1, 2, 2, 3, 1, 1, 3, 2 }),
             GetRawFloat(*data_store_->GetRawFloatColumn("target")));
 }

@@ -96,16 +96,16 @@ class FloatColumnTest : public ::testing::Test {
     auto raw_floats = GenerateRandomFloatVector(k, n);
     // We use 30% more bins than the number of unique values to make sure
     // each unique value is binned to one unique bins.
-    auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, uint(1.3 * k));
+    auto column = Column::CreateBucketizedFloatColumn("foo", raw_floats, uint(1.3 * k));
     ASSERT_NE(nullptr, column);
-    EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
+    EXPECT_EQ(Column::kBucketizedFloatColumn, column->type());
 
     vector<float> expected(column->size());
     for (int i = 0; i < column->size(); ++i) {
       expected[i] = raw_floats[i];
     }
 
-    auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+    auto* float_column = static_cast<const BucketizedFloatColumn*>(column.get());
     EXPECT_EQ(expected, GetMax(*float_column));
     EXPECT_EQ(expected, GetMin(*float_column));
   }
@@ -126,7 +126,7 @@ class FloatColumnTest : public ::testing::Test {
     return random_floats;
   }
 
-  static vector<uint> GetCol(const BinnedFloatColumn& column) {
+  static vector<uint> GetCol(const BucketizedFloatColumn& column) {
     vector<uint> col(column.size());
     for (int i = 0; i < column.size(); ++i) {
       col[i] = column.col()[i];
@@ -134,14 +134,14 @@ class FloatColumnTest : public ::testing::Test {
     return col;
   }
 
-  static vector<float> GetMax(const BinnedFloatColumn& column) {
+  static vector<float> GetMax(const BucketizedFloatColumn& column) {
     vector<float> array(column.size());
     for (int i = 0; i < column.size(); ++i) {
       array[i] = column.get_row_max(i);
     }
     return array;
   }
-  static vector<float> GetMin(const BinnedFloatColumn& column) {
+  static vector<float> GetMin(const BucketizedFloatColumn& column) {
     vector<float> array(column.size());
     for (int i = 0; i < column.size(); ++i) {
       array[i] = column.get_row_min(i);
@@ -152,25 +152,25 @@ class FloatColumnTest : public ::testing::Test {
   unique_ptr<std::default_random_engine> generator_;
 };
 
-TEST_F(FloatColumnTest, TestSimpleCreatBinnedFloatColumn) {
+TEST_F(FloatColumnTest, TestSimpleCreatBucketizedFloatColumn) {
   vector<float> raw_floats = {0.2, 0.1, -0.34, 0.2, 0.1, 0.7, 0.8, 23.4, 23.4, 0.8};
-  auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, 10);
+  auto column = Column::CreateBucketizedFloatColumn("foo", raw_floats, 10);
   ASSERT_NE(nullptr, column);
-  EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
+  EXPECT_EQ(Column::kBucketizedFloatColumn, column->type());
 
-  auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+  auto* float_column = static_cast<const BucketizedFloatColumn*>(column.get());
   EXPECT_EQ(vector<uint>({ 3, 2, 1, 3, 2, 4, 5, 6, 6, 5 }), GetCol(*float_column));
   EXPECT_EQ(raw_floats, GetMax(*float_column));
   EXPECT_EQ(raw_floats, GetMin(*float_column));
 }
 
-TEST_F(FloatColumnTest, TestSimpleCreatBinnedFloatColumnNotEnoughBins) {
+TEST_F(FloatColumnTest, TestSimpleCreatBucketizedFloatColumnNotEnoughBins) {
   vector<float> raw_floats = {0.2, 0.1, -0.34, 0.2, 0.1, 0.7, 0.8, 23.4, 23.4, 0.8};
-  auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, 3);
+  auto column = Column::CreateBucketizedFloatColumn("foo", raw_floats, 3);
   ASSERT_NE(nullptr, column);
-  EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
+  EXPECT_EQ(Column::kBucketizedFloatColumn, column->type());
 
-  auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+  auto* float_column = static_cast<const BucketizedFloatColumn*>(column.get());
   EXPECT_EQ(vector<uint>({ 1, 1, 1, 1, 1, 2, 2, 2, 2, 2}), GetCol(*float_column));
   EXPECT_EQ(vector<float>({0.2, 0.2, 0.2, 0.2, 0.2, 23.4, 23.4, 23.4, 23.4, 23.4}),
             GetMax(*float_column));
@@ -179,11 +179,11 @@ TEST_F(FloatColumnTest, TestSimpleCreatBinnedFloatColumnNotEnoughBins) {
 }
 
 TEST_F(FloatColumnTest, TestAddAfterBinBuilding) {
-  unique_ptr<BinnedFloatColumn> column(new BinnedFloatColumn("foo", 10));
+  unique_ptr<BucketizedFloatColumn> column(new BucketizedFloatColumn("foo", 10));
   auto raw_floats0 = vector<float>({1, 2, 3});
   auto raw_floats1 = vector<float>({0.5, 2.5, 3.5});
   column->Add(&raw_floats0);
-  column->BuildBins();
+  column->BuildBuckets();
   column->Add(&raw_floats1);
   column->Finalize();
 
@@ -199,10 +199,10 @@ TEST_F(FloatColumnTest, TestImbalancedDistributionWithEnoughBins) {
   for (uint i = 0; i < 10000; ++i) {
     raw_floats.push_back(0.0);
   }
-  auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, 10);
+  auto column = Column::CreateBucketizedFloatColumn("foo", raw_floats, 10);
   ASSERT_NE(nullptr, column);
-  EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
-  auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+  EXPECT_EQ(Column::kBucketizedFloatColumn, column->type());
+  auto* float_column = static_cast<const BucketizedFloatColumn*>(column.get());
   vector<uint> col(column->size());
   vector<uint> expected_col = {2, 3, 4, 5, 6, 7, 8, 9, 10};
   for (uint i = 0; i < 10000; ++i) {
@@ -223,10 +223,10 @@ TEST_F(FloatColumnTest, TestImbalancedDistributionWithoutEnoughBins) {
     raw_floats.push_back(0);
   }
 
-  auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, 6);
+  auto column = Column::CreateBucketizedFloatColumn("foo", raw_floats, 6);
   ASSERT_NE(nullptr, column);
-  EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
-  auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+  EXPECT_EQ(Column::kBucketizedFloatColumn, column->type());
+  auto* float_column = static_cast<const BucketizedFloatColumn*>(column.get());
   vector<uint> col(column->size());
   vector<uint> expected_col = {2, 2, 3, 3, 4, 4, 5, 5, 6};
   for (uint i = 0; i < kNumZeros; ++i) {
@@ -251,10 +251,10 @@ TEST_F(FloatColumnTest, TestRandomVecWithEnoughBins) {
 
 TEST_F(FloatColumnTest, TestMissingFloats) {
   vector<float> raw_floats = {0, 1, NAN, 2, 3, NAN, 4, 5, NAN, 6};
-  auto column = Column::CreateBinnedFloatColumn("foo", raw_floats, 10);
+  auto column = Column::CreateBucketizedFloatColumn("foo", raw_floats, 10);
   ASSERT_NE(nullptr, column);
-  EXPECT_EQ(Column::kBinnedFloatColumn, column->type());
-  const auto* float_column = static_cast<const BinnedFloatColumn*>(column.get());
+  EXPECT_EQ(Column::kBucketizedFloatColumn, column->type());
+  const auto* float_column = static_cast<const BucketizedFloatColumn*>(column.get());
   EXPECT_EQ(9, float_column->max_int());
   EXPECT_FALSE(float_column->col().missing(0));
   EXPECT_FALSE(float_column->col().missing(1));

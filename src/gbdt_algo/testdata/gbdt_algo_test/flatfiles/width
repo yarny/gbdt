@@ -1,4 +1,4 @@
-# dtype=binned_floats
+# dtype=bucketized_floats
 0.1
 0.1
 0.1
