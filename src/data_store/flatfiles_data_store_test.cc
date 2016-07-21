@@ -31,8 +31,8 @@ class FlatfilesDataStoreTest : public ::testing::Test {
   unique_ptr<FlatfilesDataStore> data_store_;
 };
 
-TEST_F(FlatfilesDataStoreTest, ReadBinnedFloats) {
-  auto column = data_store_->GetBinnedFloatColumn("foo");
+TEST_F(FlatfilesDataStoreTest, ReadBucketizedFloats) {
+  auto column = data_store_->GetBucketizedFloatColumn("foo");
   CHECK(column != nullptr);
   EXPECT_EQ(9, column->size());
   set<uint> missing_positions = {2, 6, 7};

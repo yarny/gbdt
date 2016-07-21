@@ -32,11 +32,11 @@ class GetTreeScoreTest : public ::testing::Test {
     auto color = Column::CreateStringColumn(
         "color",
         {"red", "blue", "green", "blue", "red", "red", "blue", "green", "red", "blue"});
-    auto length = Column::CreateBinnedFloatColumn(
+    auto length = Column::CreateBucketizedFloatColumn(
         "length", vector<float>({2, 1, 1, 3, 2, 4, 10, 2, 7, 5}));
-    auto width = Column::CreateBinnedFloatColumn(
+    auto width = Column::CreateBucketizedFloatColumn(
         "width", vector<float>({2, 3, 7, 3, 8, 4, 6, 2, 3, 5}));
-    auto height = Column::CreateBinnedFloatColumn(
+    auto height = Column::CreateBucketizedFloatColumn(
         "height", vector<float>({12, 20, 6, 3, 11, 4, 10, 2, 20, 3}));
 
     data_store_.AddColumn("color", std::move(color));

@@ -50,7 +50,7 @@ void UniformBinning(const map<float, uint>& histograms, uint bucket_capacity, ve
   }
 }
 
-template <class INT> vector<INT> ConvertIntVector(const vector<uint> col32) {
+template <class INT> vector<INT> ConvertIntVector(const vector<uint>& col32) {
   vector<INT> col(col32.size());
   for (uint i = 0; i < col32.size(); ++i) {
     col[i] = static_cast<INT>(col32[i]);
