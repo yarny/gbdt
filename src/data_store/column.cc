@@ -174,9 +174,11 @@ void StringColumn::Finalize() {
   if (max_int() <= kMaxUInt8) {
     col_8_ = ConvertIntVector<uint8>(col_32_);
     col_32_.clear();
+    col_32_.shrink_to_fit();
   } else if (max_int() <= kMaxUInt16) {
     col_16_ = ConvertIntVector<uint16>(col_32_);
     col_32_.clear();
+    col_32_.shrink_to_fit();
   }
   IntegerizedColumn::Finalize();
 }
