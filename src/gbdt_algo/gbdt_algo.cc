@@ -178,7 +178,7 @@ Status TrainGBDT(DataStore* data_store,
 
   overall_stopwatch.End();
   LOG(INFO) << "Finished training in "
-            << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()) << ".";
+            << StopWatch::MSecsToFormattedString(overall_stopwatch.ElapsedTimeInMSecs()) << ".";
 
   return Status::OK;
 }

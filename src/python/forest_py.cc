@@ -10,6 +10,7 @@
 #include "src/gbdt_algo/utils.h"
 #include "src/proto/tree.pb.h"
 #include "src/utils/json_utils.h"
+#include "src/utils/stopwatch.h"
 
 using gbdt::ForestPy;
 
@@ -36,6 +37,9 @@ vector<pair<string, double>> ForestPy::FeatureImportance() const {
 }
 
 vector<double> ForestPy::Predict(DataStorePy* data_store_py) const {
+  StopWatch stopwatch;
+  stopwatch.Start();
+  LOG(INFO) << "Start prediction.";
   vector<double> scores;
   if (!data_store_py || !data_store_py->data_store()) {
     ThrowException(Status(error::NOT_FOUND, "Data store is empty."));
@@ -44,6 +48,9 @@ vector<double> ForestPy::Predict(DataStorePy* data_store_py) const {
                                forest_,
                                &scores);
   if (!status.ok()) ThrowException(status);
+  stopwatch.End();
+  LOG(INFO) << "Finished prediction in "
+            << StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()) << ".";
   return scores;
 }
 

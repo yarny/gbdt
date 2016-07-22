@@ -72,6 +72,7 @@ cc_library(
        "//src/gbdt_algo:utils",
        "//src/proto:tree_proto_cc",
        "//src/utils:json_utils",
+       "//src/utils:stopwatch",
        ":datastore_py",
        ":gbdt_py_base",
    ],

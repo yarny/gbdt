@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+#include <glog/logging.h>
+
 #include "datastore_py.h"
 #include "forest_py.h"
 #include "gbdt_py_base.h"
 #include "train_gbdt_py.h"
+
+DECLARE_string(log_dir);
+DECLARE_int32(logbuflevel);
 
 PYBIND11_PLUGIN(libgbdt) {
     py::module m("libgbdt", "GBDT python library");
@@ -27,5 +32,15 @@ PYBIND11_PLUGIN(libgbdt) {
     InitDataStorePy(m);
     InitForestPy(m);
     InitTrainGBDTPy(m);
+
+    m.def("init_logging",
+          [] (const string& log_dir, const string& log_name) {
+            FLAGS_log_dir = log_dir;
+            FLAGS_logbuflevel = -1;
+            google::InitGoogleLogging(log_name.c_str());
+            LOG(INFO) << "Start logging.";
+          },
+          py::arg("log_dir"),
+          py::arg("log_name")=string("gbdt-py"));
     return m.ptr();
 }

@@ -46,6 +46,7 @@ DECLARE_string(base_model_file);
 DECLARE_string(output_dir);
 DECLARE_string(output_model_name);
 DECLARE_int32(seed);
+DECLARE_int32(logbuflevel);
 
 using gbdt::Config;
 using gbdt::DataStore;
@@ -63,7 +64,8 @@ void Test();
 int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
   google::ParseCommandLineFlags(&argc, &argv, true);
-
+  // Set logbuflevel to -1 so that glog won't buffer LOG(INFO).
+  FLAGS_logbuflevel = -1;
   if (FLAGS_mode == "train") {
     Train();
   } else if (FLAGS_mode == "test") {

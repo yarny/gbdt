@@ -6,6 +6,7 @@ sys.path.append('{0}/lib'.format(abspath))
 from libgbdt import DataStore
 from libgbdt import Forest
 from libgbdt import train as __train_internal__
+from libgbdt import init_logging
 import json
 
 def train(data_store,
