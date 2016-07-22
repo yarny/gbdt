@@ -95,7 +95,7 @@ class IntegerizedColumn : public Column {
   // encoded as 8 bit, 16 bit or 32 bit. The maximum we support is 32 bit.
   vector<uint8> col_8_;
   vector<uint16> col_16_;
-  vector<uint> col_32_;
+  vector<uint32> col_32_;
 };
 
 // StringColumn.
