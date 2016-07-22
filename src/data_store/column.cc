@@ -173,12 +173,10 @@ void StringColumn::Finalize() {
   // 8bit or 16bit col.
   if (max_int() <= kMaxUInt8) {
     col_8_ = ConvertIntVector<uint8>(col_32_);
-    col_32_.clear();
-    col_32_.shrink_to_fit();
+    vector<uint32>().swap(col_32_);
   } else if (max_int() <= kMaxUInt16) {
     col_16_ = ConvertIntVector<uint16>(col_32_);
-    col_32_.clear();
-    col_32_.shrink_to_fit();
+    vector<uint32>().swap(col_32_);
   }
   IntegerizedColumn::Finalize();
 }
@@ -307,8 +305,8 @@ void BucketizedFloatColumn::BuildBuckets() {
   // Initialize bucket_mins_ to be buckets_maxs_.
   bucket_mins_ = bucket_maxs_;
   status_ = AddBucketizedVec(buffer_);
-  buffer_.clear();
-  buffer_.shrink_to_fit();
+  // Clear the memory explicitly.
+  vector<float>().swap(buffer_);
 }
 
 unique_ptr<Column> Column::CreateStringColumn(
