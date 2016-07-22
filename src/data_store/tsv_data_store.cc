@@ -56,6 +56,7 @@ TSVDataStore::TSVDataStore(const vector<string>& tsvs, const Config& config) {
 }
 
 Status TSVDataStore::LoadTSVs(const vector<string>& tsvs, const Config& config) {
+  LOG(INFO) << "Start loading tsvs.";
   Status status;
   if (tsvs.size() <= 0) {
     return Status(error::INVALID_ARGUMENT, "There should be at least 1 tsvs.");
