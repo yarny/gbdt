@@ -31,7 +31,7 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-Pairwise::Pairwise(const Config& config, Pairwise::PairwiseLossFunc loss_func)
+Pairwise::Pairwise(const Config& config, PointwiseLossFunc loss_func)
     : loss_func_(loss_func) {
   pair_sampling_rate_ = config.pair_sampling_rate();
   pair_weight_by_delta_target_ = config.pair_weight_by_delta_target();
@@ -105,11 +105,11 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
               auto data = loss_func_(delta_target, delta_func);
               auto& pos_gradient_data = (*gradient_data_vec)[pos_sample];
               auto& neg_gradient_data = (*gradient_data_vec)[neg_sample];
-              pos_gradient_data.g += weight * data.gradient_data.g;
-              neg_gradient_data.g -= weight * data.gradient_data.g;
-              pos_gradient_data.h += 2.0 * weight * data.gradient_data.h;
-              neg_gradient_data.h += 2.0 * weight * data.gradient_data.h;
-              loss += weight * data.loss;
+              pos_gradient_data.g += weight * std::get<1>(data);
+              neg_gradient_data.g -= weight * std::get<1>(data);
+              pos_gradient_data.h += 2.0 * weight * std::get<2>(data);
+              neg_gradient_data.h += 2.0 * weight * std::get<2>(data);
+              loss += weight * std::get<0>(data);
               weight_sum += weight;
             }
           }

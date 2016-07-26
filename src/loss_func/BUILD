@@ -133,7 +133,8 @@ cc_library(
         "//src/utils:subsampling",
         "//src/utils:threadpool",
         "//src:flags",
-	":loss_func",
+        ":loss_func",
+        ":loss_func_math",
     ],
 )
 

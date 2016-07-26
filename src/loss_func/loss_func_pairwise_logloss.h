@@ -32,7 +32,7 @@ class PairwiseLogLoss : public Pairwise {
       : Pairwise(config,
                  [](double delta_target,
                     double delta_func) {
-                   return ComputeLogLoss(1, delta_func); }) {}
+                   return ComputeLogLoss(1.0, delta_func); }) {}
 };
 
 }  // namespace

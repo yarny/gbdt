@@ -20,10 +20,12 @@
 
 namespace gbdt {
 
-LossFuncData ComputeMSE(double y, double f);
-LossFuncData ComputeHuberizedHinge(double y, double f);
-LossFuncData ComputeLogLoss(double y, double f);
-LossFuncData ComputeSquaredHinge(double y, double f);
+typedef std::function<tuple<double, double, double>(double, double)> PointwiseLossFunc;
+
+tuple<double, double, double> ComputeMSE(double y, double f);
+tuple<double, double, double> ComputeLogLoss(double y, double f);
+tuple<double, double, double> ComputeHuberizedHinge(double y, double f);
+tuple<double, double, double> ComputeSquaredHinge(double y, double f);
 
 }  // namespace gbdt
 

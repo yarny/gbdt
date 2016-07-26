@@ -68,12 +68,13 @@ void Pointwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
           pool.Enqueue([&, this, &slice=slices_[j], &total=totals[j]](){
             for (int i = slice.first; i < slice.second; ++i) {
               double f_current = f[i] + *c;
-              LossFuncData loss = loss_func_(y_(i), f_current);
+              auto data = loss_func_(y_(i), f_current);
               auto w = w_(i);
               auto& gradient_data = (*gradient_data_vec)[i];
-              gradient_data = loss.gradient_data;
-              total.loss += w * loss.loss;
-              total.gradient_data += w * loss.gradient_data;
+              gradient_data.g = std::get<1>(data);
+              gradient_data.h = std::get<2>(data);
+              total.loss += w * std::get<0>(data);
+              total.gradient_data += w * gradient_data;
             }
           });
       }
