@@ -21,37 +21,33 @@
 
 namespace gbdt {
 
-LossFuncData ComputeMSE(double y, double f) {
-  return LossFuncData((y - f) * (y -f),
-                      y - f,
-                      1.0);
+tuple<double, double, double> ComputeMSE(double y, double f) {
+  return make_tuple((y - f) * (y - f), y -f , 1.0);
 }
 
-LossFuncData ComputeLogLoss(double y, double f) {
+tuple<double, double, double> ComputeLogLoss(double y, double f) {
   double e = exp(-y * f);
-  return LossFuncData(log(1 + e),
-                      y * e / (1 + e),
-                      e / ((1 + e) * (1 + e)));
+  return make_tuple(log(1 + e), y * e / (1 + e), e / ((1 + e) * (1 + e)));
 };
 
-LossFuncData ComputeHuberizedHinge(double y, double f) {
+tuple<double, double, double> ComputeHuberizedHinge(double y, double f) {
   double e = y * f;
   if (e >= 1) {
     // Margin is greater than 1.0. Hinge loss is 0.
-    return LossFuncData(0.0, 0.0, 0.0);
+    return make_tuple(0, 0, 0);
   } else if (e >= 0) {
-    return LossFuncData(0.5 * (1 - e) * (1 - e), (1 - e) * y, 1);
+    return make_tuple(0.5 * (1 - e) * (1 - e), (1 - e) * y, 1);
   } else {
-    return LossFuncData(0.5 - e, y, 0);
+    return make_tuple(0.5 - e, y, 0);
   }
 }
 
-LossFuncData ComputeSquaredHinge(double y, double f) {
+tuple<double, double, double> ComputeSquaredHinge(double y, double f) {
   double e = y - f;
   if (e * y > 0) {
-    return LossFuncData(e * e, e, 1.0);
+    return make_tuple(e * e, e, 1.0);
   } else {
-    return LossFuncData(0, 0, 0);
+    return make_tuple(0, 0, 0);
   }
 }
 

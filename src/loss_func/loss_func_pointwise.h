@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "loss_func.h"
+#include "loss_func_math.h"
 
 namespace gbdt {
 
@@ -28,7 +29,6 @@ namespace gbdt {
 // compute the loss, negative gradient and hessian.
 class Pointwise : public LossFunc {
 public:
-  typedef std::function<LossFuncData(double, double)> PointwiseLossFunc;
   Pointwise(PointwiseLossFunc loss_func);
   virtual Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* unused_group_column) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
