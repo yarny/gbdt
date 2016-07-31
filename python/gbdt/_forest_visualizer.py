@@ -7,10 +7,14 @@ from graphviz import Digraph
 
 class ForestVisualizer:
     def __init__(self, forestJson):
-        self.forestJson = forestJson
+        if type(forestJson) is str:
+            self._forestJson = json.loads(forestJson)
+
+    def numTrees(self):
+        return len(self._forestJson['tree'])
 
     def visualizeTree(self, i):
-        tree = self.forestJson['tree'][i]
+        tree = self._forestJson['tree'][i]
         digraph = Digraph(format='png')
         self.__visualizeTreeInternal__(digraph, tree, 'tree{0}'.format(i))
         return digraph
