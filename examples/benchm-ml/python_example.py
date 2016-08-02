@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import sys
 import csv
 from sklearn import metrics
@@ -10,10 +8,6 @@ def ComputeAUC(forest, data, targets):
     predictions = forest.predict(data)
     fpr, tpr, _ = metrics.roc_curve(targets, predictions, pos_label=1)
     return metrics.auc(fpr, tpr)
-
-def GetTargets(tsv):
-    labels = [row[8] for i, row in enumerate(csv.reader(open(tsv), delimiter='\t')) if i != 0 and len(row) > 0]
-    return [1 if l == 'Y' else -1 for l in labels]
 
 def main():
     loss_func = sys.argv[1]

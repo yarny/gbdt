@@ -63,5 +63,5 @@ setup(
     # simple. Or you can use find_packages().
     package_dir = {'': 'python'},
     packages=['gbdt'],
-    package_data = {'gbdt': ['lib/libgbdt.so']}
+    package_data = {'gbdt': ['lib/darwin_x86_64/libgbdt.so', 'lib/linux_x86_64/libgbdt.so'] }
 )
