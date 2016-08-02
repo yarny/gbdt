@@ -3,7 +3,6 @@ Visualizes forest model.
 """
 
 import json
-from graphviz import Digraph
 
 class ForestVisualizer:
     def __init__(self, forestJson):
@@ -14,6 +13,11 @@ class ForestVisualizer:
         return len(self._forestJson['tree'])
 
     def visualizeTree(self, i):
+        try:
+            from graphviz import Digraph
+        except ImportError:
+            raise ImportError('Please install graphviz.')
+
         tree = self._forestJson['tree'][i]
         digraph = Digraph(format='png')
         self.__visualizeTreeInternal__(digraph, tree, 'tree{0}'.format(i))
