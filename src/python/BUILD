@@ -7,6 +7,7 @@ exports_files([
 ])
 
 LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-pthread", "-ltcmalloc_minimal", "-lm" ]
+C_OPTS = [ "-I/usr/include/python2.7", "-I/System/Library/Frameworks/Python.framework/Headers" ]
 
 cc_library(
    name = "gbdt_py_base",
@@ -16,7 +17,7 @@ cc_library(
        "//external:pybind11-lib",
        "//src/base:base",
    ],
-   copts = [ "-I/usr/include/python2.7" ],
+   copts = C_OPTS,
 )
 
 cc_library(
@@ -29,7 +30,7 @@ cc_library(
        ":gbdt_py_base",
        ":train_gbdt_py",
    ],
-   copts = [ "-I/usr/include/python2.7" ],
+   copts = C_OPTS,
 )
 
 cc_library(
@@ -45,7 +46,7 @@ cc_library(
        ":column_py",
        ":gbdt_py_base",
    ],
-   copts = [ "-I/usr/include/python2.7",  ],
+   copts = C_OPTS,
 )
 
 cc_library(
@@ -76,7 +77,7 @@ cc_library(
        ":datastore_py",
        ":gbdt_py_base",
    ],
-   copts = [ "-I/usr/include/python2.7",  ],
+   copts = C_OPTS,
 )
 
 cc_binary(
@@ -104,5 +105,5 @@ cc_library(
        "//src/utils:subsampling",
        "//src/utils:utils",
    ],
-   copts = [ "-I/usr/include/python2.7" ],
+   copts = C_OPTS,
 )
