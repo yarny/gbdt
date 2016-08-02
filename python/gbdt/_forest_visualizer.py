@@ -3,11 +3,19 @@ Visualizes forest model.
 """
 
 import json
+from libgbdt import Forest
 
 class ForestVisualizer:
-    def __init__(self, forestJson):
-        if type(forestJson) is str:
-            self._forestJson = json.loads(forestJson)
+    def __init__(self, forest):
+        if type(forest) is str or type(forest) is unicode:
+            self._forestJson = json.loads(forest)
+        elif type(forest) is dict:
+            self._forestJson = forest
+        elif type(forest) is Forest:
+            self._forestJson = json.loads(forest.as_json())
+        else:
+            raise TypeError, 'Unsupported forest type: {0}'.format(type(forest))
+
 
     def numTrees(self):
         return len(self._forestJson['tree'])
