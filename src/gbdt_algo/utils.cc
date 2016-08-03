@@ -158,8 +158,8 @@ FloatVector GetSampleWeightsOrDie(const Config& config, DataStore* data_store) {
   if (!weight_column_name.empty()) {
     const auto* sample_weights = data_store->GetRawFloatColumn(weight_column_name);
     CHECK(sample_weights) << "Failed to load sample weights";
-    return [&](int i) {
-      return (*sample_weights)[i];
+    return [weights=sample_weights](int i) {
+      return (*weights)[i];
     };
   }
 
