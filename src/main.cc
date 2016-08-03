@@ -100,7 +100,7 @@ unique_ptr<DataStore> LoadDataStoreOrDie(const Config& config) {
     LOG(FATAL) << "Failed to load data_store. Error message: " + data_store->status().ToString();
   }
 
-  return std::move(data_store);
+  return data_store;
 }
 
 void Train() {
