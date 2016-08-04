@@ -2,12 +2,12 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-exports_files([
-    "LICENSE",
-])
-
+exports_files(["LICENSE"])
 LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-pthread", "-ltcmalloc_minimal", "-lm" ]
-C_OPTS = [ "-I/usr/include/python2.7", "-I/System/Library/Frameworks/Python.framework/Headers" ]
+
+C_OPTS = select({":darwin": ["-I/System/Library/Frameworks/Python.framework/Headers" ],
+                 ":darwin_x86_64": ["-I/System/Library/Frameworks/Python.framework/Headers" ],
+                 "//conditions:default": ["-I/usr/include/python2.7"]})
 
 cc_library(
    name = "gbdt_py_base",
@@ -106,4 +106,16 @@ cc_library(
        "//src/utils:utils",
    ],
    copts = C_OPTS,
+)
+
+config_setting(
+    name = "darwin",
+    values = {"cpu": "darwin"},
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "darwin_x86_64",
+    values = {"cpu": "darwin_x86_64"},
+    visibility = ["//visibility:public"]
 )
