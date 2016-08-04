@@ -121,6 +121,22 @@ const Column* DataStore::GetColumn(const string& column_name) {
   return it == column_map_.end() ? nullptr : it->second.get();
 }
 
+Status DataStore::Add(unique_ptr<Column>&& column) {
+  auto it = column_map_.find(column->name());
+  if (it != column_map_.end()) {
+    return Status(error::INTERNAL, fmt::format("Column {0} already exists.", column->name()));
+  }
+  if (num_rows() > 0 && num_rows() != column->size()) {
+    return Status(error::INTERNAL,
+                  fmt::format("Row size consistency check failed for column {0} (old {1} vs. new {2}",
+                              column->name(), num_rows(), column->size()));
+  }
+
+  column_map_[column->name()] = std::move(column);
+  return Status::OK;
+}
+
+
 string DataStore::Description() const {
   return fmt::format("DataStore with {0} bucketized float, {1} raw float and "
                      "{2} string columns, each with {3} rows.",

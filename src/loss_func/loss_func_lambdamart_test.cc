@@ -20,15 +20,14 @@
 
 #include "gtest/gtest.h"
 
-#include "src/data_store/mem_data_store.h"
+#include "src/data_store/data_store.h"
 
 namespace gbdt {
 
 class PairwiseTest : public ::testing::Test {
  protected:
   void SetUp() {
-    auto group0 = Column::CreateStringColumn("group0", {"1", "1", "1", "1"});
-    data_store_.AddColumn(group0->name(), std::move(group0));
+    data_store_.Add(Column::CreateStringColumn("group0", {"1", "1", "1", "1"}));
 
     config_.set_pair_sampling_rate(kSamplingRate_);
   }
@@ -45,7 +44,7 @@ class PairwiseTest : public ::testing::Test {
     }
   }
 
-  MemDataStore data_store_;
+  DataStore data_store_;
   const int kSamplingRate_ = 1000;
   Config config_;
   FloatVector w_ = [](int) { return 1.0; };
