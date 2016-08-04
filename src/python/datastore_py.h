@@ -57,6 +57,13 @@ class DataStorePy {
                const vector<string>& raw_float_cols,
                const vector<string>& string_cols);
 
+  void AddStringColumn(const string& column_name,
+                       const vector<string>& raw_strings);
+  void AddBucketizedFloatColumn(const string& column_name,
+                                const vector<float>& raw_floats);
+  void AddRawFloatColumn(const string& column_name,
+                         const vector<float>& raw_floats);
+
  private:
   unique_ptr<DataStore> data_store_;
 };

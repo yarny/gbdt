@@ -11,5 +11,5 @@ from ._version import version_info, __version__
 from libgbdt import DataStore
 from libgbdt import Forest
 from libgbdt import init_logging
-from ._gbdt import train
+from ._gbdt import train, DataLoader
 from ._forest_visualizer import ForestVisualizer

@@ -124,11 +124,11 @@ const Column* DataStore::GetColumn(const string& column_name) {
 Status DataStore::Add(unique_ptr<Column>&& column) {
   auto it = column_map_.find(column->name());
   if (it != column_map_.end()) {
-    return Status(error::INTERNAL, fmt::format("Column {0} already exists.", column->name()));
+    return Status(error::ALREADY_EXISTS, fmt::format("Column {0} already exists.", column->name()));
   }
   if (num_rows() > 0 && num_rows() != column->size()) {
-    return Status(error::INTERNAL,
-                  fmt::format("Row size consistency check failed for column {0} (old {1} vs. new {2}",
+    return Status(error::OUT_OF_RANGE,
+                  fmt::format("Row size consistency check failed for column {0} (old {1} vs. new {2})",
                               column->name(), num_rows(), column->size()));
   }
 
