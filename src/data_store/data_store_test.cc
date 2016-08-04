@@ -15,37 +15,43 @@
 
 #include "data_store.h"
 
-#include <memory>
-
 #include "gtest/gtest.h"
-#include "mem_data_store.h"
-#include "flatfiles_data_store.h"
+#include "column.h"
 
 namespace gbdt {
 
 class DataStoreTest : public ::testing::Test {
- protected:
-  void SetUp() {
-    data_store_.reset(new FlatfilesDataStore("src/data_store/testdata/flatfiles_data_store_test"));
-  }
-  unique_ptr<DataStore> data_store_;
 };
 
-TEST_F(DataStoreTest, TestGetColumn) {
-  EXPECT_NE(nullptr, data_store_->GetBucketizedFloatColumn("foo"));
-  EXPECT_NE(nullptr, data_store_->GetRawFloatColumn("foo2"));
-  EXPECT_NE(nullptr, data_store_->GetStringColumn("bar"));
+TEST_F(DataStoreTest, TestAddAndGet) {
+  DataStore data_store;
+  auto status = data_store.Add(Column::CreateStringColumn("foo", vector<string>({"a", "b", "c", "d"})));
 
-  EXPECT_EQ(nullptr, data_store_->GetRawFloatColumn("foo"));
-  EXPECT_EQ(nullptr, data_store_->GetStringColumn("foo"));
-  EXPECT_EQ(nullptr, data_store_->GetBucketizedFloatColumn("foo2"));
-  EXPECT_EQ(nullptr, data_store_->GetStringColumn("foo2"));
-  EXPECT_EQ(nullptr, data_store_->GetBucketizedFloatColumn("bar"));
-  EXPECT_EQ(nullptr, data_store_->GetRawFloatColumn("bar"));
+  EXPECT_TRUE(status.ok());
+  status = data_store.Add(Column::CreateStringColumn("foo", vector<string>({"a", "b", "c", "d"})));
+  EXPECT_FALSE(status.ok());  // Column exists.
+  status = data_store.Add(Column::CreateBucketizedFloatColumn("bar", vector<float>({0.3, 0.2, 0.45, 0.1, 0.3})));
+  EXPECT_FALSE(status.ok());  // Lengthes mismatch.
+  status = data_store.Add(Column::CreateBucketizedFloatColumn("bar", vector<float>({0.3, 0.2, 0.45, 0.1})));
+  EXPECT_TRUE(status.ok());
+  status = data_store.Add(Column::CreateRawFloatColumn("bar2", vector<float>({0.3, 0.2, 0.45, 0.1})));
+  EXPECT_TRUE(status.ok());
 
-  EXPECT_EQ(nullptr, data_store_->GetRawFloatColumn("bar2"));
-  EXPECT_EQ(nullptr, data_store_->GetBucketizedFloatColumn("bar2"));
-  EXPECT_EQ(nullptr, data_store_->GetStringColumn("bar2"));
+  EXPECT_NE(nullptr, data_store.GetStringColumn("foo"));
+  EXPECT_EQ(nullptr, data_store.GetRawFloatColumn("foo"));
+  EXPECT_EQ(nullptr, data_store.GetBucketizedFloatColumn("foo"));
+
+  EXPECT_NE(nullptr, data_store.GetBucketizedFloatColumn("bar"));
+  EXPECT_EQ(nullptr, data_store.GetRawFloatColumn("bar"));
+  EXPECT_EQ(nullptr, data_store.GetStringColumn("bar"));
+
+  EXPECT_NE(nullptr, data_store.GetRawFloatColumn("bar2"));
+  EXPECT_EQ(nullptr, data_store.GetBucketizedFloatColumn("bar2"));
+  EXPECT_EQ(nullptr, data_store.GetStringColumn("bar2"));
+
+  EXPECT_EQ(nullptr, data_store.GetRawFloatColumn("foo2"));
+  EXPECT_EQ(nullptr, data_store.GetBucketizedFloatColumn("foo2"));
+  EXPECT_EQ(nullptr, data_store.GetStringColumn("foo2"));
 }
 
 }  // namespace gbdt

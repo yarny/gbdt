@@ -23,10 +23,9 @@ def main():
 
     target_column = 'dep_delayed_15min'
 
-    training_data = gbdt.DataStore()
-    training_data.load_tsv(tsvs=["train-0.1m.tsv"],
-                           bucketized_float_cols=float_features,
-                           string_cols=cat_features + [target_column])
+    training_data = gbdt.DataLoader.from_tsvs(tsvs=["train-0.1m.tsv"],
+                                              bucketized_float_cols=float_features,
+                                              string_cols=cat_features + [target_column])
     training_targets = [1 if l == 'Y' else -1 for l in training_data.get_string_col(target_column)]
     forest = gbdt.train(training_data,
                         y=training_targets,
@@ -34,10 +33,9 @@ def main():
                         cat_features=cat_features,
                         config=config)
 
-    testing_data = gbdt.DataStore()
-    testing_data.load_tsv(tsvs=["test.tsv"],
-                           bucketized_float_cols=float_features,
-                           string_cols=cat_features + [target_column])
+    testing_data = gbdt.DataLoader.from_tsvs(tsvs=["test.tsv"],
+                                             bucketized_float_cols=float_features,
+                                             string_cols=cat_features + [target_column])
     testing_targets = [1 if l == 'Y' else -1 for l in testing_data.get_string_col(target_column)]
 
     print "\nFeature Importance:"

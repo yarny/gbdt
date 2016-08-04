@@ -23,17 +23,15 @@
 
 #include "loss_func_math.h"
 #include "loss_func_pairwise_logloss.h"
-#include "src/data_store/mem_data_store.h"
+#include "src/data_store/data_store.h"
 
 namespace gbdt {
 
 class PairwiseTest : public ::testing::Test {
  protected:
   void SetUp() {
-    auto group0 = Column::CreateStringColumn("group0", {"1", "1", "1", "1"});
-    auto group1 = Column::CreateStringColumn("group1", {"0", "0", "1", "1"});
-    data_store_.AddColumn(group0->name(), std::move(group0));
-    data_store_.AddColumn(group1->name(), std::move(group1));
+    data_store_.Add(Column::CreateStringColumn("group0", {"1", "1", "1", "1"}));
+    data_store_.Add(Column::CreateStringColumn("group1", {"0", "0", "1", "1"}));
 
     config_.set_pair_sampling_rate(kSamplingRate_);
   }
@@ -54,10 +52,10 @@ class PairwiseTest : public ::testing::Test {
     unique_ptr<Pairwise> pairwise(new PairwiseLogLoss(config_));
 
     pairwise->Init(data_store_.num_rows(), w_, y_, data_store_.GetStringColumn(group_name));
-    return std::move(pairwise);
+    return pairwise;
   }
 
-  MemDataStore data_store_;
+  DataStore data_store_;
   FloatVector w_ = [](int) { return 1.0; };
   FloatVector y_ = [](int i) { return i; };
   vector<double> f_ = { 0, 0, 0, 0};

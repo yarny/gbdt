@@ -51,21 +51,10 @@ cc_test(
 	":column",
 	":data_store",
         ":flatfiles_data_store",
-	":mem_data_store",
    ],
    data = [ ":flatfiles_data_store_testdata" ],
    copts = C_TEST_OPTS,
    linkopts = LINK_OPTS,
-)
-
-cc_library(
-    name = "mem_data_store",
-    hdrs = [ "mem_data_store.h" ],
-    srcs = [ "mem_data_store.cc" ],
-    deps = [
-         ":column",
-	 ":data_store",
-    ],
 )
 
 cc_library(

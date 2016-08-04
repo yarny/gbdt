@@ -33,7 +33,7 @@ cc_test(
     deps = [
         "//external:gtest_main",
 	"//src/data_store:column",
-	"//src/data_store:mem_data_store",
+        "//src/data_store:data_store",
 	":compute_tree_scores",
     ],
     copts = C_TEST_OPTS,

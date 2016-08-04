@@ -39,6 +39,7 @@ public:
   vector<const BucketizedFloatColumn*> GetBucketizedFloatColumns() const;
   vector<const RawFloatColumn*> GetRawFloatColumns() const;
   vector<const StringColumn*> GetStringColumns() const;
+  Status Add(unique_ptr<Column>&& column);
 
   virtual const Column* GetColumn(const string& column_name);
   string Description() const;

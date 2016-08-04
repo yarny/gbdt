@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 #include "src/base/base.h"
 #include "src/data_store/column.h"
-#include "src/data_store/mem_data_store.h"
+#include "src/data_store/data_store.h"
 #include "src/proto/tree.pb.h"
 
 namespace gbdt {
@@ -39,10 +39,10 @@ class GetTreeScoreTest : public ::testing::Test {
     auto height = Column::CreateBucketizedFloatColumn(
         "height", vector<float>({12, 20, 6, 3, 11, 4, 10, 2, 20, 3}));
 
-    data_store_.AddColumn("color", std::move(color));
-    data_store_.AddColumn("length", std::move(length));
-    data_store_.AddColumn("width", std::move(width));
-    data_store_.AddColumn("height", std::move(height));
+    data_store_.Add(std::move(color));
+    data_store_.Add(std::move(length));
+    data_store_.Add(std::move(width));
+    data_store_.Add(std::move(height));
 
     string text = "score: 0.0 "
                   "split { feature: 'color' cat_split { category: ['red', 'green'] } }"
@@ -70,7 +70,7 @@ class GetTreeScoreTest : public ::testing::Test {
     num_rows_ = data_store_.num_rows();
   }
 
-  MemDataStore data_store_;
+  DataStore data_store_;
   uint num_rows_;
   TreeNode tree_;
   unique_ptr<ComputeTreeScores> compute_tree_scores_;

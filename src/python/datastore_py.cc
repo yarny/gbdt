@@ -104,6 +104,33 @@ vector<StringColumnPy> DataStorePy::GetStringColumns() const {
   return column_pys;
 }
 
+void DataStorePy::AddStringColumn(const string& column_name,
+                                  const vector<string>& raw_strings) {
+  if (!data_store_) data_store_.reset(new DataStore);
+  auto status = data_store_->Add(Column::CreateStringColumn(column_name, raw_strings));
+  if (!status.ok()) {
+    ThrowException(status);
+  }
+}
+
+void DataStorePy::AddBucketizedFloatColumn(const string& column_name,
+                                           const vector<float>& raw_floats) {
+  if (!data_store_) data_store_.reset(new DataStore);
+  auto status = data_store_->Add(Column::CreateBucketizedFloatColumn(column_name, raw_floats));
+  if (!status.ok()) {
+    ThrowException(status);
+  }
+}
+
+void DataStorePy::AddRawFloatColumn(const string& column_name,
+                                    const vector<float>& raw_floats) {
+  if (!data_store_) data_store_.reset(new DataStore);
+  auto status = data_store_->Add(Column::CreateRawFloatColumn(column_name, vector<float>(raw_floats)));
+  if (!status.ok()) {
+    ThrowException(status);
+  }
+}
+
 void DataStorePy::Clear() {
   data_store_.reset(nullptr);
 }
@@ -131,6 +158,9 @@ void InitDataStorePy(py::module &m) {
       .def("get_bucketized_float_cols", &DataStorePy::GetBucketizedFloatColumns)
       .def("get_raw_float_cols", &DataStorePy::GetRawFloatColumns)
       .def("get_string_cols", &DataStorePy::GetStringColumns)
+      .def("add_bucketized_float_col", &DataStorePy::AddBucketizedFloatColumn)
+      .def("add_raw_float_col", &DataStorePy::AddRawFloatColumn)
+      .def("add_string_col", &DataStorePy::AddStringColumn)
       .def("clear", &DataStorePy::Clear)
       .def("__repl__", &DataStorePy::Description)
       .def("__str__", &DataStorePy::Description);
