@@ -16,6 +16,7 @@
 #include "tsv_data_store.h"
 
 #include <future>
+#include <gflags/gflags.h>
 #include <memory>
 #include <string>
 #include <unordered_map>

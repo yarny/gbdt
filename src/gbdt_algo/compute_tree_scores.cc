@@ -15,6 +15,8 @@
 
 #include "compute_tree_scores.h"
 
+#include <gflags/gflags.h>
+
 #include "split_algo.h"
 #include "src/base/base.h"
 #include "src/data_store/data_store.h"
