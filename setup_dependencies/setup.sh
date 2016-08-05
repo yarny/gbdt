@@ -20,7 +20,7 @@ function SystemType() {
 }
 
 function InstallGPerf()  {
-    if [[ -e /usr/lib/libtcmalloc.a ]]; then
+    if [[ -e $1/lib/libtcmalloc.a ]]; then
 	return
     fi
     WORK_DIR=$PWD
@@ -28,34 +28,34 @@ function InstallGPerf()  {
     git clone https://github.com/gperftools/gperftools.git
     cd gperftools
     ./autogen.sh
-    ./configure --prefix=$1 --enable-static
+    ./configure --prefix=$1 --enable-static --disable-shared
     export CXXFLAGS="-fPIC" && make && sudo make install
     cd $WORK_DIR
 }
 
 function InstallGlog()  {
-    if [[ -e /usr/lib/libglog.a ]]; then
+    if [[ -e $1/lib/libglog.a ]]; then
 	return
     fi
     WORK_DIR=$PWD
     cd /tmp
     git clone git://github.com/google/glog
     cd glog
-    mkdir -p build && cd build
+    mkdir -p build_targets && cd build_targets
     export CXXFLAGS="-fPIC" && cmake -DCMAKE_INSTALL_PREFIX=$1 .. && make VERBOSE=1
     sudo make install
     cd $WORK_DIR
 }
 
 function InstallGflags() {
-    if [[ -e /usr/lib/libgflags.a ]]; then
+    if [[ -e $1/lib/libgflags.a ]]; then
 	return
     fi
     WORK_DIR=$PWD
     cd /tmp
     git clone https://github.com/gflags/gflags.git
     cd gflags
-    mkdir -p build && cd build
+    mkdir -p build_targets && cd build_targets
     export CXXFLAGS="-fPIC"
     cmake -DCMAKE_INSTALL_PREFIX=$1 -DGFLAGS_NAMESPACE=google ..
     make && sudo make install
@@ -83,13 +83,16 @@ SYSTEM_TYPE=$(SystemType)
 
 if [[ $SYSTEM_TYPE =~ "OSX" ]];
 then
-    sudo brew install protobuf --devel
-    sudo brew install gflags
-    sudo brew install glog
-    InstallGPerf "/usr/local"
+    sudo brew install google-perftools
+    sudo brew link --overwrite gperftools
+    sudo rm /usr/loca/lib/libtcmalloc*dylib*
+
+    InstallProtoBuf3 "/usr/local"
+    InstallGflags "/usr/local"
+    InstallGlog "/usr/local"
 else
+    InstallGPerf "/usr"
     InstallProtoBuf3 "/usr"
     InstallGflags "/usr"
     InstallGlog "/usr"
-    InstallGPerf "/usr"
 fi

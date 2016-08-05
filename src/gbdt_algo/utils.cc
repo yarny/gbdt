@@ -16,6 +16,7 @@
 
 #include "utils.h"
 
+#include <gflags/gflags.h>
 #include <string>
 #include <unordered_set>
 #include <vector>

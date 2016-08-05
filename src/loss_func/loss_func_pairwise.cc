@@ -16,6 +16,7 @@
 #include "loss_func_pairwise.h"
 
 #include <algorithm>
+#include <gflags/gflags.h>
 #include <string>
 #include <vector>
 

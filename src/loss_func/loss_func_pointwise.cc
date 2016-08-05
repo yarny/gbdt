@@ -16,6 +16,7 @@
 #include "loss_func_pointwise.h"
 
 #include <functional>
+#include <gflags/gflags.h>
 #include <numeric>
 #include <vector>
 

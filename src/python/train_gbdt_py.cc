@@ -16,9 +16,10 @@
 
 #include "train_gbdt_py.h"
 
-#include <vector>
+#include <gflags/gflags.h>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include "external/cppformat/format.h"
 #include "datastore_py.h"
