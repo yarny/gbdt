@@ -6,8 +6,7 @@ from libgbdt import init_logging
 def train(data_store,
           config,
           y=[],
-          float_features=[],
-          cat_features=[],
+          features=[],
           w=[],
           base_forest=None,
           random_seed=1234567,
@@ -28,6 +27,13 @@ def train(data_store,
         import json
     except ImportError:
         raise ImportError('Please install json.')
+
+    feature_set = set(features)
+    float_features = [str(col) for col in data_store.get_bucketized_float_cols() if str(col) in feature_set]
+    cat_features = [str(col) for col in data_store.get_string_cols() if str(col) in feature_set]
+    unfound_features = feature_set - (set(float_features) | set(cat_features))
+    if len(unfound_features) > 0:
+        raise ValueError('Failed to find feature {} in data store.'.format(unfound_features))
 
     config['float_feature'] = float_features
     config['categorical_feature'] = cat_features
