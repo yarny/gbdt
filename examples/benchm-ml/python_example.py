@@ -29,8 +29,7 @@ def main():
     training_targets = [1 if l == 'Y' else -1 for l in training_data.get_string_col(target_column)]
     forest = gbdt.train(training_data,
                         y=training_targets,
-                        float_features=float_features,
-                        cat_features=cat_features,
+                        features=float_features + cat_features,
                         config=config)
 
     testing_data = gbdt.DataLoader.from_tsvs(tsvs=["test.tsv"],
