@@ -6,9 +6,9 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [ "-lprotobuf", "-lglog", "-lgflags", "-pthread", "-ltcmalloc_minimal", "-lm" ]
+LINK_OPTS = [ "-lprotobuf", "-lgflags", "-lglog", "-pthread", "-ltcmalloc_minimal", "-lm" ]
 C_TEST_OPTS = [ "-Iexternal/googletest/googletest/include",
-                "-Iexternal/googletest/googlemock/include" ]
+                "-Iexternal/googletest/googlemock/include"]
 
 cc_library(
     name = "compute_tree_scores",
@@ -38,6 +38,7 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )
 
 cc_library(
@@ -81,6 +82,7 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )
 
 cc_library(
@@ -125,6 +127,7 @@ cc_test(
     data = [ ":gbdt_algo_testdata" ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )
 
 filegroup(
@@ -166,6 +169,7 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )
 
 cc_library(
@@ -196,4 +200,5 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )

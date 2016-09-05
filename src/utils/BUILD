@@ -92,6 +92,7 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )
 
 cc_library(
