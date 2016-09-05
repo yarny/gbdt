@@ -24,7 +24,7 @@
 namespace gbdt {
 
 class Column;
-class GradientData;
+struct GradientData;
 class SamplingConfig;
 class Config;
 class TreeNode;

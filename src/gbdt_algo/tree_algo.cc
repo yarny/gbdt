@@ -50,7 +50,7 @@ GradientData ComputeWeightedSum(FloatVector w,
   {
     ThreadPool pool(FLAGS_num_threads);
     for (int i = 0; i < slices.size(); ++i) {
-      pool.Enqueue([&, &slice=slices[i], &total=totals[i]]() {
+      pool.Enqueue([w=w, &slice=slices[i], &total=totals[i], &gradient_data_vec=gradient_data_vec]() {
           for (auto index : slice) {
             total += w(index) * gradient_data_vec[index];
           }

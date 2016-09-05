@@ -30,6 +30,7 @@ cc_test(
     ],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
+    linkstatic = 1
 )
 
 cc_library(
@@ -55,6 +56,7 @@ cc_test(
    data = [ ":flatfiles_data_store_testdata" ],
    copts = C_TEST_OPTS,
    linkopts = LINK_OPTS,
+   linkstatic = 1
 )
 
 cc_library(
@@ -79,6 +81,7 @@ cc_test(
    data = [ ":flatfiles_data_store_testdata" ],
    copts = C_TEST_OPTS,
    linkopts = LINK_OPTS,
+   linkstatic = 1
 )
 
 filegroup(
@@ -117,6 +120,7 @@ cc_test(
    data = [ ":tsv_data_store_testdata" ],
    copts = C_TEST_OPTS,
    linkopts = LINK_OPTS,
+   linkstatic = 1
 )
 
 cc_library(
@@ -149,4 +153,5 @@ cc_test(
    data = [ ":tsv_data_store_testdata" ],
    copts = C_TEST_OPTS,
    linkopts = LINK_OPTS,
+   linkstatic = 1
 )
