@@ -136,6 +136,13 @@ Status DataStore::Add(unique_ptr<Column>&& column) {
   return Status::OK;
 }
 
+void DataStore::RemoveColumnIfExists(const string& column_name) {
+  auto it = column_map_.find(column_name);
+  if (it != column_map_.end()) {
+    column_map_.erase(it);
+  }
+}
+
 
 string DataStore::Description() const {
   return fmt::format("DataStore with {0} bucketized float, {1} raw float and "

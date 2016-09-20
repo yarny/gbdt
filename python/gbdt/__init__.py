@@ -13,3 +13,4 @@ from libgbdt import Forest
 from libgbdt import init_logging
 from ._gbdt import train, DataLoader
 from ._forest_visualizer import ForestVisualizer
+from ._partial_dependency_plot import plot_partial_dependency

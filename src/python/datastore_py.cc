@@ -131,6 +131,13 @@ void DataStorePy::AddRawFloatColumn(const string& column_name,
   }
 }
 
+void DataStorePy::RemoveColumnIfExists(const string& column_name) {
+  if (data_store_) {
+    data_store_->RemoveColumnIfExists(column_name);
+  }
+}
+
+
 void DataStorePy::Clear() {
   data_store_.reset(nullptr);
 }
@@ -161,6 +168,7 @@ void InitDataStorePy(py::module &m) {
       .def("add_bucketized_float_col", &DataStorePy::AddBucketizedFloatColumn)
       .def("add_raw_float_col", &DataStorePy::AddRawFloatColumn)
       .def("add_string_col", &DataStorePy::AddStringColumn)
+      .def("remove_col", &DataStorePy::RemoveColumnIfExists)
       .def("clear", &DataStorePy::Clear)
       .def("__repl__", &DataStorePy::Description)
       .def("__str__", &DataStorePy::Description);
