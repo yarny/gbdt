@@ -19,6 +19,7 @@ def main():
               'example_sampling_rate': 0.5,
               'feature_sampling_rate': 0.8,
               'pair_sampling_rate': 0.00001,
+              'min_hessian': 50,
               'shrinkage' : 0.1}
 
     target_column = 'dep_delayed_15min'

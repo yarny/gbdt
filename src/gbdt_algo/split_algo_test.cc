@@ -56,6 +56,19 @@ TEST_F(FindSplitPointTest, FindFloatSplitPointWithMissingValues) {
   EXPECT_FLOAT_EQ(4.0, split.gain());
 }
 
+TEST_F(FindSplitPointTest, FindFloatSplitPointWithMissingValues2) {
+  // In this test case, missing value is placed on the left most side and the split
+  // threshold is less than the lowest feature value.
+  auto feature = Column::CreateBucketizedFloatColumn(
+      "foo", vector<float>({1, 3, NAN, 3, 1, NAN, NAN, NAN, 3, NAN}));
+
+  Split split;
+  CHECK(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, Config(), total_, &split));
+  EXPECT_FLOAT_EQ(0.999, split.float_split().threshold());
+  EXPECT_FALSE(split.float_split().missing_to_right_child());
+  EXPECT_FLOAT_EQ(4.0, split.gain());
+}
+
 TEST_F(FindSplitPointTest, FindStringSplit) {
   auto feature = Column::CreateStringColumn(
       "foo", {"1", "3", "5", "3", "1", "7", "5", "7", "3", "5"});
@@ -105,6 +118,18 @@ TEST_F(FindSplitPointTest, NotEnoughSamplesString) {
   EXPECT_FALSE(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples, Config(), total_, &split));
   EXPECT_FLOAT_EQ(0.0, split.gain());
   EXPECT_FALSE(split.has_cat_split());
+}
+
+TEST_F(FindSplitPointTest, MinHessian) {
+  auto feature = Column::CreateBucketizedFloatColumn(
+      "foo", vector<float>({1, 3, 5, 3, 1, 7, 5, 7, 3, 5}));
+
+  Split split;
+
+  Config config;
+  config.set_min_hessian(5);
+  EXPECT_FALSE(FindBestSplit(feature.get(), w_, &gradient_data_vec_, samples_, config, total_, &split));
+  EXPECT_FLOAT_EQ(0.0, split.gain());
 }
 
 TEST_F(FindSplitPointTest, ConstFloatFeature) {

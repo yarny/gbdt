@@ -26,6 +26,8 @@ message Config {
   double min_gain = 4;
   // L2 regularization hyperparameter lambda.
   double l2_lambda = 5;
+  // Minimum hessian threshold to consider a split.
+  double min_hessian = 21;
 
   // Sampling config.
   float example_sampling_rate = 6;

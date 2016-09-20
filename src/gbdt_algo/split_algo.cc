@@ -163,33 +163,38 @@ bool FindBestSplitPoint(const IntegerizedColumn& feature,
   GradientData left;
   GradientData right;
   // Scanning to find the best splitting point.
-  for (int i = 0; i < histogram.size(); ++i) {
+  for (int i = 0; i < histogram.size(); left += histogram.data(i), ++i) {
+    if (i == 0) continue;
     right = total - left;
-    if (i > 0) {
-      double gain = left.Energy(lambda) + right.Energy(lambda) - total_energy;
-      bool missing_on_right = false;
-      if (place_missing && histogram.HasMissingValue()) {
-        // By default, for float missing value is placed on the left since they take index 0.
-        // We will try to put them on the right to see if it improves the gain. If so, we will put
-        // it on the right.
-        const auto& data_on_missing = histogram.DataOnMissing();        
-        double gain_on_right = (left - data_on_missing).Energy(lambda) +
-                               (right + data_on_missing).Energy(lambda) -
+    double gain = 0.0;
+    bool missing_on_right = false;
+    // By default we place missing on the left.
+    if (min(left.h, right.h) > config.min_hessian()) {
+      gain = left.Energy(lambda) + right.Energy(lambda) - total_energy;
+    }
+
+    // Try placing missing on the right.
+    if (place_missing && histogram.HasMissingValue()) {
+      const auto& data_on_missing = histogram.DataOnMissing();
+      auto left_missing_on_right = left - data_on_missing;
+      auto right_missing_on_right = right + data_on_missing;
+      if (min(left_missing_on_right.h, right_missing_on_right.h) > config.min_hessian()) {
+        double gain_on_right = left_missing_on_right.Energy(lambda) +
+                               right_missing_on_right.Energy(lambda) -
                                total_energy;
+
         if (gain_on_right > gain) {
           gain = gain_on_right;
           missing_on_right = true;
         }
       }
-      
-      if (gain > max(split_point->gain, max(config.min_gain(), kFloatTolerance))) {
-        split_point->gain = gain;
-        split_point->left_point = i - 1;
-        split_point->missing_on_right = missing_on_right;
-      }
     }
-
-    left += histogram.data(i);
+      
+    if (gain > max(split_point->gain, max(config.min_gain(), kFloatTolerance))) {
+      split_point->gain = gain;
+      split_point->left_point = i - 1;
+      split_point->missing_on_right = missing_on_right;
+    }
   }
 
   return split_point->left_point >= 0;
@@ -215,10 +220,15 @@ bool FindBestFloatSplit(const BucketizedFloatColumn& feature,
 
   split->set_gain(split_point.gain);
   split->mutable_float_split()->set_missing_to_right_child(split_point.missing_on_right);
-  
+
+  float left_limit = feature.get_bucket_max(histogram.value(split_point.left_point));
+  float right_limit =feature.get_bucket_min(histogram.value(split_point.left_point + 1));
+
+  // When left_point is NAN, it represents missing value. In this case, we set left_point to
+  // be the minimum feature value - 1e-3.
   split->mutable_float_split()->set_threshold(
-      (feature.get_bucket_max(histogram.value(split_point.left_point)) +
-       feature.get_bucket_min(histogram.value(split_point.left_point + 1))) / 2.0);
+      isnan(left_limit) ? feature.get_bucket_min(1) - 1e-3 :
+      (left_limit + right_limit) / 2.0);
   return true;
 }
 
