@@ -40,6 +40,7 @@ public:
   vector<const RawFloatColumn*> GetRawFloatColumns() const;
   vector<const StringColumn*> GetStringColumns() const;
   Status Add(unique_ptr<Column>&& column);
+  void RemoveColumnIfExists(const string& column_name);
 
   virtual const Column* GetColumn(const string& column_name);
   string Description() const;

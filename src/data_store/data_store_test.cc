@@ -52,6 +52,9 @@ TEST_F(DataStoreTest, TestAddAndGet) {
   EXPECT_EQ(nullptr, data_store.GetRawFloatColumn("foo2"));
   EXPECT_EQ(nullptr, data_store.GetBucketizedFloatColumn("foo2"));
   EXPECT_EQ(nullptr, data_store.GetStringColumn("foo2"));
+
+  data_store.RemoveColumnIfExists("foo");
+  EXPECT_EQ(nullptr, data_store.GetStringColumn("foo"));
 }
 
 }  // namespace gbdt
