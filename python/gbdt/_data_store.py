@@ -1,15 +1,14 @@
 from libgbdt import DataStore as _DataStore
 from libgbdt import BucketizedFloatColumn, StringColumn, RawFloatColumn
-from operator import itemgetter
 
 class DataStore:
     def __init__(self, data_store):
         self._data_store = data_store
 
-    def __len__(self, ):
+    def __len__(self):
         return len(self._data_store)
 
-    def __getitem__(self, k):
+    def _get_col(self, k):
         if k not in self._data_store:
             raise ValueError("Column '{}' cannot be found.".format(k))
         try:
@@ -19,6 +18,13 @@ class DataStore:
                 return self._data_store.get_string_col(k)
             except:
                 return self._data_store.get_raw_float_col(k)
+
+    def __getitem__(self, k):
+        if type(k) is int or type(k) is long:
+            return self.slice([k])
+        elif type(k) is list:
+            return self.slice(k)
+        return self._get_col(k)
 
     def __contains__(self, name):
         return name in self._data_store
@@ -67,18 +73,20 @@ class DataStore:
         for k in self.cols():
             yield (k, self[k])
 
-    def copy(self):
+    def slice(self, index):
         d = _DataStore()
         for key, value in self.iteritems():
-            column_type = str(type(value))
             if type(value) is StringColumn:
-                d.add_string_col(key, list(value))
+                d.add_string_col(key, [value[i] for i in index])
             elif type(value) is BucketizedFloatColumn:
-                d.add_bucketized_float_col(key, map(itemgetter(0), value))
+                d.add_bucketized_float_col(key, [value[i][0] for i in index])
             elif type(value) is RawFloatColumn:
-                d.add_raw_float_col(key, list(value))
-
+                d.add_raw_float_col(key, [value[i] for i in index])
         return DataStore(d)
+
+    def copy(self):
+        return self.slice(range(len(self._data_store)))
+
 
 class DataLoader:
     @staticmethod

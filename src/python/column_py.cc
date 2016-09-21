@@ -52,7 +52,8 @@ const string StringColumnPy::Description() const {
   for (int i = 0; i < n; ++i) {
     parts[i] = fmt::format("\"{0}\"", get(i));
   }
-  return fmt::format("StringColumn[{0} ...]", strings::JoinStrings(parts, ","));
+  return fmt::format("StringColumn[{0}{1}]", strings::JoinStrings(parts, ","),
+                     size() > n ? " ..." : "");
 }
 
 int RawFloatColumnPy::size() const {
@@ -76,7 +77,9 @@ const string RawFloatColumnPy::Description() const {
   for (int i = 0; i < n; ++i) {
     parts[i] = fmt::format("{0}", get(i));
   }
-  return fmt::format("RawFloatColumn[{0} ...]", strings::JoinStrings(parts, ","));
+  return fmt::format("RawFloatColumn[{0}{1}]",
+                     strings::JoinStrings(parts, ","),
+                     size() > n ? " ...": "");
 }
 
 int BucketizedFloatColumnPy::size() const {
@@ -110,7 +113,9 @@ const string BucketizedFloatColumnPy::Description() const {
     auto p = get(i);
     parts[i] = fmt::format("({0},{1})", p.first, p.second);
   }
-  return fmt::format("BucketizedFloatColumn[{0} ...]", strings::JoinStrings(parts, ","));
+  return fmt::format("BucketizedFloatColumn[{0}{1}]",
+                     strings::JoinStrings(parts, ","),
+                     size() > n ? " ..." : "");
 }
 
 }  // namespace gbdt
