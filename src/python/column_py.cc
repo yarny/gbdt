@@ -52,7 +52,7 @@ const string StringColumnPy::Description() const {
   for (int i = 0; i < n; ++i) {
     parts[i] = fmt::format("\"{0}\"", get(i));
   }
-  return fmt::format("StringColumn[{0}{1}]", strings::JoinStrings(parts, ","),
+  return fmt::format("StringColumn([{0}{1}])", strings::JoinStrings(parts, ","),
                      size() > n ? " ..." : "");
 }
 
@@ -77,7 +77,7 @@ const string RawFloatColumnPy::Description() const {
   for (int i = 0; i < n; ++i) {
     parts[i] = fmt::format("{0}", get(i));
   }
-  return fmt::format("RawFloatColumn[{0}{1}]",
+  return fmt::format("FloatColumn([{0}{1}])",
                      strings::JoinStrings(parts, ","),
                      size() > n ? " ...": "");
 }
@@ -90,11 +90,11 @@ const string BucketizedFloatColumnPy::name() const {
   return column_ ? column_->name() : "empty column.";
 }
 
-pair<float, float> BucketizedFloatColumnPy::get(int i) const {
+float BucketizedFloatColumnPy::get(int i) const {
   if (!column_) ThrowException(Status(error::NOT_FOUND, "The column is null."));
   if (i >= column_->size()) ThrowException(Status(error::OUT_OF_RANGE, "Index out of range."));
 
-  return make_pair(column_->get_row_min(i), column_->get_row_max(i));
+  return column_->get_row_min(i);
 }
 
 vector<pair<float, float>> BucketizedFloatColumnPy::GetBuckets() const {
@@ -110,10 +110,9 @@ const string BucketizedFloatColumnPy::Description() const {
   int n = min(size(), NUM_ELEMENTS_TO_DISPLAY);
   vector<string> parts(n);
   for (int i = 0; i < n; ++i) {
-    auto p = get(i);
-    parts[i] = fmt::format("({0},{1})", p.first, p.second);
+    parts[i] = fmt::format("{0}", get(i));
   }
-  return fmt::format("BucketizedFloatColumn[{0}{1}]",
+  return fmt::format("BucketizedFloatColumn([{0}{1}])",
                      strings::JoinStrings(parts, ","),
                      size() > n ? " ..." : "");
 }
