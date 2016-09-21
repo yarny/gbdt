@@ -174,19 +174,19 @@ void InitDataStorePy(py::module &m) {
            py::arg("bucketized_float_cols")=vector<string>(),
            py::arg("raw_float_cols")=vector<string>(),
            py::arg("string_cols")=vector<string>())
-      .def("__len__", &DataStorePy::num_rows)
       .def("get_bucketized_float_col", &DataStorePy::GetBucketizedFloatColumn)
       .def("get_raw_float_col", &DataStorePy::GetRawFloatColumn)
       .def("get_string_col", &DataStorePy::GetStringColumn)
       .def("add_bucketized_float_col", &DataStorePy::AddBucketizedFloatColumn)
       .def("add_raw_float_col", &DataStorePy::AddRawFloatColumn)
       .def("add_string_col", &DataStorePy::AddStringColumn)
-      .def("remove_col", &DataStorePy::RemoveColumnIfExists)
+      .def("erase", &DataStorePy::RemoveColumnIfExists)
       .def("clear", &DataStorePy::Clear)
       .def("cols", &DataStorePy::AllColumnNames)
       .def("bucketized_float_cols", &DataStorePy::BucketizedFloatColumnNames)
       .def("string_cols", &DataStorePy::StringColumnNames)
       .def("raw_float_cols", &DataStorePy::RawFloatColumnNames)
+      .def("__len__", &DataStorePy::num_rows)
       .def("__contains__", &DataStorePy::Exists)
       .def("__repr__", &DataStorePy::Description)
       .def("__str__", &DataStorePy::Description);

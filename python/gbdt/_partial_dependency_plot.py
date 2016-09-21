@@ -92,11 +92,9 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
         plt.plot(ind, [0] * len(x), color='k', linestyle='-')
         plt.show()
 
-
     data = data.copy()
     if feature not in data:
         raise ValueError("Unknown feature '{}'".format(feature))
-
 
     if type(data[feature]) is BucketizedFloatColumn:
         plot_float_feature(forest, data, feature, x, x0)

@@ -51,8 +51,8 @@ class BucketizedFloatColumnPy {
   BucketizedFloatColumnPy(const BucketizedFloatColumn* column) : column_(column) {}
   int size() const;
   const string name() const;
-  pair<float, float> get(int i) const;
-  vector<pair<float, float> > GetBuckets() const;
+  float get(int i) const;
+  vector<pair<float, float>> GetBuckets() const;
   const string Description() const;
  private:
   const BucketizedFloatColumn* column_ = nullptr;
