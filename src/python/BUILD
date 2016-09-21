@@ -57,6 +57,7 @@ cc_library(
        "//external:cppformat-lib",
        "//external:pybind11-lib",
        "//src/data_store:column",
+       "//src/utils:utils",
        ":gbdt_py_base",
    ],
    copts = [ "-I/usr/include/python2.7",  ],

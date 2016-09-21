@@ -7,22 +7,27 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
        Inputs:
          forest: the forest model.
          data: the sample of data to plot the graph with.
-         f: the feature.
+         feature: the feature.
          x: the values to perturb the feature with.
          x0: the base feature value to compare with.
     """
-    import matplotlib.pyplot as plt
-    import numpy as np
-    from ._gbdt import DataLoader
+    try:
+        import numpy as np
+        import matplotlib.pyplot as plt
+    except ImportError:
+        raise ImportError('Please install matplotlib and numpy.')
+
+    from ._data_store import DataLoader
+    from libgbdt import StringColumn, BucketizedFloatColumn
 
     def replace_float_feature(data, feature, v):
         n = len(data)
-        data.remove_col(feature)
+        data.erase(feature)
         data.add_bucketized_float_col(feature, [v] * n)
 
     def replace_string_feature(data, feature, v):
         n = len(data)
-        data.remove_col(feature)
+        data.erase(feature)
         data.add_string_col(feature, [v] * n)
 
     def compute_score_stats_float(forest, data, feature, v, base_scores):
@@ -38,13 +43,6 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
         scores = np.array(forest.predict(data))
         score_diffs = scores - base_scores
         return (np.mean(score_diffs), np.std(score_diffs))
-
-    def copy_data(data):
-        bucketized_float_cols = dict([(str(col), [v[0] for v in col]) for col in data.get_bucketized_float_cols()])
-        string_cols = dict([(str(col), [v for v in col]) for col in data.get_string_cols()])
-        return DataLoader.from_dict(
-            bucketized_float_cols=bucketized_float_cols,
-            string_cols=string_cols)
 
     def plot_float_feature(forest, data, feature, x, x0):
         x0 = float('nan') if x0 is None else x0
@@ -95,10 +93,14 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
         plt.show()
 
 
-    data = copy_data(data)
-    if data.exists_bucketized_float_col(feature):
+    data = data.copy()
+    if feature not in data:
+        raise ValueError("Unknown feature '{}'".format(feature))
+
+
+    if type(data[feature]) is BucketizedFloatColumn:
         plot_float_feature(forest, data, feature, x, x0)
-    elif data.exists_string_col(feature):
+    elif type(data[feature]) is StringColumn:
         plot_categorical_features(forest, data, feature, x, x0)
     else:
-        raise ValueError("Unknown feature '{}'".format(feature))
+        raise ValueError("Unsupported feature type {}.".format(type(data[feature])))

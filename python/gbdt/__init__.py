@@ -8,9 +8,12 @@ def _setup_lib_path():
 _setup_lib_path()
 
 from ._version import version_info, __version__
-from libgbdt import DataStore
-from libgbdt import Forest
+from ._forest import Forest
 from libgbdt import init_logging
-from ._gbdt import train, DataLoader
+from libgbdt import BucketizedFloatColumn
+from libgbdt import StringColumn
+from libgbdt import RawFloatColumn
+from ._gbdt import train
 from ._forest_visualizer import ForestVisualizer
+from _data_store import DataStore, DataLoader
 from ._partial_dependency_plot import plot_partial_dependency

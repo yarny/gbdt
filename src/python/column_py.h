@@ -30,6 +30,7 @@ class StringColumnPy {
   int size() const;
   const string name() const;
   const string& get(int i) const;
+  const string Description() const;
  private:
   const StringColumn* column_ = nullptr;
 };
@@ -40,6 +41,7 @@ class RawFloatColumnPy {
   int size() const;
   const string name() const;
   float get(int i) const;
+  const string Description() const;
  private:
   const RawFloatColumn* column_ = nullptr;
 };
@@ -50,8 +52,8 @@ class BucketizedFloatColumnPy {
   int size() const;
   const string name() const;
   pair<float, float> get(int i) const;
-
   vector<pair<float, float> > GetBuckets() const;
+  const string Description() const;
  private:
   const BucketizedFloatColumn* column_ = nullptr;
 };

@@ -44,13 +44,12 @@ class DataStorePy {
   BucketizedFloatColumnPy GetBucketizedFloatColumn(const string& col) const;
   RawFloatColumnPy GetRawFloatColumn(const string& col) const;
   StringColumnPy GetStringColumn(const string& col) const;
-  vector<BucketizedFloatColumnPy> GetBucketizedFloatColumns() const;
-  vector<RawFloatColumnPy> GetRawFloatColumns() const;
-  vector<StringColumnPy> GetStringColumns() const;
   void RemoveColumnIfExists(const string& col);
-  bool ExistsBucketizedFloatColumn(const string& col) const;
-  bool ExistsRawFloatColumn(const string& col) const;
-  bool ExistsStringColumn(const string& col) const;
+  bool Exists(const string& col) const;
+  vector<string> AllColumnNames() const;
+  vector<string> BucketizedFloatColumnNames() const;
+  vector<string> RawFloatColumnNames() const;
+  vector<string> StringColumnNames() const;
 
   DataStore* data_store() {
     return data_store_.get();

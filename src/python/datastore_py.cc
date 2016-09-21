@@ -77,43 +77,8 @@ BucketizedFloatColumnPy DataStorePy::GetBucketizedFloatColumn(const string& col)
   return BucketizedFloatColumnPy(column);
 }
 
-vector<BucketizedFloatColumnPy> DataStorePy::GetBucketizedFloatColumns() const {
-  auto columns = data_store_ ? data_store_->GetBucketizedFloatColumns() : vector<const BucketizedFloatColumn*> ();
-  vector<BucketizedFloatColumnPy> column_pys;
-  for (const auto* column : columns) {
-    column_pys.emplace_back(BucketizedFloatColumnPy(column));
-  }
-  return column_pys;
-}
-
-vector<RawFloatColumnPy> DataStorePy::GetRawFloatColumns() const {
-  auto columns = data_store_ ? data_store_->GetRawFloatColumns() : vector<const RawFloatColumn*>();
-  vector<RawFloatColumnPy> column_pys;
-  for (const auto* column : columns) {
-    column_pys.emplace_back(RawFloatColumnPy(column));
-  }
-  return column_pys;
-}
-
-vector<StringColumnPy> DataStorePy::GetStringColumns() const {
-  auto columns = data_store_ ? data_store_->GetStringColumns() : vector<const StringColumn*>();
-  vector<StringColumnPy> column_pys;
-  for (const auto* column : columns) {
-    column_pys.emplace_back(StringColumnPy(column));
-  }
-  return column_pys;
-}
-
-bool DataStorePy::ExistsBucketizedFloatColumn(const string& col) const {
-  return data_store_ && data_store_->GetBucketizedFloatColumn(col);
-}
-
-bool DataStorePy::ExistsRawFloatColumn(const string& col) const {
-  return data_store_ && data_store_->GetRawFloatColumn(col);
-}
-
-bool DataStorePy::ExistsStringColumn(const string& col) const {
-  return data_store_ && data_store_->GetStringColumn(col);
+bool DataStorePy::Exists(const string& col) const {
+  return data_store_ && data_store_->GetColumn(col);
 }
 
 void DataStorePy::AddStringColumn(const string& column_name,
@@ -149,6 +114,46 @@ void DataStorePy::RemoveColumnIfExists(const string& column_name) {
   }
 }
 
+vector<string> DataStorePy::BucketizedFloatColumnNames() const {
+  if (!data_store_) return vector<string>();
+  vector<string> column_names;
+  for (const auto* col: data_store_->GetBucketizedFloatColumns()) {
+    column_names.push_back(col->name());
+  }
+  return column_names;
+}
+
+vector<string> DataStorePy::RawFloatColumnNames() const {
+  if (!data_store_) return vector<string>();
+  vector<string> column_names;
+  for (const auto* col: data_store_->GetRawFloatColumns()) {
+    column_names.push_back(col->name());
+  }
+  return column_names;
+}
+
+vector<string> DataStorePy::StringColumnNames() const {
+  if (!data_store_) return vector<string>();
+  vector<string> column_names;
+  for (const auto* col: data_store_->GetStringColumns()) {
+    column_names.push_back(col->name());
+  }
+  return column_names;
+}
+
+vector<string> DataStorePy::AllColumnNames() const {
+  vector<string> column_names;
+  for (auto col : BucketizedFloatColumnNames()) {
+    column_names.emplace_back(col);
+  }
+  for (auto col : StringColumnNames()) {
+    column_names.emplace_back(col);
+  }
+  for (auto col : RawFloatColumnNames()) {
+    column_names.emplace_back(col);
+  }
+  return column_names;
+}
 
 void DataStorePy::Clear() {
   data_store_.reset(nullptr);
@@ -170,21 +175,19 @@ void InitDataStorePy(py::module &m) {
            py::arg("raw_float_cols")=vector<string>(),
            py::arg("string_cols")=vector<string>())
       .def("__len__", &DataStorePy::num_rows)
-      .def("num_cols", &DataStorePy::num_cols)
       .def("get_bucketized_float_col", &DataStorePy::GetBucketizedFloatColumn)
       .def("get_raw_float_col", &DataStorePy::GetRawFloatColumn)
       .def("get_string_col", &DataStorePy::GetStringColumn)
-      .def("get_bucketized_float_cols", &DataStorePy::GetBucketizedFloatColumns)
-      .def("get_raw_float_cols", &DataStorePy::GetRawFloatColumns)
-      .def("get_string_cols", &DataStorePy::GetStringColumns)
       .def("add_bucketized_float_col", &DataStorePy::AddBucketizedFloatColumn)
       .def("add_raw_float_col", &DataStorePy::AddRawFloatColumn)
       .def("add_string_col", &DataStorePy::AddStringColumn)
-      .def("exists_bucketized_float_col", &DataStorePy::ExistsBucketizedFloatColumn)
-      .def("exists_raw_float_col", &DataStorePy::ExistsRawFloatColumn)
-      .def("exists_string_col", &DataStorePy::ExistsStringColumn)
       .def("remove_col", &DataStorePy::RemoveColumnIfExists)
       .def("clear", &DataStorePy::Clear)
-      .def("__repl__", &DataStorePy::Description)
+      .def("cols", &DataStorePy::AllColumnNames)
+      .def("bucketized_float_cols", &DataStorePy::BucketizedFloatColumnNames)
+      .def("string_cols", &DataStorePy::StringColumnNames)
+      .def("raw_float_cols", &DataStorePy::RawFloatColumnNames)
+      .def("__contains__", &DataStorePy::Exists)
+      .def("__repr__", &DataStorePy::Description)
       .def("__str__", &DataStorePy::Description);
 }

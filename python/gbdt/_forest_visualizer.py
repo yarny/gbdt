@@ -3,24 +3,20 @@ Visualizes forest model.
 """
 
 import json
-from libgbdt import Forest
+from ._forest import Forest
 
 class ForestVisualizer:
     def __init__(self, forest):
-        if type(forest) is str or type(forest) is unicode:
-            self._forestJson = json.loads(forest)
-        elif type(forest) is dict:
+        if type(forest) is dict:
             self._forestJson = forest
-        elif type(forest) is Forest:
-            self._forestJson = json.loads(forest.as_json())
         else:
-            raise TypeError, 'Unsupported forest type: {0}'.format(type(forest))
-
+            self._forestJson = json.loads(str(forest))
 
     def numTrees(self):
         return len(self._forestJson['tree'])
 
     def visualizeTree(self, i):
+        """Visualizes tree i."""
         try:
             from graphviz import Digraph
         except ImportError:

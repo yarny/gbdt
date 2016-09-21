@@ -9,6 +9,9 @@ def ComputeAUC(forest, data, targets):
     fpr, tpr, _ = metrics.roc_curve(targets, predictions, pos_label=1)
     return metrics.auc(fpr, tpr)
 
+def ToTarget(l):
+    return 1 if l == 'Y' else -1
+
 def main():
     loss_func = sys.argv[1]
     float_features = ["DepTime", "Distance"]
@@ -27,7 +30,7 @@ def main():
     training_data = gbdt.DataLoader.from_tsvs(tsvs=["train-0.1m.tsv"],
                                               bucketized_float_cols=float_features,
                                               string_cols=cat_features + [target_column])
-    training_targets = [1 if l == 'Y' else -1 for l in training_data.get_string_col(target_column)]
+    training_targets = map(ToTarget, training_data[target_column])
     forest = gbdt.train(training_data,
                         y=training_targets,
                         features=float_features + cat_features,
@@ -36,7 +39,7 @@ def main():
     testing_data = gbdt.DataLoader.from_tsvs(tsvs=["test.tsv"],
                                              bucketized_float_cols=float_features,
                                              string_cols=cat_features + [target_column])
-    testing_targets = [1 if l == 'Y' else -1 for l in testing_data.get_string_col(target_column)]
+    testing_targets = map(ToTarget, testing_data[target_column])
 
     print "\nFeature Importance:"
     print '\n'.join(['{0}\t{1}'.format(feature, imp) for feature,imp in forest.feature_importance()])
