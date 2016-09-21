@@ -48,6 +48,9 @@ class DataStorePy {
   vector<RawFloatColumnPy> GetRawFloatColumns() const;
   vector<StringColumnPy> GetStringColumns() const;
   void RemoveColumnIfExists(const string& col);
+  bool ExistsBucketizedFloatColumn(const string& col) const;
+  bool ExistsRawFloatColumn(const string& col) const;
+  bool ExistsStringColumn(const string& col) const;
 
   DataStore* data_store() {
     return data_store_.get();
