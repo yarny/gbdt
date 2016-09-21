@@ -1,7 +1,7 @@
-from libgbdt import DataStore
 from libgbdt import Forest
-from libgbdt import train as __train_internal__
+from libgbdt import train as _train
 from libgbdt import init_logging
+from ._forest import Forest
 
 def train(data_store,
           config,
@@ -12,14 +12,14 @@ def train(data_store,
           random_seed=1234567,
           num_threads=16):
     """
-    train gbdt model.
+    Trains a gbdt model.
     Inputs: data_store: The Data Store.
             config: the config params. See https://github.com/yarny/gbdt/blob/master/src/proto/config.proto for all params.
             y: The target
-            float_features: Continuous features.
-            cat_features: Categorical features.
+            features: the list of features.
             w: The sampling weight.
-            base_forest: The base forest based on which the training will continue.
+            base_forest: The base forest upon which the training will continue.
+            random_seed: the random seed.
             num_threads: The number of threads to run training with.
     Outputs: The forest.
     """
@@ -29,8 +29,8 @@ def train(data_store,
         raise ImportError('Please install json.')
 
     feature_set = set(features)
-    float_features = [str(col) for col in data_store.get_bucketized_float_cols() if str(col) in feature_set]
-    cat_features = [str(col) for col in data_store.get_string_cols() if str(col) in feature_set]
+    float_features = [col for col in data_store.bucketized_float_cols() if str(col) in feature_set]
+    cat_features = [col for col in data_store.string_cols() if col in feature_set]
     unfound_features = feature_set - (set(float_features) | set(cat_features))
     if len(unfound_features) > 0:
         raise ValueError('Failed to find feature {} in data store.'.format(unfound_features))
@@ -42,43 +42,10 @@ def train(data_store,
     if 'feature_sampling_rate' not in config:
         config['feature_sampling_rate'] = 1
 
-    return __train_internal__(data_store,
-                              y=y,
-                              w=w,
-                              config=json.dumps(config),
-                              base_forest=base_forest,
-                              random_seed=random_seed,
-                              num_threads=num_threads)
-
-class DataLoader:
-    @staticmethod
-    def from_tsvs(tsvs, bucketized_float_cols=[], string_cols=[], raw_float_cols=[]):
-        """Loads data from tsvs.
-           Inputs:
-             tsvs: Blocks of tsvs, among which only the first contains header.
-             bucketized_float_cols: Float columns that will be bucketized. All features will be bucketized.
-             string_cols: String cols.
-             raw_float_cols: Float columns that are loaded raw. Target columns are usually not bucketized.
-        """
-        d = DataStore()
-        d.load_tsv(tsvs,
-                   bucketized_float_cols=bucketized_float_cols,
-                   string_cols=string_cols,
-                   raw_float_cols=raw_float_cols)
-        return d
-
-    @staticmethod
-    def from_dict(bucketized_float_cols={}, string_cols={}, raw_float_cols={}):
-        """Loads data from dict of columns.
-             bucketized_float_cols: Float columns that will be bucketized. All features will be bucketized.
-             string_cols: String cols.
-             raw_float_cols: Float columns that are loaded raw. Target columns are usually not bucketized.
-        """
-        d = DataStore()
-        for key, value in bucketized_float_cols.iteritems():
-            d.add_bucketized_float_col(key, value)
-        for key, value in string_cols.iteritems():
-            d.add_string_col(key, value)
-        for key, value in raw_float_cols.iteritems():
-            d.add_raw_float_col(key, value)
-        return d
+    return Forest(_train(data_store._data_store,
+                         y=y,
+                         w=w,
+                         config=json.dumps(config),
+                         base_forest=base_forest if base_forest is None else base_forest._forest,
+                         random_seed=random_seed,
+                         num_threads=num_threads))

@@ -19,12 +19,17 @@
 #include <string>
 
 #include "external/cppformat/format.h"
+#include "src/utils/utils.h"
 
 using gbdt::BucketizedFloatColumnPy;
 using gbdt::RawFloatColumnPy;
 using gbdt::StringColumnPy;
 
 namespace gbdt {
+
+namespace {
+const int NUM_ELEMENTS_TO_DISPLAY = 10;
+}  // namespace
 
 int StringColumnPy::size() const {
   return column_ ? column_->size() : 0;
@@ -41,6 +46,15 @@ const string& StringColumnPy::get(int i) const {
   return column_->get_row_string(i);
 }
 
+const string StringColumnPy::Description() const {
+  int n = min(size(), NUM_ELEMENTS_TO_DISPLAY);
+  vector<string> parts(n);
+  for (int i = 0; i < n; ++i) {
+    parts[i] = fmt::format("\"{0}\"", get(i));
+  }
+  return fmt::format("StringColumn[{0} ...]", strings::JoinStrings(parts, ","));
+}
+
 int RawFloatColumnPy::size() const {
   return column_ ? column_->size() : 0;
 }
@@ -54,6 +68,15 @@ float RawFloatColumnPy::get(int i) const {
   if (i >= column_->size()) ThrowException(Status(error::OUT_OF_RANGE, "Index out of range."));
 
   return (*column_)[i];
+}
+
+const string RawFloatColumnPy::Description() const {
+  int n = min(size(), NUM_ELEMENTS_TO_DISPLAY);
+  vector<string> parts(n);
+  for (int i = 0; i < n; ++i) {
+    parts[i] = fmt::format("{0}", get(i));
+  }
+  return fmt::format("RawFloatColumn[{0} ...]", strings::JoinStrings(parts, ","));
 }
 
 int BucketizedFloatColumnPy::size() const {
@@ -80,20 +103,32 @@ vector<pair<float, float>> BucketizedFloatColumnPy::GetBuckets() const {
   return buckets;
 }
 
+const string BucketizedFloatColumnPy::Description() const {
+  int n = min(size(), NUM_ELEMENTS_TO_DISPLAY);
+  vector<string> parts(n);
+  for (int i = 0; i < n; ++i) {
+    auto p = get(i);
+    parts[i] = fmt::format("({0},{1})", p.first, p.second);
+  }
+  return fmt::format("BucketizedFloatColumn[{0} ...]", strings::JoinStrings(parts, ","));
+}
+
 }  // namespace gbdt
 
 void InitStringColumnPy(py::module &m) {
   py::class_<StringColumnPy>(m, "StringColumn")
       .def("__len__", &StringColumnPy::size)
       .def("__getitem__", &StringColumnPy::get)
-      .def("__str__", &StringColumnPy::name);
+      .def("__str__", &StringColumnPy::name)
+      .def("__repr__", &StringColumnPy::Description);
 }
 
 void InitRawFloatColumnPy(py::module &m) {
   py::class_<RawFloatColumnPy>(m, "RawFloatColumn")
       .def("__len__", &RawFloatColumnPy::size)
       .def("__getitem__", &RawFloatColumnPy::get)
-      .def("__str__", &RawFloatColumnPy::name);
+      .def("__str__", &RawFloatColumnPy::name)
+      .def("__repr__", &RawFloatColumnPy::Description);
 }
 
 void InitBucketizedFloatColumnPy(py::module &m) {
@@ -101,5 +136,6 @@ void InitBucketizedFloatColumnPy(py::module &m) {
       .def("__len__", &BucketizedFloatColumnPy::size)
       .def("__getitem__", &BucketizedFloatColumnPy::get)
       .def("__str__", &BucketizedFloatColumnPy::name)
-      .def("buckets", &BucketizedFloatColumnPy::GetBuckets);
+      .def("buckets", &BucketizedFloatColumnPy::GetBuckets)
+      .def("__repr__", &BucketizedFloatColumnPy::Description);;
 }
