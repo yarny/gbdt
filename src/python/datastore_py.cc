@@ -104,6 +104,18 @@ vector<StringColumnPy> DataStorePy::GetStringColumns() const {
   return column_pys;
 }
 
+bool DataStorePy::ExistsBucketizedFloatColumn(const string& col) const {
+  return data_store_ && data_store_->GetBucketizedFloatColumn(col);
+}
+
+bool DataStorePy::ExistsRawFloatColumn(const string& col) const {
+  return data_store_ && data_store_->GetRawFloatColumn(col);
+}
+
+bool DataStorePy::ExistsStringColumn(const string& col) const {
+  return data_store_ && data_store_->GetStringColumn(col);
+}
+
 void DataStorePy::AddStringColumn(const string& column_name,
                                   const vector<string>& raw_strings) {
   if (!data_store_) data_store_.reset(new DataStore);
@@ -168,6 +180,9 @@ void InitDataStorePy(py::module &m) {
       .def("add_bucketized_float_col", &DataStorePy::AddBucketizedFloatColumn)
       .def("add_raw_float_col", &DataStorePy::AddRawFloatColumn)
       .def("add_string_col", &DataStorePy::AddStringColumn)
+      .def("exists_bucketized_float_col", &DataStorePy::ExistsBucketizedFloatColumn)
+      .def("exists_raw_float_col", &DataStorePy::ExistsRawFloatColumn)
+      .def("exists_string_col", &DataStorePy::ExistsStringColumn)
       .def("remove_col", &DataStorePy::RemoveColumnIfExists)
       .def("clear", &DataStorePy::Clear)
       .def("__repl__", &DataStorePy::Description)
