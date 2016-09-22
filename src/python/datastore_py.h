@@ -46,6 +46,7 @@ class DataStorePy {
   StringColumnPy GetStringColumn(const string& col) const;
   void RemoveColumnIfExists(const string& col);
   bool Exists(const string& col) const;
+  string  GetColumnType(const string& col) const;
   vector<string> AllColumnNames() const;
   vector<string> BucketizedFloatColumnNames() const;
   vector<string> RawFloatColumnNames() const;

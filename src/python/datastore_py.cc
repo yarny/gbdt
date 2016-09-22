@@ -159,6 +159,29 @@ void DataStorePy::Clear() {
   data_store_.reset(nullptr);
 }
 
+string DataStorePy::GetColumnType(const string& col) const {
+  if (!data_store_) {
+    ThrowException(Status(error::NOT_FOUND, "Empty data store"));
+  }
+
+  const auto* column = data_store_->GetColumn(col);
+  if (!column) {
+    ThrowException(Status(error::NOT_FOUND,
+                          fmt::format("Failed to find column '{0}' data store", col)));
+  }
+
+  switch(column->type()) {
+    case Column::kStringColumn:
+      return "string";
+    case Column::kBucketizedFloatColumn:
+      return "bucketized_float";
+    case Column::kRawFloatColumn:
+      return "raw_float";
+    default:
+      return "unknown";
+  }
+}
+
 }  // namespace gbdt
 
 void InitDataStorePy(py::module &m) {
@@ -186,6 +209,7 @@ void InitDataStorePy(py::module &m) {
       .def("bucketized_float_cols", &DataStorePy::BucketizedFloatColumnNames)
       .def("string_cols", &DataStorePy::StringColumnNames)
       .def("raw_float_cols", &DataStorePy::RawFloatColumnNames)
+      .def("get_column_type", &DataStorePy::GetColumnType)
       .def("__len__", &DataStorePy::num_rows)
       .def("__contains__", &DataStorePy::Exists)
       .def("__repr__", &DataStorePy::Description)

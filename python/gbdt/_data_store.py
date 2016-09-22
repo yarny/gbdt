@@ -11,13 +11,14 @@ class DataStore:
     def _get_col(self, k):
         if k not in self._data_store:
             raise ValueError("Column '{}' cannot be found.".format(k))
-        try:
+        type = self._data_store.get_column_type(k)
+
+        if type == 'bucketized_float':
             return self._data_store.get_bucketized_float_col(k)
-        except:
-            try:
-                return self._data_store.get_string_col(k)
-            except:
-                return self._data_store.get_raw_float_col(k)
+        elif type == 'string':
+            return self._data_store.get_string_col(k)
+        else:
+            return self._data_store.get_raw_float_col(k)
 
     def __getitem__(self, k):
         if type(k) is int or type(k) is long:
