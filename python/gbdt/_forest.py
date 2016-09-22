@@ -17,5 +17,23 @@ class Forest:
         """Outputs list of feature importances in descending order."""
         return self._forest.feature_importance()
 
+    def feature_importance_bar_chart(self, color='blue'):
+        try:
+            from matplotlib import pyplot as plt
+            import numpy
+        except ImportError:
+            raise ImportError('Please install matplotlib and numpy.')
+
+        fimps = self.feature_importance()
+        importances = [v for _, v in fimps]
+        features = [f for f,_ in fimps]
+        ind = -numpy.arange(len(fimps))
+
+        _, ax = plt.subplots()
+        plt.barh(ind, importances, align='center', color=color)
+        ax.set_yticks(ind)
+        ax.set_yticklabels(features)
+        ax.set_xlabel('Feature importance')
+
     def __str__(self):
         return self._forest.as_json()
