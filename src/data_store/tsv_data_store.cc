@@ -140,7 +140,7 @@ Status TSVDataStore::SetupColumns(const string& first_tsv, const Config& config)
 
   unordered_map<string, int> map_from_header_to_index;
   for (int i = 0; i < headers.size(); ++i) {
-    TrimWhiteSpace(&headers[i]);
+    strings::TrimWhiteSpace(&headers[i]);
     map_from_header_to_index[headers[i]] = i;
   }
 

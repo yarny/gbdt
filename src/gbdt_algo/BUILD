@@ -104,7 +104,7 @@ cc_library(
 	"//src/utils:threadpool",
 	"//src/utils:utils",
 	"//src/utils:vector_slice",
-	":compute_tree_scores",
+        ":compute_tree_scores",
         ":split_algo",
 	":tree_algo",
 	":utils",

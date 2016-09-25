@@ -6,9 +6,12 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 from os import path
+import os
 import sys
 
 here = path.abspath(path.dirname(__file__))
+sys.path.append(os.path.join(here, "python/gbdt"))
+import _version
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -20,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.21-beta",
+    version=_version.__version__,
 
     description='GBDT',
     long_description=long_description,
@@ -28,7 +31,7 @@ setup(
     # The project's main homepage.
     url='https://github.com/yarny/gbdt',
 
-    # Author details
+    # Author details.
     author='Jiang Chen',
     author_email='criver@gmail.com',
 
@@ -58,7 +61,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='gbdt,machine learning,decision tree',
+    keywords='gbdt,machine learning,decision trees,forest',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
