@@ -16,7 +16,9 @@
 #include "utils.h"
 
 #include <cstdlib>
+#include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <glog/logging.h>
 #include <streambuf>
 #include <string>
@@ -105,4 +107,12 @@ string ReadLine(istream& is) {
   std::getline(is, line);
   line.erase(line.find_last_not_of("\n\r") + 1);
   return line;
+}
+
+string CurrentTimeInString() {
+  auto t = std::time(nullptr);
+  auto tm = std::localtime(&t);
+  char buffer[32];
+  std::strftime(buffer, 32, "%Y-%m-%d %H:%M:%S", tm);
+  return std::string(buffer);
 }

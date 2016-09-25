@@ -32,16 +32,6 @@ vector<string> split(const string& s, const string& delim);
 bool StringCast(const string& s, float* v);
 bool HasPrefix(const string& s, const string& prefix);
 bool HasSuffix(const string& s, const string& suffix);
-
-}  // namespace string
-
-string ReadFileToStringOrDie(const string& file);
-void WriteStringToFile(const string& content, const string& file);
-
-vector<uint> VectorSliceToVector(VectorSlice<uint> slice);
-
-bool FileExists(const string& file);
-
 inline void LTrimWhiteSpace(string *s) {
   s->erase(s->begin(), find_if(s->begin(), s->end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 }
@@ -56,6 +46,17 @@ inline void TrimWhiteSpace(string *s) {
   RTrimWhiteSpace(s);
 }
 
+}  // namespace string
+
+string ReadFileToStringOrDie(const string& file);
+void WriteStringToFile(const string& content, const string& file);
+
+vector<uint> VectorSliceToVector(VectorSlice<uint> slice);
+
+bool FileExists(const string& file);
+
 string ReadLine(istream& in);
+
+string CurrentTimeInString();
 
 #endif  // UTILS_H_

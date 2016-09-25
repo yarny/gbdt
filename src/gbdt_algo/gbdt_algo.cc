@@ -45,6 +45,8 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
+namespace {
+
 void ApplyShrinkage(TreeNode* tree, float shrinkage) {
   tree->set_score(tree->score() * shrinkage);
   if (tree->has_left_child()) {
@@ -97,6 +99,25 @@ void InitializeWithBaseForest(const Forest* base_forest,
   }
   LOG(INFO) << "Finished initializing forest with " << base_forest->tree_size() << " trees.";
 }
+
+string MetaInfo(const StopWatch& stopwatch, const Config& config) {
+  Config config_copy = config;
+  config_copy.clear_float_feature();
+  config_copy.clear_categorical_feature();
+  config_copy.clear_additional_float_column();
+  config_copy.clear_additional_string_column();
+  string config_str = config_copy.DebugString();
+  strings::TrimWhiteSpace(&config_str);
+  std::replace(config_str.begin(), config_str.end(), '\n', ',');
+  std::replace(config_str.begin(), config_str.end(), '"', '\'');
+
+  return fmt::format("GBDT forest trained at {0} for {1} with the following config: {2}.",
+                     CurrentTimeInString(),
+                     StopWatch::MSecsToFormattedString(stopwatch.ElapsedTimeInMSecs()),
+                     config_str);
+}
+
+}  // namespace
 
 Status TrainGBDT(DataStore* data_store,
                  const unordered_set<string>& feature_names,
@@ -179,6 +200,7 @@ Status TrainGBDT(DataStore* data_store,
   overall_stopwatch.End();
   LOG(INFO) << "Finished training in "
             << StopWatch::MSecsToFormattedString(overall_stopwatch.ElapsedTimeInMSecs()) << ".";
+  forest->set_meta_info(MetaInfo(overall_stopwatch, config));
 
   return Status::OK;
 }
