@@ -24,7 +24,7 @@ Installation (python2.7, linux x86_64 or osx x86_64):
 
 Documentations
 ---------
-* Installation instructions can be found at [docs/INSTALL.md](https://github.com/yarny/gbdt/blob/master/docs/INSTALL.md).
-* Example usages can be found at [examples/benchm-ml/TUTORIAL.md](https://github.com/yarny/gbdt/blob/master/examples/benchm-ml/TUTORIAL.md).
-* Some details of the algorithms can be found at [docs/ALGORITHMS.md](https://github.com/yarny/gbdt/blob/master/docs/ALGORITHMS.md).
-* Performance benchmark: [docs/PERFORMANCE_BENCHMARK.md](https://github.com/yarny/gbdt/blob/master/docs/PERFORMANCE_BENCHMARK.md)
+* [Installation Instructions](https://github.com/yarny/gbdt/blob/master/docs/INSTALL.md)
+* [Tutorial](https://github.com/yarny/gbdt/blob/master/docs/TUTORIAL.md)
+* [Algorithms](https://github.com/yarny/gbdt/blob/master/docs/ALGORITHMS.md)
+* [Performance benchmark](https://github.com/yarny/gbdt/blob/master/docs/PERFORMANCE_BENCHMARK.md)
