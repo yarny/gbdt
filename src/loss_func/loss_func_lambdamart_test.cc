@@ -37,15 +37,15 @@ class PairwiseTest : public ::testing::Test {
     for (int i = 0; i < expected.size(); ++i) {
       double avg_g = gradient_data_vec[i].g / kSamplingRate_;
       double avg_h = gradient_data_vec[i].h / kSamplingRate_;
-      EXPECT_LT(fabs(expected[i].g - avg_g), 5e-2)
+      EXPECT_LT(fabs(expected[i].g - avg_g), 1e-3)
           << " at " << i << " actual " << avg_g << " vs " << expected[i].g;
-      EXPECT_LT(fabs(expected[i].h - avg_h), 5e-2)
+      EXPECT_LT(fabs(expected[i].h - avg_h), 1e-4)
           << " at " << i << " actual " << avg_h << " vs " << expected[i].h;
     }
   }
 
   DataStore data_store_;
-  const int kSamplingRate_ = 1000;
+  const int kSamplingRate_ = 100000;
   Config config_;
   FloatVector w_ = [](int) { return 1.0; };
   FloatVector y_ = [](int i) { return i; };
@@ -63,7 +63,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessians) {
   EXPECT_FLOAT_EQ(0, c);
 
   // The gradients reflect the relative order of the original targets.
-  vector<GradientData> expected = { {-0.28, 0.4}, {-0.022, 0.16}, {-0.113, 0.4}, {0.416, 0.38} };
+  vector<GradientData> expected = { {-0.092, 0.131}, {-0.00817, 0.0543}, {-0.04, 0.1358 }, {0.141, 0.128} };
   ExpectGradientEqual(expected, gradient_data_vec);
 }
 

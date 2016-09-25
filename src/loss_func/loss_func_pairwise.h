@@ -37,7 +37,7 @@ class Pairwise : public LossFunc {
  public:
   // delta_target is always positive since we only generates pairs where the first has larger target
   // value.
-  Pairwise(const Config& config, PointwiseLossFunc loss_func);
+  Pairwise(const Config& config, bool rerank, PointwiseLossFunc loss_func);
 
   virtual Status Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) override;
   virtual void ComputeFunctionalGradientsAndHessians(const vector<double>& f,
@@ -48,21 +48,26 @@ class Pairwise : public LossFunc {
  protected:
   // The following function provides custom interface for adding custom pair weights.
   // This weights can be used to implement listwise loss functions like LambdaMart.
-  virtual function<double(const pair<uint, uint>&)> GeneratePairWeightingFunc(
-      const vector<uint>& group, const vector<double>& f);
+  virtual function<double(const pair<uint, uint>&)> PairWeightingFunc(const Group& group) const;
 
   string PrepareProgressMessage(double loss);
-  FloatVector w_;
-  FloatVector y_;
-  float pair_sampling_rate_;
-  bool pair_weight_by_delta_target_;
 
  private:
   vector<Group> groups_;
-  // Division of [1, group_size] into slices to help multithreading.
-  vector<pair<uint, uint>> slices_;
-  double initial_loss_ = -1;
 
+  // Division of [0, group_size) into slices to help multithreading.
+  vector<pair<uint, uint>> slices_;
+
+  double initial_loss_ = -1;
+  uint64 min_num_pairs_ = 1;
+  FloatVector w_;
+  FloatVector y_;
+  double pair_sampling_rate_;
+  double pair_sampling_probability_;
+  bool pair_weight_by_delta_target_;
+  bool equal_group_weight_;
+  // If true, the algorithm will rerank each group every iteration.
+  bool rerank_ = false;
   PointwiseLossFunc loss_func_;
 };
 

@@ -60,7 +60,7 @@ class PairwiseTest : public ::testing::Test {
   FloatVector y_ = [](int i) { return i; };
   vector<double> f_ = { 0, 0, 0, 0};
   // Set sampleing_rate to 10000 so that g and h are more stable.
-  const int kSamplingRate_ = 10000;
+  const int kSamplingRate_ = 100000;
   Config config_;
 };
 
@@ -74,7 +74,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansOneGroup) {
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);
   // The gradients reflect the relative order of the original targets.
-  vector<GradientData> expected = { {-1.5, 1.5}, {-0.5, 1.5}, {0.5, 1.5}, {1.5, 1.5} };
+  vector<GradientData> expected = { {-0.5, 0.5}, {-0.5/3, 0.5}, {0.5/3, 0.5}, {0.5, 0.5} };
   ExpectGradientEqual(expected, gradient_data_vec);
 }
 
@@ -89,7 +89,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansNoGroup) {
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);
   // The gradients reflect the relative order of the original targets.
-  vector<GradientData> expected = { {-1.5, 1.5}, {-0.5, 1.5}, {0.5, 1.5}, {1.5, 1.5} };
+  vector<GradientData> expected = { {-0.5, 0.5}, {-0.5/3, 0.5}, {0.5/3, 0.5}, {0.5, 0.5} };
   ExpectGradientEqual(expected, gradient_data_vec);
 }
 
@@ -121,7 +121,7 @@ TEST_F(PairwiseTest, TestComputeFunctionalGradientsAndHessiansWeightByDeltaTarge
   // c is zero for all pairwise losses.
   EXPECT_FLOAT_EQ(0, c);
   // More weights are put on higher target separation.
-  vector<GradientData> expected = { {-3, 3}, {-1, 2}, {1, 2}, {3, 3} };
+  vector<GradientData> expected = { {-1, 1}, {-1.0/3, 2.0/3}, {1.0/3, 2.0/3}, {1, 1} };
   ExpectGradientEqual(expected, gradient_data_vec);
 }
 

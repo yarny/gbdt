@@ -30,7 +30,7 @@ class Config;
 class AUC : public Pairwise {
  public:
   AUC(const Config& config)
-      : Pairwise(config,
+      : Pairwise(config, false,
                  [] (double delta_target, double delta_func) {
                    return ComputeHuberizedHinge(1, delta_func); }) {}
 };

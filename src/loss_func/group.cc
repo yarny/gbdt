@@ -22,10 +22,15 @@
 
 namespace gbdt {
 
-Group::Group(vector<uint>&& group, FloatVector y) : group_(group) {
+Group::Group(vector<uint>&& group, FloatVector y) : group_(group), y_(y) {
   // Sort groups on the descending order of y.
   sort(group_.begin(), group_.end(),
        [&] (uint i, uint j) { return y(i) > y(j); });
+  // Rank is initialize to identity order.
+  ranks_.resize(group_.size());
+  for (int i = 0; i < ranks_.size(); ++i) {
+    ranks_[i] = i;
+  }
 
   // Find change boundaries of targets.
   int last_boundary = 0;
@@ -37,6 +42,22 @@ Group::Group(vector<uint>&& group, FloatVector y) : group_(group) {
       pair_map_.insert(make_pair(num_pairs_, make_pair(block_size, i)));
       last_boundary = i;
     }
+  }
+}
+
+void Group::Rerank(const vector<double>& f) {
+  // Computes the ranking based on the current function.
+  vector<uint> ranking(size());
+  for (int i = 0; i < ranking.size(); ++i) {
+    ranking[i] = i;
+  }
+
+  // Sort by f.
+  sort(ranking.begin(), ranking.end(),
+       [&group=group_, &f=f](uint i, uint j) { return f[group[i]] > f[group[j]]; });
+
+  for (int i = 0; i < ranking.size(); ++i) {
+    ranks_[ranking[i]] = i;
   }
 }
 

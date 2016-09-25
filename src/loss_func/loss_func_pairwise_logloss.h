@@ -29,7 +29,7 @@ class LossFuncConfig;
 class PairwiseLogLoss : public Pairwise {
  public:
   PairwiseLogLoss(const Config& config)
-      : Pairwise(config,
+      : Pairwise(config, false,
                  [](double delta_target,
                     double delta_func) {
                    return ComputeLogLoss(1.0, delta_func); }) {}
