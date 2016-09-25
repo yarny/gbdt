@@ -13,10 +13,6 @@ here = path.abspath(path.dirname(__file__))
 sys.path.append(os.path.join(here, "python/gbdt"))
 import _version
 
-# Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
-
 setup(
     name='gbdt',
 

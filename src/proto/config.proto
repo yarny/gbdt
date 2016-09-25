@@ -20,21 +20,40 @@ package gbdt;
 message Config {
   // Tree building config.
   int32 num_trees = 1;
+  // The number of leaves in each tree.
   int32 num_leaves = 2;
+  // The learning rate
   float shrinkage = 3;
-  // The minimum gain to consider split a leaf.
+  // The minimum gain to consider splitting a leaf.
   double min_gain = 4;
   // L2 regularization hyperparameter lambda.
   double l2_lambda = 5;
-  // Minimum hessian threshold to consider a split.
+  // Minimum Hessian threshold to consider a split. This is can be seen
+  // as the minimum number of samples we would consider splitting a leaf.
   double min_hessian = 21;
 
   // Sampling config.
+  // The row sampling rate of the data matrix.
   float example_sampling_rate = 6;
+  // The column sampling rate of the data matrix.
   float feature_sampling_rate = 7;
 
   // Eval config.
   int32 eval_interval = 8;
+
+  // Loss Func config.
+  // Currently, we support mse, logloss, auc, pairwise_logloss, gbrank and lambdarank.
+  string loss_func = 17;
+
+  // Pairwise Loss Func Config.
+  // Average number of pairs we will sample per example. The complexity of the algorithm
+  // grows linearly with this parameter.
+  float pair_sampling_rate = 18;
+  // If true, each pair are weighted by the absolute value of their delta target difference.
+  bool pair_weight_by_delta_target = 19;
+  float lambdamart_dcg_base = 20;
+  // Makes each group's weight equal. This allows us to balance weights between groups.
+  bool equal_group_weight = 22;
 
   // Data config.
   repeated string float_feature = 9;
@@ -48,19 +67,4 @@ message Config {
   // These are usually columns needed for loss function computation.
   repeated string additional_float_column = 15;
   repeated string additional_string_column = 16;
-
-  // Loss Func config.
-  string loss_func = 17;
-  // Pairwise loss func.
-  // Average number of pairs per sample. This determines direclty the complexity blowup for
-  // pairwise learning algorithm. The time complexity of the gradient computation
-  // are roughly pair_sampling_rate * N, where N is the number of examples.
-  float pair_sampling_rate = 18;
-  // If true, each pair are weighted by the absolute value of their delta target difference.
-  bool pair_weight_by_delta_target = 19;
-  float lambdamart_dcg_base = 20;
-  // Makes each group's weight equal. This is useful to avoid
-  // putting disporportionately more weights on groups with more
-  // pairs.
-  bool equal_group_weight = 22;
 }
