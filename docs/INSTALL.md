@@ -1,15 +1,12 @@
 # Installation Instructions
 The package can be installed as a python package or compiled as C++ biinary.
 
+## Python Installation Instructions
+Precompiled packages are available for linux x86_64 platform and python 2.
+* Install stable version: `pip install gbdt`
+* Install latest development version: `pip install git+https://github.com/yarny/gbdt.git`
 
-Python Installation Instructions
-------------------------
-Precompiled packages are available for linux x86_64 platform and python 2. To install, just run
-`pip install git+https://github.com/yarny/gbdt.git`
-
-
-C++ Binary Compilation Instructions
---------------------
+## C++ Binary Compilation Instructions
 The package can be compiled in both Linux and OSX platforms.
 It depends on *[bazel](bazel.io), gflags, glogs, gperf, protobuf3*.
 Per limitation of bazel, for linux, please use ubuntu 14 and above to build.

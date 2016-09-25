@@ -12,10 +12,10 @@ class ForestVisualizer:
         else:
             self._forestJson = json.loads(str(forest))
 
-    def numTrees(self):
+    def num_trees(self):
         return len(self._forestJson['tree'])
 
-    def visualizeTree(self, i):
+    def visualize_tree(self, i):
         """Visualizes tree i."""
         try:
             from graphviz import Digraph
@@ -67,8 +67,8 @@ class ForestVisualizer:
 def main():
     import sys
     model = json.loads(open(sys.argv[1]).read())
-    forestVisualizer = ForestVisualizer(model)
-    digraph = forestVisualizer.visualizeTree(1)
+    visualizer = ForestVisualizer(model)
+    digraph = visualizer.visualize_tree(1)
     digraph.render(filename='tree')
 
 if __name__ == '__main__':
