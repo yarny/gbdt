@@ -1,4 +1,3 @@
-https://testpypi.python.org/pypi
 # TUTORIALS
 
 ## Table of Contents
