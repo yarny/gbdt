@@ -19,7 +19,8 @@ When is GBDT good for you?
 
 Installation (python2.7, linux x86_64 or osx x86_64):
 ---------
-`pip install git+https://github.com/yarny/gbdt.git`
+* Install the latest stable version: `pip install gbdt`
+* Install the latest development version: `pip install git+https://github.com/yarny/gbdt.git`
 
 Documentations
 ---------
