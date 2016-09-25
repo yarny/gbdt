@@ -35,8 +35,8 @@ inline double discount(uint rank, float base) {
 }
 
 LambdaMART::LambdaMART(const Config& config)
-    : Pairwise(config, [](double delta_target, double delta_func) {
-                 return ComputeLogLoss(1, delta_func); }) {
+    : Pairwise(config, true, [](double delta_target, double delta_func) {
+        return ComputeLogLoss(1, delta_func); }) {
   if (config.lambdamart_dcg_base() > 0) {
     dcg_base_ = config.lambdamart_dcg_base();
   }
@@ -57,38 +57,15 @@ LambdaMART::LambdaMART(const Config& config)
 //
 // Proposal:
 // Sort scores in descending order.
-// Compute the rank delta between adjacent store by p = 1 / (1 + exp(f_i - f_j)).
+// Compute the rank delta between adjacent score by p = 1 / (1 + exp(f_i - f_j)).
 // rank_j =  rank_i + 2 * (p - 0.5).
 // At the beginning of the training, there are less separation of scores. All ranks will be 0.
 // With more score separation, the ranks will be more separated out.
-vector<uint> ComputeRanks(const vector<uint>& group, const vector<double>& f) {
-  // Computes the ranking based on the current function.
-  vector<uint> ranking(group.size());
-  for (int i = 0; i < ranking.size(); ++i) {
-    ranking[i] = i;
-  }
-
-  // Sort by f.
-  sort(ranking.begin(), ranking.end(),
-       [&](uint i, uint j) { return f[group[i]] > f[group[j]]; });
-
-  // For each index, store its rank.
-  vector<uint> ranks(group.size());
-  for (int i = 0; i < ranking.size(); ++i) {
-    ranks[ranking[i]] = i;
-  }
-
-  return ranks;
-}
-
-function<double(const pair<uint, uint>&)> LambdaMART::GeneratePairWeightingFunc(
-    const vector<uint>& group, const vector<double>& f) {
-  ranks_ = ComputeRanks(group, f);
-
+function<double(const pair<uint, uint>&)> LambdaMART::PairWeightingFunc(const Group& group) const {
   // The weight is set to the delta_dcg if the pair is inverted.
   return [&, this] (const pair<uint, uint>& p) {
-    double target_diff = y_(group[p.first]) - y_(group[p.second]);
-    double discount_diff = fabs(discount_(ranks_[p.first]) - discount_(ranks_[p.second]));
+    double target_diff = group.y(p.first) - group.y(p.second);
+    double discount_diff = fabs(discount_(group.rank(p.first)) - discount_(group.rank(p.second)));
     return target_diff * discount_diff;
   };
 }

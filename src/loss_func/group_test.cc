@@ -28,7 +28,6 @@ class GroupTest : public ::testing::Test {
   void SetUp() {
   }
   vector<float> targets_ = {0, 1, 2, 0, 3, 0, 1, 1, 0, 2, 3, 1, 1, 0, 3};
-  unique_ptr<Group> group_;
   std::mt19937 generator_;
   const int kSampleCount_ = 10000;
 };
@@ -42,7 +41,7 @@ TEST_F(GroupTest, TestGroup) {
   EXPECT_EQ(8, group.size());
   // The group is sorted by targets.
   EXPECT_EQ(vector<float>({3, 3, 2, 2, 1, 0, 0, 0}), targets);
-  // num_pairs = 2 * 6 + 2 * 4 + 3 = 23
+  // num_pairs = 2 * 6 + 2 * 4 + 3 = 23.
   EXPECT_EQ(23, group.num_pairs());
   map<pair<uint, uint>, double> counts;
   for (int i = 0; i < kSampleCount_; ++i) {
@@ -62,6 +61,24 @@ TEST_F(GroupTest, TestGroup) {
       }
     }
   }
+}
+
+TEST_F(GroupTest, TestRerank) {
+  Group group({0, 2, 3, 4, 5, 7, 9, 10}, [this](int i) { return i; });
+
+  vector<double> f(targets_.size());
+  // f is the reverse rank of targets.
+  for (int i = 0; i < f.size(); ++i) {
+    f[i] = -i;
+  }
+
+  group.Rerank(f);
+  vector<uint> expected_ranks = {7, 6, 5, 4, 3, 2, 1, 0};
+  vector<uint> ranks(group.size());
+  for (int i = 0; i < group.size(); ++i) {
+    ranks[i] = group.rank(i);
+  }
+  EXPECT_EQ(expected_ranks, ranks);
 }
 
 }  // namespace gbdt

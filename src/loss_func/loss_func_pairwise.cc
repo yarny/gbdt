@@ -32,10 +32,25 @@ DECLARE_int32(num_threads);
 
 namespace gbdt {
 
-Pairwise::Pairwise(const Config& config, PointwiseLossFunc loss_func)
-    : loss_func_(loss_func) {
-  pair_sampling_rate_ = config.pair_sampling_rate();
-  pair_weight_by_delta_target_ = config.pair_weight_by_delta_target();
+namespace {
+
+double ComputePairSamplingProbability(int num_rows, double pair_sampling_rate,
+                                      const vector<Group>& groups) {
+  uint64 num_total_pairs = 0;
+  for (const auto& group : groups) {
+    num_total_pairs += group.num_pairs();
+  }
+  return pair_sampling_rate * num_rows / num_total_pairs / 2.0;
+}
+
+}  // namespace
+
+Pairwise::Pairwise(const Config& config, bool rerank, PointwiseLossFunc loss_func) :
+    pair_sampling_rate_(config.pair_sampling_rate()),
+    pair_weight_by_delta_target_(config.pair_weight_by_delta_target()),
+    equal_group_weight_(config.equal_group_weight()),
+    rerank_(rerank),
+    loss_func_(loss_func) {
 }
 
 Status Pairwise::Init(int num_rows, FloatVector w, FloatVector y, const StringColumn* group_column) {
@@ -58,7 +73,7 @@ Status Pairwise::Init(int num_rows, FloatVector w, FloatVector y, const StringCo
     const auto& group_col = group_column->col();
     for (int i = 0; i < group_column->size(); ++i) {
       uint group_id = group_col[i];
-      groups[group_id - 1].push_back(i);
+      groups[group_id - 1].emplace_back(i);
     }
   }
 
@@ -66,6 +81,15 @@ Status Pairwise::Init(int num_rows, FloatVector w, FloatVector y, const StringCo
   for (auto& group : groups) {
     groups_.emplace_back(std::move(group), y);
   }
+
+  min_num_pairs_ = 1;
+  for (const auto& group : groups_) {
+    min_num_pairs_ = max(min_num_pairs_, group.num_pairs());
+  }
+
+  pair_sampling_probability_ = ComputePairSamplingProbability(num_rows, pair_sampling_rate_,
+                                                              groups_);
+
   slices_ = Subsampling::DivideSamples(groups_.size(), FLAGS_num_threads * 5);
 
   return Status::OK;
@@ -92,14 +116,22 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
       pool.Enqueue([&, this, &slice=slices_[j], &loss=losses[j], &weight_sum=weight_sums[j]]() {
           std::mt19937* generator = Subsampling::get_generator();
           for (int group_index = slice.first; group_index < slice.second; ++group_index) {
-            const auto& group = groups_[group_index];
-            uint64 num_sample_pairs = group.num_pairs() * pair_sampling_rate_;
-            auto pair_weighting_func = GeneratePairWeightingFunc(group.group(), f);
+            auto& group = groups_[group_index];
+            if (rerank_) group.Rerank(f);
+
+            uint64 num_sample_pairs = group.num_pairs() * pair_sampling_probability_;
+
+            // To make each group's weight constant, we rescale each group's weight by
+            // 1.0 / group.num_pairs().
+            double weight_rescaling_factor = equal_group_weight_ ?
+                                             double(min_num_pairs_) / group.num_pairs() : 1.0;
+            auto pair_weighting_func = PairWeightingFunc(group);
             for (int i = 0; i < num_sample_pairs; ++i) {
               auto p = group.SamplePair(generator);
               auto pos_sample = group[p.first];
               auto neg_sample = group[p.second];
-              double weight = w_(pos_sample) * w_(neg_sample) * pair_weighting_func(p);
+              double weight = w_(pos_sample) * w_(neg_sample) * pair_weighting_func(p) *
+                              weight_rescaling_factor;
               double delta_target = y_(pos_sample) - y_(neg_sample);
               double delta_func = f[pos_sample] - f[neg_sample];
 
@@ -128,11 +160,11 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
 }
 
 // Basic pairwise loss uses uniform weighting.
-function<double(const pair<uint, uint>&)> Pairwise::GeneratePairWeightingFunc(
-    const vector<uint>& group, const vector<double>& f) {
+function<double(const pair<uint, uint>&)> Pairwise::PairWeightingFunc(
+    const Group& group) const {
   if (pair_weight_by_delta_target_) {
-    return [&, this] (const pair<uint, uint>& p) {
-      return y_(group[p.first]) - y_(group[p.second]);
+    return [&group=group] (const pair<uint, uint>& p) {
+      return group.y(p.first) - group.y(p.second);
     };
   } else {
     return [](const pair<uint, uint>& p) { return 1;};

@@ -27,8 +27,7 @@ class LambdaMART : public Pairwise {
   LambdaMART(const Config& config);
 
  private:
-  function<double(const pair<uint, uint>&)> GeneratePairWeightingFunc(
-      const vector<uint>& group, const vector<double>& f) override;
+  function<double(const pair<uint, uint>&)> PairWeightingFunc(const Group& group) const override;
   float dcg_base_ = 2.0;
 
   // ranks_ for each group. Used to generate pair weight function for LambdaMart.

@@ -32,7 +32,7 @@ namespace gbdt {
 class GBRank : public Pairwise {
  public:
   GBRank(const Config& config)
-      : Pairwise(config,
+      : Pairwise(config, false,
                  [](double delta_target, double delta_func) {
                    return ComputeSquaredHinge(delta_target, delta_func);
                  }) {}

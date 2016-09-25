@@ -52,7 +52,15 @@ message Config {
   // Loss Func config.
   string loss_func = 17;
   // Pairwise loss func.
+  // Average number of pairs per sample. This determines direclty the complexity blowup for
+  // pairwise learning algorithm. The time complexity of the gradient computation
+  // are roughly pair_sampling_rate * N, where N is the number of examples.
   float pair_sampling_rate = 18;
+  // If true, each pair are weighted by the absolute value of their delta target difference.
   bool pair_weight_by_delta_target = 19;
   float lambdamart_dcg_base = 20;
+  // Makes each group's weight equal. This is useful to avoid
+  // putting disporportionately more weights on groups with more
+  // pairs.
+  bool equal_group_weight = 22;
 }

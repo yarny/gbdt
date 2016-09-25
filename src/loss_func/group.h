@@ -37,22 +37,29 @@ class Group {
 
   // Randomly sample a pair from the group.
   pair<uint, uint> SamplePair(std::mt19937* generator) const;
-  inline const vector<uint>& group() const {
-    return group_;
-  }
   inline uint size() const {
     return group_.size();
   }
-  inline uint operator [] (uint i) const {
+  inline uint operator [] (int i) const {
     return group_[i];
   }
   inline uint64 num_pairs() const {
     return num_pairs_;
   }
+  inline uint rank(int i) const {
+    return ranks_[i];
+  }
+  inline float y(int i) const {
+    return y_(group_[i]);
+  }
+
+  void Rerank(const vector<double>& f);
 
 private:
   vector<uint> group_;
+  vector<uint> ranks_;
   uint64 num_pairs_ = 0;
+  FloatVector y_;
 
   // The following data structure is used to map pair index to the actual
   // pair. Each entry represent a target block (instances with the

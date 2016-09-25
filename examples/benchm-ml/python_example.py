@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import csv
 from sklearn import metrics
@@ -21,9 +22,9 @@ def main():
               'num_leaves': 16,
               'example_sampling_rate': 0.5,
               'feature_sampling_rate': 0.8,
-              'pair_sampling_rate': 0.00001,
+              'pair_sampling_rate': 20,
               'min_hessian': 50,
-              'shrinkage' : 0.1}
+              'shrinkage' : 0.05}
 
     target_column = 'dep_delayed_15min'
 
@@ -40,6 +41,7 @@ def main():
                                              bucketized_float_cols=float_features,
                                              string_cols=cat_features + [target_column])
     testing_targets = map(ToTarget, testing_data[target_column])
+    print >>open('forest.{}.json'.format(loss_func), 'w'), forest
 
     print "\nFeature Importance:"
     print '\n'.join(['{0}\t{1}'.format(feature, imp) for feature,imp in forest.feature_importance()])
