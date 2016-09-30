@@ -1,4 +1,4 @@
-def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
+def plot_partial_dependency(forest, data, feature, x, x0=None, log_scale=False, color='blue'):
     """Plots partial dependency graph.
        Plot forest(instance|f=x) - forest(instance|f=x0) vs x, where instance is
        a feature vector and instance|f=x represents the resulting feature vector after
@@ -14,6 +14,7 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
     try:
         import numpy as np
         import matplotlib.pyplot as plt
+        import math
     except ImportError:
         raise ImportError('Please install matplotlib and numpy.')
 
@@ -44,7 +45,7 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
         score_diffs = scores - base_scores
         return (np.mean(score_diffs), np.std(score_diffs))
 
-    def plot_float_feature(forest, data, feature, x, x0):
+    def plot_float_feature(forest, data, feature, x, x0, log_scale):
         x0 = float('nan') if x0 is None else x0
 
         replace_float_feature(data, feature, x0)
@@ -61,6 +62,9 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
         ax.set_xlabel(feature)
         ax.set_ylabel('forest score delta')
         ax.set_title('Partial dependency plot')
+        if log_scale:
+            x = np.log(x)
+            ax.set_xlabel('log({})'.format(feature))
 
         plt.plot(x, [p[0] for p in score_stats], color=color)
         plt.fill_between(x, lower_bounds, upper_bounds, alpha=.3, color=color)
@@ -97,7 +101,7 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, color='blue'):
         raise ValueError("Unknown feature '{}'".format(feature))
 
     if type(data[feature]) is BucketizedFloatColumn:
-        plot_float_feature(forest, data, feature, x, x0)
+        plot_float_feature(forest, data, feature, x, x0, log_scale)
     elif type(data[feature]) is StringColumn:
         plot_categorical_features(forest, data, feature, x, x0)
     else:
