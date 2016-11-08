@@ -193,19 +193,14 @@ template <typename INT> Status AddBucketizedVecHelper(const vector<float>& raw_f
                                                       vector<INT>* col,
                                                       vector<float>* bucket_mins) {
   col->reserve(col->size() + raw_floats.size());
+  int max_bucket_id = bucket_map.rbegin()->second;
   for (auto v : raw_floats) {
     // NAN represents missing and has index 0.
     if (isnan(v)) {
       col->push_back(0);
     } else {
       auto it = bucket_map.lower_bound(v);
-      if (it == bucket_map.end()) {
-        return Status(error::OUT_OF_RANGE,
-                      fmt::format(
-                          "This should not happen because the last bucket is the max float value. "
-                          "Value ({0})", v));
-      }
-      int bucket_id = it->second;
+      uint bucket_id = it != bucket_map.end() ? it->second : max_bucket_id;
       col->push_back(bucket_id);
       (*bucket_mins)[bucket_id] = min((*bucket_mins)[bucket_id], v);
     }
