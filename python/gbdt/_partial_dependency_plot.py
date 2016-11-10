@@ -1,4 +1,4 @@
-def plot_partial_dependency(forest, data, feature, x, x0=None, log_scale=False, color='blue'):
+def plot_partial_dependency(forest, data, feature, x, x0=None, log_scale=False, color=None):
     """Plots partial dependency graph.
        Plot forest(instance|f=x) - forest(instance|f=x0) vs x, where instance is
        a feature vector and instance|f=x represents the resulting feature vector after
