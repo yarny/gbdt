@@ -30,7 +30,11 @@ class Forest:
         """Outputs list of feature importances in descending order."""
         return self._forest.feature_importance()
 
-    def feature_importance_bar_chart(self, color='blue'):
+    def features(self):
+        """Outputs list of features."""
+        return [f for (f, imp) in self._forest.feature_importance()]
+
+    def feature_importance_bar_chart(self, color=None):
         try:
             from matplotlib import pyplot as plt
             import numpy
