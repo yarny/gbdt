@@ -65,14 +65,14 @@ function InstallGflags() {
 function InstallProtoBuf3() {
     PROTO_VERSION=`protoc --version`
     if [[ $PROTO_VERSION =~ "3.0.0" ]]; then
-	return
+        return
     fi
     WORK_DIR=$PWD
-    cd /tmp
-    wget https://github.com/google/protobuf/archive/v3.0.0-beta-3.1.tar.gz
-    tar zxvf v3.0.0-beta-3.1.tar.gz
 
-    cd protobuf-3.0.0-beta-3.1
+    cd /tmp
+    git clone https://github.com/google/protobuf.git
+    cd protobuf
+
     ./autogen.sh
     ./configure --prefix=$1 --disable-shared --with-pic
     export CXXFLAGS="-fPIC" && make && sudo make install
