@@ -21,11 +21,16 @@ git_repository(
     tag = "2015-11-01",
 )
 
-new_http_archive(
-  name = "gmock_archive",
-  url = "https://googlemock.googlecode.com/files/gmock-1.7.0.zip",
-  sha256 = "26fcbb5925b74ad5fc8c26b0495dfc96353f4d553492eb97e85a8a6d2f43095b",
-  build_file = "gmock.BUILD",
+new_git_repository(
+  name = "googletest",
+  remote = "https://github.com/google/googletest.git",
+  tag = "release-1.8.0",
+  build_file = "googletest.BUILD",
+)
+
+bind(
+  name = "gtest_main",
+  actual = "@googletest//:gtest_main",
 )
 
 bind(
@@ -38,14 +43,4 @@ new_git_repository(
     remote = "https://github.com/pybind/pybind11.git",
     tag = "v1.8.1",
     build_file = "pybind11.BUILD",
-)
-
-bind(
-  name = "gtest",
-  actual = "@gmock_archive//:gtest",
-)
-
-bind(
-  name = "gtest_main",
-  actual = "@gmock_archive//:gtest_main",
 )

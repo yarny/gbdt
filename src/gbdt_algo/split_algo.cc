@@ -153,7 +153,7 @@ struct SplitPoint {
 // place_missing tells the algorithm to try placing missing on the left or right.
 bool FindBestSplitPoint(const IntegerizedColumn& feature,
                         const Config& config,
-                        const Histogram histogram,
+                        const Histogram& histogram,
                         const GradientData& total,
                         bool place_missing,
                         SplitPoint* split_point) {
