@@ -7,7 +7,7 @@ class Forest:
         elif type(forest) is _Forest:
             self._forest = forest
         else:
-            raise TypeError, 'Unsupported forest type: {0}'.format(type(forest))
+            raise TypeError('Unsupported forest type: {0}'.format(type(forest)))
 
     def predict(self, data_store):
         """Computes prediction scores for data_store."""
