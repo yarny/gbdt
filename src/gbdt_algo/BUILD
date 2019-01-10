@@ -195,7 +195,7 @@ cc_test(
     srcs = [ "utils_test.cc" ],
     deps = [
         "//external:gtest_main",
-	"//src/proto:tree_proto_cc",
+	"//src/proto:tree_cc_proto",
 	":utils",
     ],
     copts = C_TEST_OPTS,
