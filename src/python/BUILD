@@ -5,9 +5,7 @@ licenses(["notice"])  # Apache 2.0
 exports_files(["LICENSE"])
 LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-pthread", "-ltcmalloc_minimal", "-lm" ]
 
-C_OPTS = select({":darwin": ["-I/System/Library/Frameworks/Python.framework/Headers" ],
-                 ":darwin_x86_64": ["-I/System/Library/Frameworks/Python.framework/Headers" ],
-                 "//conditions:default": ["-I/usr/include/python2.7"]})
+C_OPTS = []
 
 cc_library(
    name = "gbdt_py_base",
@@ -42,7 +40,7 @@ cc_library(
        "//external:pybind11-lib",
        "//src/data_store:data_store",
        "//src/data_store:tsv_data_store",
-       "//src/proto:config_proto_cc",
+       "//src/proto:config_cc_proto",
        ":column_py",
        ":gbdt_py_base",
    ],
@@ -72,7 +70,7 @@ cc_library(
        "//external:pybind11-lib",
        "//src/gbdt_algo:evaluation",
        "//src/gbdt_algo:utils",
-       "//src/proto:tree_proto_cc",
+       "//src/proto:tree_cc_proto",
        "//src/utils:json_utils",
        "//src/utils:stopwatch",
        ":datastore_py",
@@ -101,7 +99,7 @@ cc_library(
        "//src:flags",
        "//src/gbdt_algo:gbdt_algo",
        "//src/gbdt_algo:utils",
-       "//src/proto:config_proto_cc",
+       "//src/proto:config_cc_proto",
        "//src/utils:json_utils",
        "//src/utils:subsampling",
        "//src/utils:utils",

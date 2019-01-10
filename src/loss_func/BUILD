@@ -91,7 +91,7 @@ cc_library(
     hdrs = [ "loss_func.h" ],
     deps = [
         "//src/base:base",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         ":gradient_data"
     ],
 )
@@ -102,7 +102,7 @@ cc_library(
     hdrs = [ "loss_func_factory.h" ],
     deps = [
 	"//src/base:base",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         ":loss_func",
         ":loss_func_auc",
         ":loss_func_gbrank",
@@ -119,7 +119,7 @@ cc_test(
     srcs = [ "loss_func_factory_test.cc" ],
     deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         ":loss_func_factory",
     ],
     copts = C_TEST_OPTS,
@@ -187,7 +187,7 @@ cc_test(
     srcs = [ "loss_func_pairwise_test.cc" ],
     deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         "//src/base:base",
 	"//src/data_store:column",
         "//src/data_store:data_store",
@@ -249,7 +249,7 @@ cc_test(
     srcs = [ "loss_func_lambdamart_test.cc" ],
     deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         "//src/base:base",
 	"//src/data_store:column",
         "//src/data_store:data_store",
