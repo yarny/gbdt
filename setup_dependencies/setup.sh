@@ -83,8 +83,8 @@ SYSTEM_TYPE=$(SystemType)
 
 if [[ $SYSTEM_TYPE =~ "OSX" ]];
 then
-    sudo brew install google-perftools
-    sudo brew link --overwrite gperftools
+    brew install google-perftools
+    brew link --overwrite gperftools
     sudo rm /usr/loca/lib/libtcmalloc*dylib*
 
     InstallProtoBuf3 "/usr/local"
