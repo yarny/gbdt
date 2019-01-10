@@ -131,7 +131,7 @@ cc_library(
         "//external:cppformat-lib",
         "//src/base:base",
         "//src:flags",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         "//src/utils:threadpool",
         "//src/utils:stopwatch",
         "//src/utils:utils",
@@ -146,7 +146,7 @@ cc_test(
    srcs = [ "tsv_data_store_test.cc" ],
    deps = [
         "//external:gtest_main",
-        "//src/proto:config_proto_cc",
+        "//src/proto:config_cc_proto",
         ":column",
         ":tsv_data_store",
    ],

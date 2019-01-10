@@ -6,14 +6,22 @@ exports_files([
     "LICENSE",
 ])
 
-load("/build_rules/gen_proto", "proto_lib")
-
-proto_lib(
+proto_library(
   name = "tree_proto",
-  src = "tree.proto",
+  srcs = ["tree.proto"],
 )
 
-proto_lib(
+proto_library(
   name = "config_proto",
-  src = "config.proto",
+  srcs = ["config.proto"],
+)
+
+cc_proto_library(
+    name = "tree_cc_proto",
+    deps = [":tree_proto"],
+)
+
+cc_proto_library(
+    name = "config_cc_proto",
+    deps = [":config_proto"],
 )
