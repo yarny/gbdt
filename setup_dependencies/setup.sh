@@ -86,13 +86,6 @@ then
     brew install google-perftools
     brew link --overwrite gperftools
     sudo rm /usr/loca/lib/libtcmalloc*dylib*
-
-    InstallProtoBuf3 "/usr/local"
-    InstallGflags "/usr/local"
-    InstallGlog "/usr/local"
 else
     InstallGPerf "/usr"
-    InstallProtoBuf3 "/usr"
-    InstallGflags "/usr"
-    InstallGlog "/usr"
 fi
