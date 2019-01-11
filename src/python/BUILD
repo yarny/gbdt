@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
-LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-pthread", "-ltcmalloc_minimal", "-lm" ]
+LINK_OPTS = [ "-pthread", "-lm" ]
 
 C_OPTS = []
 
@@ -14,8 +14,8 @@ cc_library(
    deps = [
        "//external:pybind11-lib",
        "//src/base:base",
+       "@local_config_python//:python_headers",
    ],
-   copts = C_OPTS,
 )
 
 cc_library(
@@ -27,8 +27,8 @@ cc_library(
        ":forest_py",
        ":gbdt_py_base",
        ":train_gbdt_py",
+       "@local_config_python//:python_headers",
    ],
-   copts = C_OPTS,
 )
 
 cc_library(
@@ -43,8 +43,8 @@ cc_library(
        "//src/proto:config_cc_proto",
        ":column_py",
        ":gbdt_py_base",
+       "@local_config_python//:python_headers",
    ],
-   copts = C_OPTS,
 )
 
 cc_library(
@@ -57,8 +57,8 @@ cc_library(
        "//src/data_store:column",
        "//src/utils:utils",
        ":gbdt_py_base",
+       "@local_config_python//:python_headers",
    ],
-   copts = [ "-I/usr/include/python2.7",  ],
 )
 
 
@@ -73,10 +73,10 @@ cc_library(
        "//src/proto:tree_cc_proto",
        "//src/utils:json_utils",
        "//src/utils:stopwatch",
+       "@local_config_python//:python_headers",
        ":datastore_py",
        ":gbdt_py_base",
    ],
-   copts = C_OPTS,
 )
 
 cc_binary(
@@ -103,8 +103,8 @@ cc_library(
        "//src/utils:json_utils",
        "//src/utils:subsampling",
        "//src/utils:utils",
+       "@local_config_python//:python_headers",
    ],
-   copts = C_OPTS,
 )
 
 config_setting(
