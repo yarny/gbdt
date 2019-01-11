@@ -36,7 +36,9 @@ cc_library(
     hdrs = [ "utils.h", "utils_inl.h" ],
     deps = [
          "//src/base:base",
-	 ":vector_slice",
+	    ":vector_slice",
+        "//external:glog",
+        "//external:protobuf"
     ],
 )
 
@@ -78,7 +80,8 @@ cc_library(
    srcs = [ "json_utils.cc" ],
    hdrs = [ "json_utils.h" ],
    deps = [
-        "//src/base:base"
+        "//src/base:base",
+        "//external:protobuf"
    ]
 )
 

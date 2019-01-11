@@ -148,7 +148,8 @@ cc_library(
     hdrs = [ "group.h" ],
     deps = [
         "//src/base:base",
-        "//src/data_store:column"
+        "//src/data_store:column",
+        "//external:glog"
     ]
 )
 

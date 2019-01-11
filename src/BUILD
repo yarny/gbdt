@@ -6,11 +6,14 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [ "-lgflags", "-lglog", "-lprotobuf", "-pthread", "-ltcmalloc_minimal", "-lm" ]
+LINK_OPTS = [ "-pthread", "-ltcmalloc_minimal", "-lm" ]
 
 cc_library(
     name = "flags",
     srcs = [ "flags.cc" ],
+    deps = [
+        "//external:gflags"
+    ]
 )
 
 cc_binary(
@@ -32,6 +35,7 @@ cc_binary(
       "//src/utils:utils",
       "//src/utils:json_utils",
       ":flags",
+      "//external:glog"
    ],
    linkopts = LINK_OPTS,
    linkstatic = 1

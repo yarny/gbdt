@@ -46,6 +46,39 @@ bind(
     actual = "@pybind11//:pybind11"
 )
 
+git_repository(
+    name = "com_github_glog_glog",
+    remote = "https://github.com/google/glog.git",
+    commit = "5d46e1bcfc92bf06a9ca3b3f1c5bb1dc024d9ecd"
+)
+
+bind(
+    name = "glog",
+    actual = "@com_github_glog_glog//:glog",
+)
+
+git_repository(
+    name = "com_github_gflags_gflags",
+    remote = "https://github.com/gflags/gflags.git",
+    commit = "1005485222e8b0feff822c5723ddcaa5abadc01a"
+)
+
+bind(
+    name = "gflags",
+    actual = "@com_github_gflags_gflags//:gflags",
+)
+
+git_repository(
+    name = "com_google_protobuf",
+    remote = "https://github.com/google/protobuf.git",
+    tag = "v3.6.1",
+)
+
+bind(
+    name = "protobuf",
+    actual = "@com_google_protobuf//:protobuf"
+)
+
 new_git_repository(
     name = "pybind11",
     remote = "https://github.com/pybind/pybind11.git",

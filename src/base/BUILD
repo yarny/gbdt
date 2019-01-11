@@ -9,4 +9,8 @@ exports_files([
 cc_library(
     name = "base",
     hdrs = [ "base.h" ],
+    deps = [
+        "//external:glog",
+        "//external:protobuf"
+    ]
 )
