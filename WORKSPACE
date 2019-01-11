@@ -86,7 +86,7 @@ new_git_repository(
     build_file = "//third_party:pybind11.BUILD",
 )
 
-load("//third_party:python_configure.bzl", "python_configure")
+load("//third_party/py:python_configure.bzl", "python_configure")
 
 python_configure(name = "local_config_python")
 
