@@ -21,11 +21,11 @@ class DataStore:
             return self._data_store.get_raw_float_col(k)
 
     def __getitem__(self, k):
-        if type(k) is int or type(k) is long:
+        if isinstance(k, int):
             return self.slice([k])
-        if type(k) is tuple and len(k) == 2:
-            return self.slice(xrange(k[0], k[1]))
-        elif type(k) is list:
+        if isinstance(k, tuple) and len(k) == 2:
+            return self.slice(range(k[0], k[1]))
+        elif isinstance(k, list):
             return self.slice(k)
         return self._get_col(k)
 
@@ -75,18 +75,18 @@ class DataStore:
         """Erases column from data store."""
         self._data_store.erase(name)
 
-    def iteritems(self):
+    def items(self):
         for k in self.cols():
             yield (k, self[k])
 
     def slice(self, index):
         d = _DataStore()
-        for key, value in self.iteritems():
-            if type(value) is StringColumn:
+        for key, value in self.items():
+            if isinstance(value, StringColumn):
                 d.add_string_col(key, [value[i] for i in index])
-            elif type(value) is BucketizedFloatColumn:
+            elif isinstance(value, BucketizedFloatColumn):
                 d.add_bucketized_float_col(key, [value[i] for i in index])
-            elif type(value) is RawFloatColumn:
+            elif isinstance(value, RawFloatColumn):
                 d.add_raw_float_col(key, [value[i] for i in index])
         return DataStore(d)
 
@@ -99,7 +99,7 @@ class DataStore:
         except ImportError:
             raise ImportError('Please install pandas.')
 
-        return pandas.DataFrame(dict([(k, list(v)) for k, v in self.iteritems()]))
+        return pandas.DataFrame(dict([(k, list(v)) for k, v in self.items()]))
 
     def __repr__(self):
         return self._data_store.__repr__()
@@ -129,11 +129,11 @@ class DataLoader:
              raw_float_cols: Float columns that are loaded raw. Target columns are usually not bucketized.
         """
         d = _DataStore()
-        for key, value in bucketized_float_cols.iteritems():
+        for key, value in bucketized_float_cols.items():
             d.add_bucketized_float_col(key, value)
-        for key, value in string_cols.iteritems():
+        for key, value in string_cols.items():
             d.add_string_col(key, value)
-        for key, value in raw_float_cols.iteritems():
+        for key, value in raw_float_cols.items():
             d.add_raw_float_col(key, value)
 
         return DataStore(d)
@@ -153,9 +153,9 @@ class DataLoader:
             raise ImportError('Please install numpy and pandas.')
 
         d = _DataStore()
-        raw_float_cols = set([k for k, v in type_overrides.iteritems()
+        raw_float_cols = set([k for k, v in type_overrides.items()
                               if v == 'float' or v == 'raw_float'])
-        string_cols = set([k for k, v in type_overrides.iteritems()
+        string_cols = set([k for k, v in type_overrides.items()
                            if v == 'string'])
 
         for col in df.select_dtypes(include=[numpy.number]).keys():

@@ -7,7 +7,7 @@ from ._forest import Forest
 
 class ForestVisualizer:
     def __init__(self, forest):
-        if type(forest) is dict:
+        if isinstance(forest, dict):
             self._forestJson = forest
         else:
             self._forestJson = json.loads(str(forest))

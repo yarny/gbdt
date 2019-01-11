@@ -15,5 +15,5 @@ from libgbdt import StringColumn
 from libgbdt import RawFloatColumn
 from ._gbdt import train
 from ._forest_visualizer import ForestVisualizer
-from _data_store import DataStore, DataLoader
+from ._data_store import DataStore, DataLoader
 from ._partial_dependency_plot import plot_partial_dependency
