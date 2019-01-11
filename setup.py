@@ -1,17 +1,18 @@
 """GBDT package: https://github.com/yarny/gbdt
 """
 
-# Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+import os
+import sys
 # To use a consistent encoding
 from codecs import open
 from os import path
-import os
-import sys
+
+# Always prefer setuptools over distutils
+from setuptools import find_packages, setup
+
+from python.gbdt import _version
 
 here = path.abspath(path.dirname(__file__))
-sys.path.append(os.path.join(here, "python/gbdt"))
-import _version
 
 setup(
     name='gbdt',
@@ -61,7 +62,9 @@ When is GBDT good for you?
         'Programming Language :: C++',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 
     # What does your project relate to?
