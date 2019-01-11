@@ -1,10 +1,13 @@
+import six
+
 from libgbdt import Forest as _Forest
+
 
 class Forest:
     def __init__(self, forest):
-        if type(forest) is str or type(forest) is unicode:
+        if isinstance(forest, six.text_type):
             self._forest = _Forest(forest)
-        elif type(forest) is _Forest:
+        elif isinstance(forest, _Forest):
             self._forest = forest
         else:
             raise TypeError('Unsupported forest type: {0}'.format(type(forest)))

@@ -100,9 +100,9 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, log_scale=False, 
     if feature not in data:
         raise ValueError("Unknown feature '{}'".format(feature))
 
-    if type(data[feature]) is BucketizedFloatColumn:
+    if isinstance(data[feature], BucketizedFloatColumn):
         plot_float_feature(forest, data, feature, x, x0, log_scale)
-    elif type(data[feature]) is StringColumn:
+    elif isinstance(data[feature], StringColumn):
         plot_categorical_features(forest, data, feature, x, x0)
     else:
         raise ValueError("Unsupported feature type {}.".format(type(data[feature])))
