@@ -1,8 +1,6 @@
 """GBDT package: https://github.com/yarny/gbdt
 """
 
-import os
-import sys
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -10,7 +8,7 @@ from os import path
 # Always prefer setuptools over distutils
 from setuptools import find_packages, setup
 
-from python.gbdt import _version
+from gbdt import _version
 
 here = path.abspath(path.dirname(__file__))
 
@@ -68,11 +66,11 @@ When is GBDT good for you?
     ],
 
     # What does your project relate to?
-    keywords='gbdt,machine learning,decision trees,forest',
+    keywords='gbdt,gbm,tree boosting algorithms,machine learning,decision trees,forest',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    package_dir = {'': 'python'},
+    package_dir = {'': '.'},
     packages=['gbdt'],
     package_data = {'gbdt': ['lib/darwin_x86_64/libgbdt.so', 'lib/linux_x86_64/libgbdt.so'] }
 )
