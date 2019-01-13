@@ -1,0 +1,4 @@
+# Force bazel output to use colors (good for jenkins) and print useful errors.
+common --color=yes
+test --verbose_failures --test_output=errors
+build -c opt
