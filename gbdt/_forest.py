@@ -1,13 +1,12 @@
 import six
 
-from libgbdt import Forest as _Forest
-
+from ._libgbdt import libgbdt
 
 class Forest:
     def __init__(self, forest):
         if isinstance(forest, six.text_type):
-            self._forest = _Forest(forest)
-        elif isinstance(forest, _Forest):
+            self._forest = libgbdt.Forest(forest)
+        elif isinstance(forest, libgbdt.Forest):
             self._forest = forest
         else:
             raise TypeError('Unsupported forest type: {0}'.format(type(forest)))

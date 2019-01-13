@@ -1,7 +1,5 @@
-from libgbdt import Forest
-from libgbdt import train as _train
-from libgbdt import init_logging
 from ._forest import Forest
+from ._libgbdt import libgbdt 
 
 def train(data_store,
           config,
@@ -42,7 +40,7 @@ def train(data_store,
     if 'feature_sampling_rate' not in config:
         config['feature_sampling_rate'] = 1
 
-    return Forest(_train(data_store._data_store,
+    return Forest(libgbdt.train(data_store._data_store,
                          y=y,
                          w=w,
                          config=json.dumps(config),
