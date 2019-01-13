@@ -1,5 +1,5 @@
-from libgbdt import DataStore as _DataStore
-from libgbdt import BucketizedFloatColumn, StringColumn, RawFloatColumn
+from ._libgbdt import libgbdt
+
 
 class DataStore:
     def __init__(self, data_store):
@@ -82,11 +82,11 @@ class DataStore:
     def slice(self, index):
         d = _DataStore()
         for key, value in self.items():
-            if isinstance(value, StringColumn):
+            if isinstance(value, libgbdt.StringColumn):
                 d.add_string_col(key, [value[i] for i in index])
-            elif isinstance(value, BucketizedFloatColumn):
+            elif isinstance(value, libgbdt.BucketizedFloatColumn):
                 d.add_bucketized_float_col(key, [value[i] for i in index])
-            elif isinstance(value, RawFloatColumn):
+            elif isinstance(value, libgbdt.RawFloatColumn):
                 d.add_raw_float_col(key, [value[i] for i in index])
         return DataStore(d)
 
@@ -114,7 +114,7 @@ class DataLoader:
              string_cols: String cols.
              raw_float_cols: Float columns that are loaded raw. Target columns are usually not bucketized.
         """
-        d = _DataStore()
+        d = libgbdt.DataStore()
         d.load_tsv(tsvs,
                    bucketized_float_cols=bucketized_float_cols,
                    string_cols=string_cols,
@@ -128,7 +128,7 @@ class DataLoader:
              string_cols: String cols.
              raw_float_cols: Float columns that are loaded raw. Target columns are usually not bucketized.
         """
-        d = _DataStore()
+        d = libgbdt.DataStore()
         for key, value in bucketized_float_cols.items():
             d.add_bucketized_float_col(key, value)
         for key, value in string_cols.items():
@@ -152,7 +152,7 @@ class DataLoader:
         except ImportError:
             raise ImportError('Please install numpy and pandas.')
 
-        d = _DataStore()
+        d = libgbdt.DataStore()
         raw_float_cols = set([k for k, v in type_overrides.items()
                               if v == 'float' or v == 'raw_float'])
         string_cols = set([k for k, v in type_overrides.items()
