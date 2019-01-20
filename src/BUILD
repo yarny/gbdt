@@ -6,7 +6,7 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [ "-pthread", "-ltcmalloc_minimal", "-lm" ]
+LINK_OPTS = [ "-pthread", "-ltcmalloc_minimal", "-lm", "-L /usr/local/lib" ]
 
 cc_library(
     name = "flags",
