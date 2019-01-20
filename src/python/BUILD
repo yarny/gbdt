@@ -3,7 +3,8 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
-LINK_OPTS = [ "-pthread", "-lm" ]
+
+LINK_OPTS = [ "-pthread", "-ltcmalloc_minimal", "-lm", "-L /usr/local/lib" ]
 
 C_OPTS = []
 
