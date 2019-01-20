@@ -42,7 +42,7 @@ Partition(const BucketizedFloatColumn* feature, const Split& split, VectorSlice<
   for (uint i = 0; i < samples.size(); ++i) {
     if ((col.missing(samples[i]) && !missing_to_right) ||
         (!col.missing(samples[i]) && feature->get_row_max(samples[i]) < threshold)) {
-      swap(samples[i], samples[left_size++]);
+      std::swap(samples[i], samples[left_size++]);
     }
   }
   return make_pair(VectorSlice<uint>(samples, 0, left_size),
@@ -72,7 +72,7 @@ Partition(const StringColumn* feature, const Split& split, VectorSlice<uint> sam
   uint left_size = 0;
   for (uint i = 0; i < samples.size(); ++i) {
     if (categories.find(col[samples[i]]) != categories.end())
-      swap(samples[i], samples[left_size++]);
+      std::swap(samples[i], samples[left_size++]);
   }
   return make_pair(VectorSlice<uint>(samples, 0, left_size),
                    VectorSlice<uint>(samples, left_size, samples.size() - left_size));
