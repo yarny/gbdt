@@ -163,7 +163,7 @@ void Pairwise::ComputeFunctionalGradientsAndHessians(const vector<double>& f,
 function<double(const pair<uint, uint>&)> Pairwise::PairWeightingFunc(
     const Group& group) const {
   if (pair_weight_by_delta_target_) {
-    return [&group=group] (const pair<uint, uint>& p) {
+    return [&group] (const pair<uint, uint>& p) {
       return group.y(p.first) - group.y(p.second);
     };
   } else {
