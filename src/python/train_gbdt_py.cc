@@ -66,10 +66,10 @@ ForestPy TrainPy(DataStorePy* data_store,
 
   FloatVector w_hat = [](int){ return 1.0f; };
   if (!w.empty()) {
-    w_hat = ([&w=w](int i) { return w[i]; });
+    w_hat = ([&w](int i) { return w[i]; });
   }
 
-  FloatVector y_hat = [&y=y](int i) { return y[i]; };
+  FloatVector y_hat = [&y](int i) { return y[i]; };
   if (y.empty()) {
     if (config.target_column().empty()) {
       ThrowException(Status(error::INVALID_ARGUMENT,
@@ -80,7 +80,8 @@ ForestPy TrainPy(DataStorePy* data_store,
       ThrowException(Status(error::INVALID_ARGUMENT,
                             fmt::format("Failed to load target column {0}", config.target_column())));
     }
-    y_hat = [&y=targets->raw_floats()](int i) { return y[i]; };
+    const vector<float>& target_floats = targets->raw_floats();
+    y_hat = [&target_floats](int i) { return target_floats[i]; };
   }
 
 

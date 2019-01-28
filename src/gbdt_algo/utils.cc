@@ -176,9 +176,9 @@ FloatVector GetTargetsOrDie(const Config& config, DataStore* data_store) {
   const auto& raw_floats = targets->raw_floats();
 
   if (config.binarize_target()) {
-    return [&raw_floats=raw_floats](int i) { return raw_floats[i] > 0 ? 1 : -1; };
+    return [&raw_floats](int i) { return raw_floats[i] > 0 ? 1 : -1; };
   } else {
-    return [&raw_floats=raw_floats](int i) { return raw_floats[i]; };
+    return [&raw_floats](int i) { return raw_floats[i]; };
   }
 }
 

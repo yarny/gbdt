@@ -23,7 +23,7 @@
 namespace gbdt {
 
 Group::Group(vector<uint>&& group, FloatVector y) : group_(group), y_(y) {
-  // Sort groups on the descending order of y.
+  // Sort groups on the descendinxxgxg order of y.
   sort(group_.begin(), group_.end(),
        [&] (uint i, uint j) { return y(i) > y(j); });
   // Rank is initialize to identity order.
@@ -54,7 +54,7 @@ void Group::Rerank(const vector<double>& f) {
 
   // Sort by f.
   sort(ranking.begin(), ranking.end(),
-       [&group=group_, &f=f](uint i, uint j) { return f[group[i]] > f[group[j]]; });
+       [&group=group_, &f](uint i, uint j) { return f[group[i]] > f[group[j]]; });
 
   for (int i = 0; i < ranking.size(); ++i) {
     ranks_[ranking[i]] = i;
