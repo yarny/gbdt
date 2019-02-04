@@ -53,6 +53,7 @@ class Forest:
         ax.set_yticks(ind)
         ax.set_yticklabels(features)
         ax.set_xlabel('Feature importance')
+        plt.show()
 
     def __str__(self):
         return self._forest.as_json()
