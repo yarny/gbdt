@@ -3,7 +3,6 @@ Visualizes forest model.
 """
 
 import json
-from ._forest import Forest
 
 class ForestVisualizer:
     def __init__(self, forest):

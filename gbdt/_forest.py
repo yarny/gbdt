@@ -1,6 +1,7 @@
 import six
 
 from ._libgbdt import libgbdt
+from ._forest_visualizer import ForestVisualizer
 
 class Forest:
     def __init__(self, forest):
@@ -10,6 +11,7 @@ class Forest:
             self._forest = forest
         else:
             raise TypeError('Unsupported forest type: {0}'.format(type(forest)))
+        self._visualizer = ForestVisualizer(str(self))
 
     def predict(self, data_store):
         """Computes prediction scores for data_store."""
@@ -57,3 +59,6 @@ class Forest:
 
     def __str__(self):
         return self._forest.as_json()
+
+    def visualize_tree(self, i):
+        return self._visualizer.visualize_tree(i)
