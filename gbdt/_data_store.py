@@ -80,7 +80,7 @@ class DataStore:
             yield (k, self[k])
 
     def slice(self, index):
-        d = _DataStore()
+        d = libgbdt.DataStore()
         for key, value in self.items():
             if isinstance(value, libgbdt.StringColumn):
                 d.add_string_col(key, [value[i] for i in index])

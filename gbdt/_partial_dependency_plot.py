@@ -18,8 +18,8 @@ def plot_partial_dependency(forest, data, feature, x, x0=None, log_scale=False, 
     except ImportError:
         raise ImportError('Please install matplotlib and numpy.')
 
-    from ._data_store import DataLoader
-    from libgbdt import StringColumn, BucketizedFloatColumn
+    from gbdt import DataLoader
+    from gbdt import StringColumn, BucketizedFloatColumn
 
     def replace_float_feature(data, feature, v):
         n = len(data)
