@@ -29,16 +29,15 @@ git_repository(
     tag = "2015-11-01",
 )
 
-new_git_repository(
-  name = "googletest",
-  remote = "https://github.com/google/googletest.git",
-  tag = "release-1.8.0",
-  build_file = "//third_party:googletest.BUILD",
+git_repository(
+    name = "com_google_googletest",
+    commit = "d850e144710e330070b756c009749dc7a7302301",
+    remote = "https://github.com/google/googletest.git",
 )
 
 bind(
   name = "gtest_main",
-  actual = "@googletest//:gtest_main",
+  actual = "@com_google_googletest//:gtest_main",
 )
 
 bind(

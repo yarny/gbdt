@@ -6,20 +6,6 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [
-    "-lprotobuf",
-    "-lglog",
-    "-lgflags",
-    "-pthread",
-    "-ltcmalloc_minimal",
-    "-lm",
-]
-
-C_TEST_OPTS = [
-    "-Iexternal/googletest/googletest/include",
-    "-Iexternal/googletest/googlemock/include",
-]
-
 cc_library(
     name = "stopwatch",
     srcs = ["stopwatch.cc"],
@@ -33,8 +19,6 @@ cc_library(
 cc_test(
     name = "stopwatch_test",
     srcs = ["stopwatch_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
     deps = [
         ":stopwatch",
         "//external:gtest_main",
@@ -59,8 +43,6 @@ cc_library(
 cc_test(
     name = "utils_test",
     srcs = ["utils_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
     deps = [
         ":utils",
         "//external:gtest_main",
@@ -75,8 +57,6 @@ cc_library(
 cc_test(
     name = "vector_slice_test",
     srcs = ["vector_slice_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
     deps = [
         ":vector_slice",
         "//external:gtest_main",
@@ -102,8 +82,6 @@ cc_library(
 cc_test(
     name = "json_utils_test",
     srcs = ["json_utils_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
     linkstatic = 1,
     deps = [
         ":json_utils",
@@ -124,8 +102,6 @@ cc_library(
 cc_test(
     name = "subsampling_test",
     srcs = ["subsampling_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
     deps = [
         ":subsampling",
         ":utils",

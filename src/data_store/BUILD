@@ -7,17 +7,6 @@ exports_files([
 ])
 
 LINK_OPTS = [
-    "-lprotobuf",
-    "-lglog",
-    "-lgflags",
-    "-pthread",
-    "-ltcmalloc_minimal",
-    "-lm",
-]
-
-C_TEST_OPTS = [
-    "-Iexternal/googletest/googletest/include",
-    "-Iexternal/googletest/googlemock/include",
 ]
 
 cc_library(
@@ -33,9 +22,6 @@ cc_library(
 cc_test(
     name = "column_test",
     srcs = ["column_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":column",
         "//external:gtest_main",
@@ -57,10 +43,7 @@ cc_library(
 cc_test(
     name = "data_store_test",
     srcs = ["data_store_test.cc"],
-    copts = C_TEST_OPTS,
     data = [":flatfiles_data_store_testdata"],
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":column",
         ":data_store",
@@ -83,10 +66,7 @@ cc_library(
 cc_test(
     name = "flatfiles_data_store_test",
     srcs = ["flatfiles_data_store_test.cc"],
-    copts = C_TEST_OPTS,
     data = [":flatfiles_data_store_testdata"],
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":column",
         ":flatfiles_data_store",
@@ -123,10 +103,7 @@ filegroup(
 cc_test(
     name = "tsv_block_test",
     srcs = ["tsv_block_test.cc"],
-    copts = C_TEST_OPTS,
     data = [":tsv_data_store_testdata"],
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":tsv_block",
         "//external:gtest_main",
@@ -154,10 +131,7 @@ cc_library(
 cc_test(
     name = "tsv_data_store_test",
     srcs = ["tsv_data_store_test.cc"],
-    copts = C_TEST_OPTS,
     data = [":tsv_data_store_testdata"],
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":column",
         ":tsv_data_store",

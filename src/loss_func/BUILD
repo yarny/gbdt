@@ -6,20 +6,6 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [
-    "-lprotobuf",
-    "-lglog",
-    "-lgflags",
-    "-pthread",
-    "-ltcmalloc_minimal",
-    "-lm",
-]
-
-C_TEST_OPTS = [
-    "-Iexternal/googletest/googletest/include",
-    "-Iexternal/googletest/googlemock/include",
-]
-
 cc_library(
     name = "loss_func_logloss",
     srcs = ["loss_func_logloss.cc"],
@@ -36,9 +22,6 @@ cc_library(
 cc_test(
     name = "loss_func_logloss_test",
     srcs = ["loss_func_logloss_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":loss_func_logloss",
         "//external:gtest_main",
@@ -62,9 +45,6 @@ cc_library(
 cc_test(
     name = "loss_func_huberized_hinge_test",
     srcs = ["loss_func_huberized_hinge_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":loss_func_huberized_hinge",
         "//external:gtest_main",
@@ -86,9 +66,6 @@ cc_library(
 cc_test(
     name = "loss_func_mse_test",
     srcs = ["loss_func_mse_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":loss_func_mse",
         "//external:gtest_main",
@@ -127,9 +104,6 @@ cc_library(
 cc_test(
     name = "loss_func_factory_test",
     srcs = ["loss_func_factory_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":loss_func_factory",
         "//external:gtest_main",
@@ -166,9 +140,6 @@ cc_library(
 cc_test(
     name = "group_test",
     srcs = ["group_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":group",
         "//external:gtest_main",
@@ -196,9 +167,6 @@ cc_library(
 cc_test(
     name = "loss_func_pairwise_test",
     srcs = ["loss_func_pairwise_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":loss_func_math",
         ":loss_func_pairwise",
@@ -258,9 +226,6 @@ cc_library(
 cc_test(
     name = "loss_func_lambdamart_test",
     srcs = ["loss_func_lambdamart_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":loss_func_lambdamart",
         "//external:gtest_main",
