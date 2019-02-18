@@ -6,199 +6,206 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [ "-lprotobuf", "-lgflags", "-lglog", "-pthread", "-ltcmalloc_minimal", "-lm" ]
-C_TEST_OPTS = [ "-Iexternal/googletest/googletest/include",
-                "-Iexternal/googletest/googlemock/include"]
+LINK_OPTS = [
+    "-lprotobuf",
+    "-lgflags",
+    "-lglog",
+    "-pthread",
+    "-ltcmalloc_minimal",
+    "-lm",
+]
+
+C_TEST_OPTS = []
 
 cc_library(
     name = "compute_tree_scores",
-    srcs = [ "compute_tree_scores.cc" ],
-    hdrs = [ "compute_tree_scores.h" ],
+    srcs = ["compute_tree_scores.cc"],
+    hdrs = ["compute_tree_scores.h"],
     deps = [
+        ":split_algo",
         "//src:flags",
-        "//src/base:base",
-	"//src/data_store:column",
-        "//src/data_store:data_store",
+        "//src/base",
+        "//src/data_store",
+        "//src/data_store:column",
         "//src/proto:tree_cc_proto",
         "//src/utils:subsampling",
-	"//src/utils:threadpool",
+        "//src/utils:threadpool",
         "//src/utils:vector_slice",
-        ":split_algo",
     ],
 )
 
 cc_test(
     name = "compute_tree_scores_test",
-    srcs = [ "compute_tree_scores_test.cc" ],
-    deps = [
-        "//external:gtest_main",
-	"//src/data_store:column",
-        "//src/data_store:data_store",
-	":compute_tree_scores",
-    ],
+    srcs = ["compute_tree_scores_test.cc"],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
-    linkstatic = 1
+    linkstatic = 1,
+    deps = [
+        ":compute_tree_scores",
+        "//external:gtest_main",
+        "//src/data_store",
+        "//src/data_store:column",
+    ],
 )
 
 cc_library(
     name = "evaluation",
-    srcs = [ "evaluation.cc" ],
-    hdrs = [ "evaluation.h" ],
+    srcs = ["evaluation.cc"],
+    hdrs = ["evaluation.h"],
     deps = [
+        ":compute_tree_scores",
+        ":split_algo",
+        ":utils",
         "//external:cppformat-lib",
-	"//src/base:base",
-	"//src/data_store:data_store",
+        "//src/base",
+        "//src/data_store",
         "//src/proto:tree_cc_proto",
-	"//src/utils:utils",
-	":compute_tree_scores",
-	":split_algo",
-	":utils",
+        "//src/utils",
     ],
 )
 
 cc_library(
     name = "split_algo",
-    srcs = [ "split_algo.cc" ],
-    hdrs = [ "split_algo.h" ],
+    srcs = ["split_algo.cc"],
+    hdrs = ["split_algo.h"],
     deps = [
-         "//src/base:base",
-         "//src/data_store:column",
-         "//src/loss_func:gradient_data",
-         "//src/proto:config_cc_proto",
-         "//src/proto:tree_cc_proto",
-	 "//src/utils:vector_slice",
-	 "//src/utils:utils",
+        "//src/base",
+        "//src/data_store:column",
+        "//src/loss_func:gradient_data",
+        "//src/proto:config_cc_proto",
+        "//src/proto:tree_cc_proto",
+        "//src/utils",
+        "//src/utils:vector_slice",
     ],
 )
 
 cc_test(
     name = "split_algo_test",
-    srcs = [ "split_algo_test.cc" ],
-    deps = [
-        "//external:gtest_main",
-        "//src/proto:config_cc_proto",
-	":split_algo",
-    ],
+    srcs = ["split_algo_test.cc"],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
-    linkstatic = 1
+    linkstatic = 1,
+    deps = [
+        ":split_algo",
+        "//external:gtest_main",
+        "//src/proto:config_cc_proto",
+    ],
 )
 
 cc_library(
     name = "gbdt_algo",
-    srcs = [ "gbdt_algo.cc" ],
-    hdrs = [ "gbdt_algo.h" ],
+    srcs = ["gbdt_algo.cc"],
+    hdrs = ["gbdt_algo.h"],
     deps = [
-        "//external:cppformat-lib",
-	"//src:flags",
-        "//src/base:base",
-	"//src/data_store:data_store",
-	"//src/data_store:flatfiles_data_store",
-	"//src/loss_func:loss_func",
-	"//src/loss_func:loss_func_factory",
-        "//src/proto:config_cc_proto",
-        "//src/proto:tree_cc_proto",
-        "//src/utils:stopwatch",
-        "//src/utils:subsampling",
-	"//src/utils:threadpool",
-	"//src/utils:utils",
-	"//src/utils:vector_slice",
         ":compute_tree_scores",
         ":split_algo",
-	":tree_algo",
-	":utils",
+        ":tree_algo",
+        ":utils",
+        "//external:cppformat-lib",
+        "//src:flags",
+        "//src/base",
+        "//src/data_store",
+        "//src/data_store:flatfiles_data_store",
+        "//src/loss_func",
+        "//src/loss_func:loss_func_factory",
+        "//src/proto:config_cc_proto",
+        "//src/proto:tree_cc_proto",
+        "//src/utils",
+        "//src/utils:stopwatch",
+        "//src/utils:subsampling",
+        "//src/utils:threadpool",
+        "//src/utils:vector_slice",
     ],
 )
 
 cc_test(
     name = "gbdt_algo_test",
-    srcs = [ "gbdt_algo_test.cc" ],
+    srcs = ["gbdt_algo_test.cc"],
+    copts = C_TEST_OPTS,
+    data = [":gbdt_algo_testdata"],
+    linkopts = LINK_OPTS,
+    linkstatic = 1,
     deps = [
+        ":gbdt_algo",
+        ":utils",
         "//external:gtest_main",
-         "//src/loss_func:loss_func",
+        "//src/loss_func",
         "//src/loss_func:loss_func_factory",
         "//src/proto:config_cc_proto",
         "//src/proto:tree_cc_proto",
-	"//src/utils:utils",
-        ":gbdt_algo",
-        ":utils",
+        "//src/utils",
     ],
-    data = [ ":gbdt_algo_testdata" ],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1
 )
 
 filegroup(
     name = "gbdt_algo_testdata",
     srcs = [
-        "testdata/gbdt_algo_test"
-	]
+        "testdata/gbdt_algo_test",
+    ],
 )
 
 cc_library(
     name = "tree_algo",
-    srcs = [ "tree_algo.cc" ],
-    hdrs = [ "tree_algo.h" ],
+    srcs = ["tree_algo.cc"],
+    hdrs = ["tree_algo.h"],
     deps = [
-	"//src:flags",
-        "//src/base:base",
-	"//src/data_store:column",
+        ":split_algo",
         "//external:cppformat-lib",
+        "//src:flags",
+        "//src/base",
+        "//src/data_store:column",
         "//src/proto:config_cc_proto",
         "//src/proto:tree_cc_proto",
+        "//src/utils",
         "//src/utils:stopwatch",
         "//src/utils:subsampling",
-	"//src/utils:threadpool",
-	"//src/utils:utils",
-        ":split_algo",
+        "//src/utils:threadpool",
     ],
 )
 
 cc_test(
     name = "tree_algo_test",
-    srcs = [ "tree_algo_test.cc" ],
+    srcs = ["tree_algo_test.cc"],
+    copts = C_TEST_OPTS,
+    linkopts = LINK_OPTS,
+    linkstatic = 1,
     deps = [
+        ":tree_algo",
         "//external:gtest_main",
         "//src/loss_func:gradient_data",
         "//src/proto:config_cc_proto",
         "//src/proto:tree_cc_proto",
         "//src/utils:subsampling",
-	":tree_algo",
     ],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1
 )
 
 cc_library(
     name = "utils",
-    srcs = [ "utils.cc" ],
-    hdrs = [ "utils.h" ],
+    srcs = ["utils.cc"],
+    hdrs = ["utils.h"],
     deps = [
         "//external:cppformat-lib",
-	"//src:flags",
-        "//src/base:base",
-        "//src/data_store:data_store",
+        "//src:flags",
+        "//src/base",
+        "//src/data_store",
         "//src/proto:config_cc_proto",
         "//src/proto:tree_cc_proto",
+        "//src/utils",
         "//src/utils:json_utils",
-	"//src/utils:stopwatch",
-	"//src/utils:threadpool",
-	"//src/utils:utils",
+        "//src/utils:stopwatch",
+        "//src/utils:threadpool",
     ],
 )
 
 cc_test(
     name = "utils_test",
-    srcs = [ "utils_test.cc" ],
-    deps = [
-        "//external:gtest_main",
-	"//src/proto:tree_cc_proto",
-	":utils",
-    ],
+    srcs = ["utils_test.cc"],
     copts = C_TEST_OPTS,
     linkopts = LINK_OPTS,
-    linkstatic = 1
+    linkstatic = 1,
+    deps = [
+        ":utils",
+        "//external:gtest_main",
+        "//src/proto:tree_cc_proto",
+    ],
 )
