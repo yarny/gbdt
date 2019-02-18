@@ -7,13 +7,13 @@ exports_files([
 ])
 
 proto_library(
-  name = "tree_proto",
-  srcs = ["tree.proto"],
+    name = "tree_proto",
+    srcs = ["tree.proto"],
 )
 
 proto_library(
-  name = "config_proto",
-  srcs = ["config.proto"],
+    name = "config_proto",
+    srcs = ["config.proto"],
 )
 
 cc_proto_library(

@@ -68,12 +68,6 @@ bind(
     actual = "@com_github_gflags_gflags//:gflags",
 )
 
-git_repository(
-    name = "com_google_protobuf",
-    remote = "https://github.com/google/protobuf.git",
-    tag = "v3.6.1",
-)
-
 bind(
     name = "protobuf",
     actual = "@com_google_protobuf//:protobuf"
