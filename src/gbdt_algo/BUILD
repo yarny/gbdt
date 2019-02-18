@@ -6,15 +6,6 @@ exports_files([
     "LICENSE",
 ])
 
-LINK_OPTS = [
-    "-lprotobuf",
-    "-lgflags",
-    "-lglog",
-    "-pthread",
-    "-ltcmalloc_minimal",
-    "-lm",
-]
-
 C_TEST_OPTS = []
 
 cc_library(
@@ -37,9 +28,6 @@ cc_library(
 cc_test(
     name = "compute_tree_scores_test",
     srcs = ["compute_tree_scores_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":compute_tree_scores",
         "//external:gtest_main",
@@ -82,9 +70,6 @@ cc_library(
 cc_test(
     name = "split_algo_test",
     srcs = ["split_algo_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":split_algo",
         "//external:gtest_main",
@@ -121,10 +106,7 @@ cc_library(
 cc_test(
     name = "gbdt_algo_test",
     srcs = ["gbdt_algo_test.cc"],
-    copts = C_TEST_OPTS,
     data = [":gbdt_algo_testdata"],
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":gbdt_algo",
         ":utils",
@@ -166,9 +148,6 @@ cc_library(
 cc_test(
     name = "tree_algo_test",
     srcs = ["tree_algo_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":tree_algo",
         "//external:gtest_main",
@@ -200,9 +179,6 @@ cc_library(
 cc_test(
     name = "utils_test",
     srcs = ["utils_test.cc"],
-    copts = C_TEST_OPTS,
-    linkopts = LINK_OPTS,
-    linkstatic = 1,
     deps = [
         ":utils",
         "//external:gtest_main",
